@@ -35,7 +35,8 @@ public class DirChooser extends Activity implements OnItemClickListener {
 		dirs = (ListView) findViewById(R.id.listView1);
 		dirs.setOnItemClickListener(this);
 		SharedPreferences settings = getSharedPreferences(SETTINGSNAME, 0);
-		currentDirectory = settings.getString("scaleDirectory", "");
+		//currentDirectory = settings.getString("scaleDirectory", "");
+		currentDirectory = "http://pages.cs.wisc.edu/~hrycynia/cs407project/";
 		loadMenu();
 	}
 	

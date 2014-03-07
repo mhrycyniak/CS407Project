@@ -47,7 +47,8 @@ public class ScaleChooser extends Activity implements OnItemClickListener {
 		scales = (ListView) findViewById(R.id.listView1);
 		scales.setOnItemClickListener(this);
 		SharedPreferences settings = getSharedPreferences(SETTINGSNAME, 0);
-		currentDirectory = settings.getString("scaleDirectory", "");
+		//currentDirectory = settings.getString("scaleDirectory", "");
+		currentDirectory = "http://pages.cs.wisc.edu/~hrycynia/cs407project/";
 		if (currentDirectory != "") {
 			new LoadScalesTask().execute(currentDirectory);
 		}

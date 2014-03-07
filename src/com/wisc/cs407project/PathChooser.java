@@ -48,18 +48,18 @@ public class PathChooser extends Activity implements OnItemClickListener {
 		changeDirectory = (Button)findViewById(R.id.changeDirectory_btn);
 		changeDirectory.setVisibility(View.GONE);
 		localButton.setVisibility(View.VISIBLE);
-		local = false;
+		local = true;
 		ref = this;
 		Intent intent = getIntent();
 		scaleItem = intent.getStringExtra("scaleItem");
 		paths = (ListView) findViewById(R.id.listView1);
 		paths.setOnItemClickListener(this);
-		//LoadLocalPath();
-		SharedPreferences settings = getSharedPreferences(SETTINGSNAME, 0);
-		currentDirectory = settings.getString("pathDirectory", "");
-		if (currentDirectory != "") {
-			new LoadPathsTask().execute(currentDirectory);
-		}
+		LoadLocalPath();
+		//SharedPreferences settings = getSharedPreferences(SETTINGSNAME, 0);
+		//currentDirectory = settings.getString("pathDirectory", "");
+		//if (currentDirectory != "") {
+			//new LoadPathsTask().execute(currentDirectory);
+		//}
 	}
 	
 	public void ChangeLocalClicked(View view)
@@ -81,7 +81,8 @@ public class PathChooser extends Activity implements OnItemClickListener {
 			changeDirectory.setVisibility(View.VISIBLE);
 			localButton.setText("Change To Local Paths");
 			SharedPreferences settings = getSharedPreferences(SETTINGSNAME, 0);
-			currentDirectory = settings.getString("pathDirectory", "");
+			//currentDirectory = settings.getString("pathDirectory", "");
+			currentDirectory = "http://pages.cs.wisc.edu/~hrycynia/cs407project/";
 			if (currentDirectory != "") {
 				new LoadPathsTask().execute(currentDirectory);
 			}

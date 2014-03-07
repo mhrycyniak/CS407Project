@@ -222,8 +222,6 @@ containing a value of this type.
     }
     public static final class id {
         public static final int action_settings=0x7f050010;
-        public static final int button1=0x7f050008;
-        public static final int button2=0x7f050009;
         public static final int changeDirectory_btn=0x7f050007;
         public static final int dismiss_btn=0x7f05000e;
         public static final int hybrid=0x7f050004;
@@ -236,9 +234,11 @@ containing a value of this type.
         public static final int popup_image=0x7f05000c;
         public static final int popup_title=0x7f05000b;
         public static final int popup_txt=0x7f05000d;
+        public static final int recordPath=0x7f050009;
         public static final int recordbutton=0x7f05000f;
         public static final int satellite=0x7f050002;
         public static final int terrain=0x7f050003;
+        public static final int walkPath=0x7f050008;
     }
     public static final class integer {
         public static final int google_play_services_version=0x7f070000;

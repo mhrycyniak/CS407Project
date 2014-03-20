@@ -1,5 +1,6 @@
 package com.wisc.cs407project;
 
+import com.wisc.cs407project.ParseObjects.*;
 import android.app.Application;
 import android.util.Log;
 
@@ -17,5 +18,7 @@ public class Cs407Application extends Application {
 		//ParseObject testObject = new ParseObject("AnotherTestObject");
 		//testObject.put("foo", "bar");
 		//testObject.saveInBackground();
-	}
+		
+		//StaticUtils.CreateDinoScale();
+	}	
 }

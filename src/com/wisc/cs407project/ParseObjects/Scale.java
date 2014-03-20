@@ -2,13 +2,17 @@ package com.wisc.cs407project.ParseObjects;
 
 import java.util.ArrayList;
 
+import android.util.Log;
+
 import com.parse.ParseObject;
 
 public class Scale extends ScaleParseObject{
 	private String Objects = "scaleObjects";
+	private String Name = "name";
+	
 	public Scale()
 	{
-		super();		
+		super();
 	}
 	
 	public Scale(ParseObject object)
@@ -48,8 +52,15 @@ public class Scale extends ScaleParseObject{
 	public void SetObjects(ArrayList<ScaleObject> objects){
 		ArrayList<String> objectIds = new ArrayList<String>();
 		for(ScaleObject object : objects){
-			objectIds.add(object.parseObject.getObjectId());
+			objectIds.add(object.Id());
 		}
 		parseObject.put(this.Objects, objectIds);
+	}
+	
+	public void SetName(String name){
+		parseObject.put(this.Name, name);
+	}
+	public String GetName(){
+		return parseObject.getString(this.Name);
 	}
 }

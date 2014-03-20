@@ -1,6 +1,7 @@
 package com.wisc.cs407project.ParseObjects;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -24,6 +25,10 @@ public class ScaleObject extends ScaleParseObject{
 		super();
 	}
 
+	public String Id(){
+		return parseObject.getObjectId();
+	}
+	
 	public ScaleObject(ParseObject object)
 	{
 		pullData(object);

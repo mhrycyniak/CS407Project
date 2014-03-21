@@ -16,8 +16,8 @@ public class ScaleObject implements Comparable<ScaleObject> {
 	public double distance;
 	public boolean opened;
 	// Added these fields to be used with ScaleGenerator
-	public Double comparativeValue;
-	public String localImageLocation;
+	public Long comparativeValue;
+	public boolean isImageLocal;
 	
 	// NOTE: Only use this if you are sure both objects have comparativeValues and not just percentages.
 	@Override

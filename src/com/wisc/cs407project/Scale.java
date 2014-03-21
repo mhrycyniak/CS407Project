@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.view.Menu;
 import android.view.View;
-import android.widget.Toast;
 
 import com.wisc.cs407project.R;
 
@@ -46,8 +45,10 @@ public class Scale extends Activity {
 			{
 				public void onClick(DialogInterface dialog, int id) 
 				{
-					Toast.makeText(getApplicationContext(), "WIP", Toast.LENGTH_LONG).show();
-					//TODO
+					Intent builderIntent = new Intent(v.getContext(), ScaleBuilder.class);
+					builderIntent.putExtra("Load", true);
+					// TODO builderIntent.putExtra("Filename", "filename");
+					startActivity(builderIntent);
 				}
 			});
 			builder.setNegativeButton("New Scale", new DialogInterface.OnClickListener() 
@@ -55,6 +56,7 @@ public class Scale extends Activity {
 				public void onClick(DialogInterface dialog, int id) 
 				{
 					Intent builderIntent = new Intent(v.getContext(), ScaleBuilder.class);
+					builderIntent.putExtra("Load", false);
 					startActivity(builderIntent);
 				}
 			});

@@ -11,6 +11,7 @@
 		<measurement>2</measurement>
         <percentage></percentage>
         <picture>http://www.clipartsfree.net/svg/18177-tv-test-screen-download.svg</picture>
+        <local>0</local>
     </scaleItem>
 
     <scaleItem>
@@ -19,6 +20,7 @@
 		<measurement>15</measurement>
         <percentage></percentage>
         <picture>http://www.clipartsfree.net/svg/18177-tv-test-screen-download.svg</picture>
+        <local>0</local>
     </scaleItem>
     
     <scaleItem>
@@ -27,6 +29,7 @@
 		<measurement>33</measurement>
         <percentage></percentage>
         <picture>http://www.clipartsfree.net/svg/18177-tv-test-screen-download.svg</picture>
+        <local>0</local>
     </scaleItem>
     
     <scaleItem>
@@ -35,6 +38,7 @@
 		<measurement>75</measurement>
         <percentage></percentage>
         <picture>http://www.clipartsfree.net/svg/18177-tv-test-screen-download.svg</picture>
+        <local>0</local>
     </scaleItem>
     
     <scaleItem>
@@ -43,5 +47,6 @@
 		<measurement>80</measurement>
         <percentage></percentage>
         <picture>http://www.clipartsfree.net/svg/18177-tv-test-screen-download.svg</picture>
+        <local>0</local>
     </scaleItem>
 </scale>

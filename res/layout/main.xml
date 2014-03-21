@@ -25,5 +25,16 @@
         android:layout_marginLeft="2sp"
         android:layout_marginRight="5sp"
         android:layout_marginTop="0sp"/>
+    
+        <Button
+        android:id="@+id/scaleBuilder"
+        android:text="Scale Builder"
+        android:onClick="onButtonClick"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5sp"
+        android:layout_marginLeft="2sp"
+        android:layout_marginRight="5sp"
+        android:layout_marginTop="0sp"/>
 
 </LinearLayout>

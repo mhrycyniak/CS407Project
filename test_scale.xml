@@ -1,0 +1,47 @@
+<scale>
+	<scaleInfo>
+	    <name>Test Scale 01</name>
+	    <units>feet</units>
+	    <max>80</max>
+	</scaleInfo>
+	
+    <scaleItem>
+        <name>Item 1</name>
+        <description>This is a description of item 1</description>
+		<measurement>2</measurement>
+        <percentage></percentage>
+        <picture>http://www.clipartsfree.net/svg/18177-tv-test-screen-download.svg</picture>
+    </scaleItem>
+
+    <scaleItem>
+        <name>Item 2</name>
+        <description>This is a description of item 2</description>
+		<measurement>15</measurement>
+        <percentage></percentage>
+        <picture>http://www.clipartsfree.net/svg/18177-tv-test-screen-download.svg</picture>
+    </scaleItem>
+    
+    <scaleItem>
+        <name>Item 3</name>
+        <description>This is a description of item 3</description>
+		<measurement>33</measurement>
+        <percentage></percentage>
+        <picture>http://www.clipartsfree.net/svg/18177-tv-test-screen-download.svg</picture>
+    </scaleItem>
+    
+    <scaleItem>
+        <name>Item 4</name>
+        <description>This is a description of item 4</description>
+		<measurement>75</measurement>
+        <percentage></percentage>
+        <picture>http://www.clipartsfree.net/svg/18177-tv-test-screen-download.svg</picture>
+    </scaleItem>
+    
+    <scaleItem>
+        <name>Item 5</name>
+        <description>This is a description of item 5</description>
+		<measurement>80</measurement>
+        <percentage></percentage>
+        <picture>http://www.clipartsfree.net/svg/18177-tv-test-screen-download.svg</picture>
+    </scaleItem>
+</scale>

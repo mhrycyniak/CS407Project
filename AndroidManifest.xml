@@ -23,6 +23,8 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/android:Theme.Holo" >
+        
+        <!-- Main Activity -->
         <activity
             android:name="com.wisc.cs407project.Scale"
             android:label="@string/app_name" >
@@ -32,26 +34,38 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <!-- Scale Builder Activity -->
+        <activity
+            android:name="com.wisc.cs407project.ScaleBuilder"
+            android:label="@string/app_name"
+            android:windowSoftInputMode="adjustPan" />	<!-- so EditTexts remain focused in ListView -->
+        
         <activity
             android:name="com.wisc.cs407project.Map"
-            android:label="@string/app_name" >
-        </activity>
+            android:label="@string/app_name" />
+        
         <activity
             android:name="com.wisc.cs407project.Popup"
             android:theme="@android:style/Theme.Dialog">
         </activity>
+        
         <activity
             android:name="com.wisc.cs407project.ScaleChooser"
             android:label="@string/app_name" />
+        
         <activity
             android:name="com.wisc.cs407project.PathChooser"
             android:label="@string/app_name" />
+        
         <activity
             android:name="com.wisc.cs407project.RecordPath"
             android:label="@string/app_name" />
+        
         <activity
             android:name="com.wisc.cs407project.DirChooser"
             android:label="@string/app_name" />
+        
         <activity android:name="com.google.android.gms.maps.SupportMapFragment"/>
             <meta-data
             android:name="com.google.android.gms.version"

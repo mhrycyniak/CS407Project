@@ -68,6 +68,7 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener {
 	private boolean localPath;
 	public List<ScaleObject> scaleItemList = new ArrayList<ScaleObject>();
 	public LatLng startingPoint;
+	public LatLng previousPoint;
 	public boolean pathStarted = false;
 	public double distanceTraveled = 0;
 	public double distanceInterval;
@@ -391,7 +392,7 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener {
 	
 	@Override
 	public void onResume() {
-		locationLis = new ScaleLocationListener(this);
+		locationLis = new ScaleLocationListener(ref);
 		locationMan.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 2, locationLis);
 	    super.onResume();
 	}

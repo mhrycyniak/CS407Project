@@ -27,7 +27,8 @@
         <activity
             android:name="com.wisc.cs407project.Scale"
             android:label="@string/app_name" 
-            android:screenOrientation="portrait" >
+            android:screenOrientation="portrait" 
+            android:theme="@style/MyTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

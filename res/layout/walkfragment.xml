@@ -12,7 +12,7 @@
 
     <RelativeLayout
         android:id="@+id/relativeLayout1"
-        android:layout_width="270dp"
+        android:layout_width="230dp"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
         android:background="@android:color/black" >
@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_toLeftOf="@+id/view"
-            android:text="Choose Path" />
+            android:text="Path" />
 
         <View
             android:id="@+id/view"
@@ -37,7 +37,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_toRightOf="@+id/view"
-            android:text="Choose Scale" />
+            android:text="Scale" />
 
         <Button
             android:id="@+id/walkPath"
@@ -49,7 +49,7 @@
     
     <LinearLayout 
         android:id="@+id/linearLayout1"
-        android:layout_width="250dp"
+        android:layout_width="230dp"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
         android:background="@android:color/black"

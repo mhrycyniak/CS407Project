@@ -374,6 +374,7 @@ containing a value of this type.
         public static final int walk_path=0x7f06001e;
     }
     public static final class style {
+        public static final int ActionBarTabStyle=0x7f090003;
         /** 
         Base application theme, dependent on API level. This theme is replaced
         by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
@@ -400,6 +401,7 @@ containing a value of this type.
  All customizations that are NOT specific to a particular API-level can go here. 
          */
         public static final int AppTheme=0x7f090001;
+        public static final int MyTheme=0x7f090002;
     }
     public static final class styleable {
         /** Attributes that can be used with a AdsAttrs.

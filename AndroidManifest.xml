@@ -37,7 +37,7 @@
         
         <!-- Scale Builder Activity -->
         <activity
-            andcom.wisc.cs407project.ScaleGenUI.ScaleBuildercaleBuilder"
+            android:name="com.wisc.cs407project.ScaleGenUI.ScaleBuildercaleBuilder"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateHidden|adjustPan" />
         	
@@ -51,7 +51,7 @@
         </activity>
         
         <activity 
-    com.wisc.cs407project.ScaleGenUI.ImageExplorerPopupect.ImageExplorerPopup" 
+    		android:name="com.wisc.cs407project.ScaleGenUI.ImageExplorerPopupect.ImageExplorerPopup" 
             android:theme="@android:style/Theme.Dialog" >
         </activity>
         

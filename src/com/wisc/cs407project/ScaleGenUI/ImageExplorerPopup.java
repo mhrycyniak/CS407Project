@@ -136,13 +136,13 @@ public class ImageExplorerPopup extends Activity {
 		String extState = Environment.getExternalStorageState();
 		if(!extState.equals(Environment.MEDIA_MOUNTED)) {
 			//TODO make a popup message and close the activity
-			Log.d("ERROR", "Storage not mounted");
+			Log.e("ERROR", "Storage not mounted");
 		}
 		else {
 			// Try to set path to start with app directory
 			path = Environment.getExternalStorageDirectory().toString();
 			// TODO make this the Image directory if we add that option
-			String betterPath = path + getResources().getString(R.string.app_name);;
+			String betterPath = path + "/" + getResources().getString(R.string.app_name);;
 			if (new File(betterPath).isDirectory()) {
 				path = betterPath;
 			}

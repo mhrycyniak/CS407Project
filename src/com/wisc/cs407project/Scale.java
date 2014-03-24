@@ -1,4 +1,4 @@
-package com.wisc.cs407project.ScaleGenUI;
+package com.wisc.cs407project;
 
 import java.io.File;
 
@@ -13,13 +13,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 
-import com.wisc.cs407project.DirChooser;
 import com.wisc.cs407project.R;
-import com.wisc.cs407project.RecordPath;
 import com.wisc.cs407project.R.id;
 import com.wisc.cs407project.R.layout;
 import com.wisc.cs407project.R.menu;
 import com.wisc.cs407project.R.string;
+import com.wisc.cs407project.ScaleGenUI.ScaleBuilder;
+import com.wisc.cs407project.ScaleGenUI.ScaleExplorerPopup;
 
 public class Scale extends Activity {
 

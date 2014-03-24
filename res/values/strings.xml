@@ -7,6 +7,7 @@
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
+    <string name="resume_backup_filename">last_edited_scale_file.xml</string>
     <item type="id" name="TAG_BUILDER_IMGLOAD_POSITION_ID"/>
     <item type="id" name="TAG_BUILDER_IMGLOAD_TEXT_ID"/>
     <item type="id" name="TAG_BUILDER_IMGLOAD_ID"/>

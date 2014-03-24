@@ -227,7 +227,7 @@ containing a value of this type.
         public static final int TAG_BUILDER_IMGLOAD_ID=0x7f050007;
         public static final int TAG_BUILDER_IMGLOAD_POSITION_ID=0x7f050005;
         public static final int TAG_BUILDER_IMGLOAD_TEXT_ID=0x7f050006;
-        public static final int action_settings=0x7f050036;
+        public static final int action_settings=0x7f05003a;
         public static final int builderHeaderAddButton=0x7f05002e;
         public static final int builderHeaderName=0x7f05002b;
         public static final int builderHeaderNameLabel=0x7f05002a;
@@ -264,7 +264,7 @@ containing a value of this type.
         public static final int listView1=0x7f050016;
         public static final int local_btn=0x7f050017;
         public static final int map=0x7f050024;
-        public static final int menu_settings=0x7f050037;
+        public static final int menu_settings=0x7f05003b;
         public static final int none=0x7f050000;
         public static final int normal=0x7f050001;
         public static final int popup_image=0x7f050026;
@@ -274,8 +274,12 @@ containing a value of this type.
         public static final int recordbutton=0x7f050029;
         public static final int satellite=0x7f050002;
         public static final int scaleBuilder=0x7f050023;
+        public static final int scaleExplorerBackButton=0x7f050037;
+        public static final int scaleExplorerDirectory=0x7f050036;
+        public static final int scaleExplorerList=0x7f050038;
         public static final int scaleExplorerLoadLocalButton=0x7f050034;
-        public static final int scaleExplorerLoadOnlineButton=0x7f050035;
+        public static final int scaleExplorerLoadLocalLayout=0x7f050035;
+        public static final int scaleExplorerLoadOnlineButton=0x7f050039;
         public static final int scaleExplorerNewButton=0x7f050033;
         public static final int scaleExplorerResumeButton=0x7f050032;
         public static final int terrain=0x7f050003;
@@ -401,6 +405,7 @@ containing a value of this type.
         public static final int common_signin_button_text_long=0x7f060013;
         public static final int hello_world=0x7f06001e;
         public static final int menu_settings=0x7f06001f;
+        public static final int resume_backup_filename=0x7f060020;
     }
     public static final class style {
         /** 

@@ -182,6 +182,7 @@ public class ScaleGenerator {
 		for (ScaleObject object : members) {
 			result = result + getObjectXML(object);
 		}
+		result = result + "</scale>\n";
 		Log.d("XML generated", result);
 		return result;
 	}

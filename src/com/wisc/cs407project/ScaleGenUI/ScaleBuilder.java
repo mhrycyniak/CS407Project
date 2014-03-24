@@ -72,14 +72,22 @@ public class ScaleBuilder extends Activity {
 		Intent intent = getIntent();
 		boolean loadNeeded = intent.getBooleanExtra("Load", false);
 		
+		scale = new ScaleGenerator();
+		
 		if (loadNeeded) {
 			loadedPath = intent.getStringExtra("Path");
-			scale = new ScaleGenerator();
 
 			//TODO make this dynamic, with menu
-			String path = Environment.getExternalStorageDirectory().toString() + "/Pictures/Andrew/test_scale.xml";
-			new LoadIndividualScaleTask().execute(path);
-
+			//String path = Environment.getExternalStorageDirectory().toString() + "/Pictures/Andrew/test_scale.xml";
+			new LoadIndividualScaleTask().execute(loadedPath);
+		} else {
+			// Set up list and adapter
+			list = (ListView)findViewById(R.id.list);
+			list.setItemsCanFocus(true);
+			adapter = new BuilderListAdapter(ref, scale);
+			list.setAdapter(adapter);
+		}
+		
 			// Find the header views
 			// Header Name and Change Listener
 			headerName = (EditText)findViewById(R.id.builderHeaderName);
@@ -122,8 +130,10 @@ public class ScaleBuilder extends Activity {
 			headerSort = (Button)findViewById(R.id.builderHeaderSortButton);
 			headerSort.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					scale.sort();
-					adapter.notifyDataSetChanged();
+					if (!scale.members.isEmpty()) {
+						scale.sort();
+						adapter.notifyDataSetChanged();
+					}
 				}
 			});
 			
@@ -131,9 +141,7 @@ public class ScaleBuilder extends Activity {
 			headerSave = (Button)findViewById(R.id.builderHeaderSaveButton);
 			headerSave.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					// Let's just make sure
-					adapter.notifyDataSetChanged();
-					
+					//TODO make this asynctask
 					// Check access to device
 					String extState = Environment.getExternalStorageState();
 					if(!extState.equals(Environment.MEDIA_MOUNTED)) {
@@ -147,6 +155,7 @@ public class ScaleBuilder extends Activity {
 					if (scaleName.equals("")) {
 						//TODO make proper error here
 						Log.e("ERROR", "Scale must have a name");
+						return;
 					}
 					
 					// Check if name is already used (by a file other than what was loaded)
@@ -180,19 +189,38 @@ public class ScaleBuilder extends Activity {
 				}
 			});
 
-		} else {
-			// TODO load new scale
-			list.setItemsCanFocus(true);
-
-		}
 	}
 
 	@Override
 	protected void onStop() {
 	    super.onStop();
 	    // TODO Save scale for Resume option
+	    // Check access to device
+		String extState = Environment.getExternalStorageState();
+		if(!extState.equals(Environment.MEDIA_MOUNTED)) {
+			Log.e("ERROR: Save on Stop", "Storage not mounted");
+			return;
+		}
+		
+		// Build the save path
+		String path = Environment.getExternalStorageDirectory().toString();
+		path = path + "/" + getResources().getString(R.string.app_name) + "/"
+				+ getResources().getString(R.string.resume_backup_filename);
+		
+		// Try to write the file
+		File saveFile = new File(path);
+		FileOutputStream fos;
+		String xmlFile = scale.getXML();
+		byte[] data = xmlFile.getBytes();
+		try {
+		    fos = new FileOutputStream(saveFile);
+		    fos.write(data);
+		    fos.flush();
+		    fos.close();
+		} catch (Exception e) {
+		    // No big deal if the resume save didn't work for whatever reason
+		}
 	}
-
 
 // TODO clean this up and (maybe) modify the error popups etc.
 
@@ -235,14 +263,7 @@ public class ScaleBuilder extends Activity {
 							.newInstance().newDocumentBuilder();
 					Document doc = docBuilder.parse(new ByteArrayInputStream(scaleItem.getBytes()));
 					NodeList items = doc.getElementsByTagName("scaleItem");
-					if (items.getLength() < 2)
-					{
-						Intent intent = new Intent(ref, Popup.class);
-						intent.putExtra("title", "Error");
-						intent.putExtra("text", "The requested scale does not contain enough scale items.");
-						startActivity(intent);
-					}
-					else {
+					 
 						scaleText = scaleItem;
 						try {
 							scale.loadScale(scaleText);
@@ -260,13 +281,13 @@ public class ScaleBuilder extends Activity {
 							Log.d("", "ERROR: in ScaleGenerator.loadScale()");
 							e.printStackTrace();
 						}
-					}
 				}
 				catch (Exception e)
 				{
 					Intent intent = new Intent(ref, Popup.class);
 					intent.putExtra("title", "Error");
 					intent.putExtra("text", "The requested scale is not in the correct format.");
+					e.printStackTrace();
 					startActivity(intent);
 				}
 			} else {

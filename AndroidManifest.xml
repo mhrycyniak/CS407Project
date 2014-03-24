@@ -26,7 +26,7 @@
         
         <!-- Main Activity -->
         <activity
-            android:name="com.wisc.cs407project.Scale"
+            android:name="com.wisc.cs407project.ScaleGenUI.Scale"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -37,10 +37,10 @@
         
         <!-- Scale Builder Activity -->
         <activity
-            android:name="com.wisc.cs407project.ScaleBuilder"
+            andcom.wisc.cs407project.ScaleGenUI.ScaleBuildercaleBuilder"
             android:label="@string/app_name"
-            android:windowSoftInputMode="adjustPan" />	<!-- so EditTexts remain focused in ListView -->
-        
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+        	
         <activity
             android:name="com.wisc.cs407project.Map"
             android:label="@string/app_name" />
@@ -48,6 +48,11 @@
         <activity
             android:name="com.wisc.cs407project.Popup"
             android:theme="@android:style/Theme.Dialog">
+        </activity>
+        
+        <activity 
+    com.wisc.cs407project.ScaleGenUI.ImageExplorerPopupect.ImageExplorerPopup" 
+            android:theme="@android:style/Theme.Dialog" >
         </activity>
         
         <activity

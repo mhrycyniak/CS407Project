@@ -2,8 +2,13 @@
 <resources>
 
     <string name="app_name">cs407project</string>
+    <string name="app_image_directory">/cs407project/Images</string>
+    <string name="app_scale_directory">/cs407project/Scales</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
+    <item type="id" name="TAG_BUILDER_IMGLOAD_POSITION_ID"/>
+    <item type="id" name="TAG_BUILDER_IMGLOAD_TEXT_ID"/>
+    <item type="id" name="TAG_BUILDER_IMGLOAD_ID"/>
 
 </resources>

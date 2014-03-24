@@ -1,4 +1,4 @@
-package com.wisc.cs407project;
+package com.wisc.cs407project.ScaleGenUI;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -15,6 +15,8 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
+import com.wisc.cs407project.ScaleObject;
+
 import android.util.Log;
 
 public class ScaleGenerator {
@@ -23,6 +25,7 @@ public class ScaleGenerator {
 	public Long maxComparativeValue; // Used for updating percentages
 	public String scaleMetric;	// What is being compared
 	public String scaleName;
+	public boolean xmlWarningFlag;
 
 	public ScaleGenerator() {
 		members = new ArrayList<ScaleObject>();
@@ -35,7 +38,6 @@ public class ScaleGenerator {
 		//TODO clean and comment it better
 		Document docScale;
 
-		Log.d("", "loadScale; pre exceptions");
 		//// The source of the thrown exceptions:
 		DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 		docScale = docBuilder.parse(new ByteArrayInputStream(xmlScale.getBytes()));
@@ -43,7 +45,6 @@ public class ScaleGenerator {
 
 		// Load header info
 		NodeList scaleInfoList = docScale.getElementsByTagName("scaleInfo");
-		Log.d("", "got to scaleInfo loading");
 		if (scaleInfoList.getLength() > 0) {
 			// Only the top (index 0) scaleInfo in an XML is used (there should be only one anyway)
 			Element scaleInfo = (Element) scaleInfoList.item(0);
@@ -82,7 +83,6 @@ public class ScaleGenerator {
 						String nodeName = child.getNodeName();
 						if (nodeName.equals("name")) {
 							item.name = child.getTextContent();
-							Log.d("", "loading name of a child, name is " + item.name);
 						} else if (nodeName.equals("description")) {
 							item.text = child.getTextContent();
 						} else if (nodeName.equals("measurement")) {
@@ -91,11 +91,7 @@ public class ScaleGenerator {
 							item.percentage = convertToDouble(child.getTextContent());
 						} else if(nodeName.equals("picture")) {
 							item.imageLocation = child.getTextContent();
-						} else if (nodeName.equals("local")) {
-							if (child.getTextContent().equals("1") || child.getTextContent().equals("true")) {
-								item.isImageLocal = true;
-							}
-						}
+						} 
 					}
 				}
 			}
@@ -105,6 +101,12 @@ public class ScaleGenerator {
 			if (item.comparativeValue == null || item.comparativeValue.equals(0)) {
 				item.comparativeValue = Double.doubleToLongBits(item.percentage);
 			}
+			/* Fill in the percentage if only a comparative value was given. This is more for the sake
+			 * of where I'm at with testing at the moment and will probably not be used by the finished app.
+			 */
+			if (item.percentage == null || item.percentage.equals(0.0)) {
+				item.percentage = ((double)item.comparativeValue / maxComparativeValue);
+			}
 			// Add the item
 			members.add(item);
 		}
@@ -113,7 +115,7 @@ public class ScaleGenerator {
 	public void add(ScaleObject... objects) {
 		boolean maxUpdate = false;
 		for (ScaleObject object : objects) {
-			members.add(object);
+			members.add(0, object);
 			// Flag a change in the max value
 			if (object.comparativeValue > maxComparativeValue) {
 				maxComparativeValue = object.comparativeValue;
@@ -122,12 +124,35 @@ public class ScaleGenerator {
 		}
 		// If max value changed, update each percentage
 		if (maxUpdate) {
-			for (ScaleObject object : members) {
-				object.percentage = Double.longBitsToDouble(object.comparativeValue / maxComparativeValue);
-			}
+			refactorMaxValue(maxComparativeValue);
 		}
 		// Maintain sorted order
-		sort();
+		//sort();
+	}
+	
+	public void refactorMaxValue(long newMax) {
+		maxComparativeValue = newMax;
+		for (ScaleObject object : members) {
+			object.percentage = ((double)object.comparativeValue / maxComparativeValue);
+		}
+	}
+	
+	public void refactorMaxValue() {
+		long temp = (long)0;
+		// Find the new max
+		for (ScaleObject object : members) {
+			if (object.comparativeValue > temp) {
+				temp = object.comparativeValue;
+			}
+		}
+		refactorMaxValue(temp);
+	}
+	
+	public void addNew() {
+		ScaleObject object = new ScaleObject();
+		object.percentage = (double)0;
+		object.comparativeValue = (long)0;
+		add(object);
 	}
 
 	public void remove(String... names) {
@@ -142,12 +167,54 @@ public class ScaleGenerator {
 			}
 		}
 	}
-
+	
 	public void sort() {
 		Collections.sort(members);
 	}
+	
+	public String getXML() {
+		xmlWarningFlag = false;
+		// We want scales stored in sorted order
+		sort();
+		String result = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>";
+		result = result + "\n<scale>\n";
+		result = result + getHeaderXML();
+		for (ScaleObject object : members) {
+			result = result + getObjectXML(object);
+		}
+		Log.d("XML generated", result);
+		return result;
+	}
+	
+	private String getHeaderXML() {
+		String result = "\t<scaleInfo>\n";
+		result = result + "\t\t<name>" + scaleName + "</name>\n";
+		result = result + "\t\t<units>" + scaleMetric + "</units>\n";
+		result = result + "\t\t<max>" + maxComparativeValue.toString() + "</max>\n";
+		result = result + "\t</scaleInfo>\n";
+		// Flag if necessary
+		if (scaleMetric.equals("") || scaleName.equals("")) {
+			xmlWarningFlag = true;
+		}
+		return result;
+	}
+	
+	private String getObjectXML(ScaleObject object) {
+		String result = "\n\t<scaleItem>\n";
+		result = result + "\t\t<name>" + object.name + "</name>\n";
+		result = result + "\t\t<description>" + object.text + "</description>\n";
+		result = result + "\t\t<measurement>" + object.comparativeValue.toString() + "</measurement>\n";
+		result = result + "\t\t<percentage>" + object.percentage.toString() + "</percentage>\n";
+		result = result + "\t\t<picture>" + object.imageLocation + "</picture>\n";
+		result = result + "\t</scaleItem>\n";
+		// Flag if necessary
+		if (object.name.equals("") || object.text.equals("") || object.imageLocation.equals("")) {
+			xmlWarningFlag = true;
+		}
+		return result;
+	}
 
-	public Double convertToDouble(String myString) {
+	public static Double convertToDouble(String myString) {
 
 		try {
 			return Double.valueOf(myString);
@@ -156,7 +223,7 @@ public class ScaleGenerator {
 		}
 	}
 	
-	public Long convertToLong(String myString) {
+	public static Long convertToLong(String myString) {
 		try {
 			return Long.valueOf(myString);
 		} catch (NumberFormatException e) {

@@ -2,101 +2,164 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal" >
-    
-    <!-- Image on the left half -->
+    android:orientation="vertical" >
+
     <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_width="0dp"
-        android:layout_weight="1" >
-        
-        <ImageView
-            android:id="@+id/builderRowImage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        
-    </LinearLayout>
-    
-    <!-- Info on the right -->
-    <LinearLayout
-        android:layout_height="wrap_content"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:orientation="vertical" >
-        
-        <!-- Name -->
-        <TextView
-          	android:id="@+id/builderRowNameLabel"
-        	android:layout_width="wrap_content"
-        	android:layout_height="wrap_content"
-        	android:text="Name:" />
-        
-        <EditText
-            android:id="@+id/builderRowNameEdit"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-        	android:text="Name" />
-        
-        <!-- The comparable data -->
-        <TextView
-            android:id="@+id/builderRowComparableLabel"
-        	android:layout_width="wrap_content"
-        	android:layout_height="wrap_content"
-        	android:text="Measurement:" />
-        
+        android:orientation="horizontal" >
+
+        <!-- Image on the left half -->
+
         <LinearLayout
-        	android:layout_height="wrap_content"
-        	android:layout_width="match_parent"
-        	android:orientation="horizontal" >
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+    		android:layout_marginTop="5dp"
+    		android:gravity="center_horizontal"
+    		android:layout_marginBottom="5dp" >
+
+            <ImageView
+                android:id="@+id/builderRowImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:adjustViewBounds="true"
+                android:background="@drawable/gray_image_border" />
+        </LinearLayout>
+
+        <!-- Info on the right -->
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginLeft="5dp"
+    		android:layout_marginTop="5dp"
+    		android:layout_marginBottom="5dp" >
+
+            <!-- Name -->
+
+            <TextView
+                android:id="@+id/builderRowNameLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Name:" />
 
             <EditText
-            	android:id="@+id/builderRowComparableEdit"
-            	android:layout_width="fill_parent"
-            	android:layout_height="wrap_content"
-            	android:layout_weight="1"
-        		android:text="Comparable Value" />
-        
-        	<TextView
-            	android:id="@+id/builderRowUnits"
-        		android:layout_width="wrap_content"
-        		android:layout_height="wrap_content"        		
-        		android:text="units" />
-            
+                android:id="@+id/builderRowNameEdit"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:focusable="true"
+                android:hint="Enter Item Name" />
+
+            <!-- The comparable data -->
+
+            <TextView
+                android:id="@+id/builderRowComparableLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Measurement:" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <EditText
+                    android:id="@+id/builderRowComparableEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:inputType="number"
+                    android:hint="eg &quot;10&quot;" />
+
+                <TextView
+                    android:id="@+id/builderRowUnits"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:singleLine="true"
+                    android:gravity="left"
+                    android:text="units" />
+
+                <!-- Item/Max Ratio Display -->
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Item/Max Ratio: " />
+
+                <TextView
+                    android:id="@+id/builderRowPercentage"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="left"
+                    android:text="0.00" />
+            </LinearLayout>
         </LinearLayout>
-             
-        <!-- The description -->
-        <TextView
-            android:id="@+id/builderRowDescriptionLabel"
-        	android:layout_width="wrap_content"
-        	android:layout_height="wrap_content"
-        	android:text="Description:" />
-        
-        <EditText
-            android:id="@+id/builderRowDescriptionEdit"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-        	android:text="Description" />
-        
-        <!-- The image location -->
-        <TextView
-            android:id="@+id/builderRowImageLocationLabel"
-        	android:layout_width="wrap_content"
-        	android:layout_height="wrap_content"
-        	android:text="Image Location:" />
-        
+    </LinearLayout>
+
+    <!-- The image location -->
+
+    <TextView
+        android:id="@+id/builderRowImageLocationLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Image Location:" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
         <EditText
             android:id="@+id/builderRowImageLocationEdit"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-        	android:text="Image Location" />
-        
-        <!-- Delete Button -->
-        <Button
-            android:id="@+id/builderRowDelete"
-            android:layout_width="match_parent"
+            android:layout_weight="1"
+            android:singleLine="true"
+            android:hint="Enter Web Address or Select Browse" />
+        <Button 
+            android:id="@+id/builderRowImageLoadButton"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Delete This Item" />
-        
+            android:text="Load" />
+        <Button
+            android:id="@+id/builderRowImageBrowseButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Browse..." />
     </LinearLayout>
+    <!-- The description -->
+
+    <TextView
+        android:id="@+id/builderRowDescriptionLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Description:" />
+
+    <EditText
+        android:id="@+id/builderRowDescriptionEdit"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter Item Description" />
+
+    <!-- Delete Button -->
+
+    <Button
+        android:id="@+id/builderRowDelete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:text="Delete This Item" />
 
 </LinearLayout>

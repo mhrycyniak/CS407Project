@@ -10,8 +10,7 @@
         <description>This is a description of item 1</description>
 		<measurement>2</measurement>
         <percentage></percentage>
-        <picture>http://www.clipartsfree.net/svg/18177-tv-test-screen-download.svg</picture>
-        <local>0</local>
+        <picture>/storage/emulated/0/Pictures/Andrew/Andrew_20140303_111922.jpeg</picture>
     </scaleItem>
 
     <scaleItem>
@@ -19,8 +18,7 @@
         <description>This is a description of item 2</description>
 		<measurement>15</measurement>
         <percentage></percentage>
-        <picture>http://www.clipartsfree.net/svg/18177-tv-test-screen-download.svg</picture>
-        <local>0</local>
+        <picture>http://thumbs.dreamstime.com/z/tv-test-screen-9317381.jpg</picture>
     </scaleItem>
     
     <scaleItem>
@@ -28,8 +26,7 @@
         <description>This is a description of item 3</description>
 		<measurement>33</measurement>
         <percentage></percentage>
-        <picture>http://www.clipartsfree.net/svg/18177-tv-test-screen-download.svg</picture>
-        <local>0</local>
+        <picture>http://2.bp.blogspot.com/-zlCBFDkmYHo/ThNjxgyP6HI/AAAAAAAAA4Q/-w1p_fb-d3o/s1600/testpattern2.jpg</picture>
     </scaleItem>
     
     <scaleItem>
@@ -37,8 +34,7 @@
         <description>This is a description of item 4</description>
 		<measurement>75</measurement>
         <percentage></percentage>
-        <picture>http://www.clipartsfree.net/svg/18177-tv-test-screen-download.svg</picture>
-        <local>0</local>
+        <picture>http://2.bp.blogspot.com/-zlCBFDkmYHo/ThNjxgyP6HI/AAAAAAAAA4Q/-w1p_fb-d3o/s1600/testpattern2.jpg</picture>
     </scaleItem>
     
     <scaleItem>
@@ -46,7 +42,6 @@
         <description>This is a description of item 5</description>
 		<measurement>80</measurement>
         <percentage></percentage>
-        <picture>http://www.clipartsfree.net/svg/18177-tv-test-screen-download.svg</picture>
-        <local>0</local>
+        <picture>http://2.bp.blogspot.com/-zlCBFDkmYHo/ThNjxgyP6HI/AAAAAAAAA4Q/-w1p_fb-d3o/s1600/testpattern2.jpg</picture>
     </scaleItem>
 </scale>

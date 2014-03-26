@@ -24,13 +24,18 @@ import com.wisc.cs407project.R.layout;
 import com.wisc.cs407project.R.string;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.Editable;
+import android.text.InputFilter;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
@@ -55,11 +60,14 @@ public class ScaleBuilder extends Activity {
 	BuilderListAdapter adapter;
 	private ScaleBuilder ref;
 	String scaleText = "";
+	String path;
 	ScaleGenerator scale;
 	EditText headerName;
 	EditText headerUnits;
 	Button headerAdd, headerSort, headerSave;
 	String loadedPath = "";
+	boolean cancelSave = false;
+	boolean holdForDialog = false;
 
 
 	@Override
@@ -101,6 +109,34 @@ public class ScaleBuilder extends Activity {
 		        public void beforeTextChanged(CharSequence s, int start, int count, int after){}
 		        public void onTextChanged(CharSequence s, int start, int before, int count){}
 		    });
+			// Filter the EditText to allow only some chars (since it's used as a filename)
+			InputFilter filter = new InputFilter() {
+			    @Override
+			    public CharSequence filter(CharSequence source, int start, int end,
+			            Spanned dest, int dstart, int dend) {
+
+			        if (source instanceof SpannableStringBuilder) {
+			            SpannableStringBuilder sourceAsSpannableBuilder = (SpannableStringBuilder)source;
+			            for (int i = end - 1; i >= start; i--) { 
+			                char currentChar = source.charAt(i);
+			                 if (!Character.isLetterOrDigit(currentChar) && !Character.isSpaceChar(currentChar)) {    
+			                     sourceAsSpannableBuilder.delete(i, i+1);
+			                 }     
+			            }
+			            return source;
+			        } else {
+			            StringBuilder filteredStringBuilder = new StringBuilder();
+			            for (int i = start; i < end; i++) { 
+			                char currentChar = source.charAt(i);
+			                if (Character.isLetterOrDigit(currentChar) || Character.isSpaceChar(currentChar)) {    
+			                    filteredStringBuilder.append(currentChar);
+			                }     
+			            }
+			            return filteredStringBuilder.toString();
+			        }
+			    }
+			};
+			headerName.setFilters(new InputFilter[]{filter});
 			
 			// Header Units and Change Listener
 			headerUnits = (EditText)findViewById(R.id.builderHeaderUnits);
@@ -159,14 +195,60 @@ public class ScaleBuilder extends Activity {
 					}
 					
 					// Check if name is already used (by a file other than what was loaded)
+					// Confirm overwrite, save here if confirmed
 					scaleName = scaleName + ".xml";
-					String path = Environment.getExternalStorageDirectory().toString();
+					path = Environment.getExternalStorageDirectory().toString();
 					path = path + getResources().getString(R.string.app_scale_directory) + "/" + scaleName;
 					if ((!path.equals(loadedPath)) && (new File(path).exists())) {
-						//TODO make overwrite confirmation
+						
+						AlertDialog.Builder builder = new AlertDialog.Builder(ref);
+
+						builder.setTitle("A file by this name already exists. Do you want to overwrite it?");
+
+						// Add the buttons
+						builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() 
+						{
+							public void onClick(DialogInterface dialog, int id) 
+							{
+								dialog.dismiss();
+								// Save (with Toast confirmation) (check warning flag, possibly)
+								// DEFAULT IS TO OVERWRITE
+								File saveFile = new File(path);
+								FileOutputStream fos;
+								String xmlFile = scale.getXML();
+								//boolean warning = scale.xmlWarningFlag;
+								byte[] data = xmlFile.getBytes();
+								try {
+								    fos = new FileOutputStream(saveFile);
+								    fos.write(data);
+								    fos.flush();
+								    fos.close();
+								} catch (FileNotFoundException e) {
+								    // TODO handle exception
+								} catch (IOException e) {
+								    // TODO handle exception
+								}
+
+								Toast toast = Toast.makeText(getApplicationContext(), "File Saved" , Toast.LENGTH_LONG);
+								toast.show();
+							}
+						});
+						builder.setNegativeButton("No", new DialogInterface.OnClickListener() 
+						{
+							public void onClick(DialogInterface dialog, int id) 
+							{
+								dialog.dismiss();
+							}
+						});
+
+						// Create and show
+						builder.create();
+						builder.show(); 
+						
+						return;
 					}
 					
-					// Save (with Toast confirmation) (check warning flag, possibly)
+					// (Non-overwrite) Save (with Toast confirmation) (check warning flag, possibly)
 					// DEFAULT IS TO OVERWRITE
 					File saveFile = new File(path);
 					FileOutputStream fos;

@@ -101,6 +101,10 @@ public class ImageExplorerPopup extends Activity {
 					// Pop off "/currentDirectory/"
 					item = item.substring(0, item.lastIndexOf("/"));
 					item = item.substring(0, item.lastIndexOf("/"));
+					// Root is "/" not ""
+					if (item.equals("")) {
+						item = "/";
+					}
 					new LoadDirectoryTask().execute(item);
 				}
 			}
@@ -177,7 +181,11 @@ public class ImageExplorerPopup extends Activity {
 					result[i+1] = children[i].getName();
 				}
 				// Add the directory (offsetting for the confusing directory flag)
-				result[children.length + 1] = arg0[0] + "/";
+				if (arg0[0].equals("/")) {
+					result[children.length + 1] = arg0[0]; // Root is "/" not "//"
+				} else {
+					result[children.length + 1] = arg0[0] + "/";
+				}
 				return result;
 			} 
 			// If path is an image

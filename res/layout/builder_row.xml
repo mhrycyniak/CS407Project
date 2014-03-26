@@ -51,7 +51,8 @@
                 android:id="@+id/builderRowNameEdit"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:focusable="true"
+                android:singleLine="true"
+                android:inputType="textNoSuggestions"
                 android:hint="Enter Item Name" />
 
             <!-- The comparable data -->
@@ -127,6 +128,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:singleLine="true"
+            android:inputType="textNoSuggestions"
             android:hint="Enter Web Address or Select Browse" />
         <Button 
             android:id="@+id/builderRowImageLoadButton"

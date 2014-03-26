@@ -16,11 +16,10 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@drawable/list_header_border"
-        
-    android:layout_marginLeft="5dp"
-    android:layout_marginRight="5dp"
-    android:layout_marginTop="5dp"
-    android:layout_marginBottom="5dp" >
+        android:layout_marginLeft="5dp"
+    	android:layout_marginRight="5dp"
+    	android:layout_marginTop="5dp"
+    	android:layout_marginBottom="5dp" >
 
         <!-- Header: Scale Name -->
 
@@ -42,6 +41,8 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:singleLine="true"
+                android:inputType="textNoSuggestions"
                 android:hint="Enter the Name of this Scale" />
         </LinearLayout>
 
@@ -64,6 +65,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:singleLine="true"
                 android:hint="eg &quot;km&quot;" />
         </LinearLayout>
 

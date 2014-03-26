@@ -59,7 +59,6 @@
             android:name="com.wisc.cs407project.ScaleGenUI.ScaleExplorerPopup"
             android:theme="@android:style/Theme.Dialog"
             android:noHistory="true" >
-            
         </activity>
         
         <activity

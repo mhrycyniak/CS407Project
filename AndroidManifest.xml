@@ -35,14 +35,34 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <!-- Scale Builder Activity -->
+        <activity
+            android:name="com.wisc.cs407project.ScaleGenUI.ScaleBuilder"
+            android:label="@string/app_name"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+        
         <activity
             android:name="com.wisc.cs407project.Map"
             android:label="@string/app_name" >
         </activity>
+        
         <activity
             android:name="com.wisc.cs407project.Popup"
             android:theme="@android:style/Theme.Dialog">
         </activity>
+        
+        <activity 
+    		android:name="com.wisc.cs407project.ScaleGenUI.ImageExplorerPopup" 
+            android:theme="@android:style/Theme.Dialog" >
+        </activity>
+        
+        <activity 
+            android:name="com.wisc.cs407project.ScaleGenUI.ScaleExplorerPopup"
+            android:theme="@android:style/Theme.Dialog"
+            android:noHistory="true" >
+        </activity>
+        
         <activity
             android:name="com.wisc.cs407project.ScaleChooser"
             android:label="@string/app_name" />

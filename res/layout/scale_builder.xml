@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp" >
+
+    <!-- Header -->
+<RelativeLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" >
+    
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/list_header_border"
+        android:layout_marginLeft="5dp"
+    	android:layout_marginRight="5dp"
+    	android:layout_marginTop="5dp"
+    	android:layout_marginBottom="5dp" >
+
+        <!-- Header: Scale Name -->
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/builderHeaderNameLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:focusable="true"
+                android:text="Scale Name:" />
+
+            <EditText
+                android:id="@+id/builderHeaderName"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:singleLine="true"
+                android:inputType="textNoSuggestions"
+                android:hint="Enter the Name of this Scale" />
+        </LinearLayout>
+
+        <!-- Header: Measurement Units -->
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/builderHeaderUnitsLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:text="Measurement Units:" />
+
+            <EditText
+                android:id="@+id/builderHeaderUnits"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:singleLine="true"
+                android:hint="eg &quot;km&quot;" />
+        </LinearLayout>
+
+        <!-- Header: Buttons -->
+		<LinearLayout 
+		    android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="right" >
+        <Button
+            android:id="@+id/builderHeaderAddButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add New Item" />
+        <Button
+            android:id="@+id/builderHeaderSortButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sort Items" />
+        <Button
+            android:id="@+id/builderHeaderSaveButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Save Scale" />
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>
+    <!-- Item List -->
+
+    <ListView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:divider="#33b5e5"
+        android:dividerHeight="1px"
+        android:smoothScrollbar="false" >
+    </ListView>
+
+</LinearLayout>

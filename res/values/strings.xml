@@ -9,5 +9,11 @@
     <string name="record_path">Record Path</string>
     <string name="path_settings">Paths</string>
     <string name="scale_settings">Scales</string>
+    <string name="resume_backup_filename">last_edited_scale_file.xml</string>
+    <item type="id" name="TAG_BUILDER_IMGLOAD_POSITION_ID"/>
+    <item type="id" name="TAG_BUILDER_IMGLOAD_TEXT_ID"/>
+    <item type="id" name="TAG_BUILDER_IMGLOAD_ID"/>
+    <string name="app_image_directory">/cs407project/Images</string>
+    <string name="app_scale_directory">/cs407project/Scales</string>
 
 </resources>

@@ -30,6 +30,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 public class RecordFragment extends Fragment {
 	private GoogleMap map;
 	private Button recordButton;
+	private Button drawButton;
 	private LocationManager locationMan;
 	private RecordLocationListener locationLis;
 	private boolean recording;
@@ -53,6 +54,7 @@ public class RecordFragment extends Fragment {
 		locationMan.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 2, locationLis);
 		
 		recordButton = (Button) myFragmentView.findViewById(R.id.recordPath);
+		drawButton = (Button) myFragmentView.findViewById(R.id.drawPath);
 		recordClicked();
 		return myFragmentView;
 	}
@@ -67,6 +69,13 @@ public class RecordFragment extends Fragment {
 	}
 
 	public void recordClicked() {
+		drawButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				String coordinates = "";
+			}
+		});
+		
 		recordButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {

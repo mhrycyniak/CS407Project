@@ -253,8 +253,8 @@ public class ScaleExplorerPopup extends Activity {
 	}
 	
 	@Override
-	public void onDestroy() {
-		super.onDestroy();
+	public void onPause() {
+		super.onPause();
 		unregisterReceiver(mConnReceiver);
 	}
 

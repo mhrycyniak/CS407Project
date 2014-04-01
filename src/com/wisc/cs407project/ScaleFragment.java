@@ -36,7 +36,5 @@ public class ScaleFragment extends Fragment {
 				startActivity(builderIntent);
 			}
 		});
-	}
-	
-	
+	}	
 }

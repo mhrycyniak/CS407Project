@@ -15,7 +15,7 @@ public class ScaleObject implements Comparable<ScaleObject> {
 	public LatLng position;
 	public double distance;
 	public boolean opened;
-	// Added these fields to be used with ScaleGenerator
+	// Added this field to be used with ScaleGenerator
 	public Long comparativeValue;
 	
 	// NOTE: Only use this if you are sure both objects have comparativeValues and not just percentages.

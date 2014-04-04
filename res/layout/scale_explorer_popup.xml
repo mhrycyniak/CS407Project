@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scaleExplorerScroll"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="top" >
+<LinearLayout
     android:id="@+id/scaleExplorerParentView"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="5dp"
-    android:layout_marginLeft="5dp"
-    android:layout_marginRight="5dp"
-    android:layout_marginTop="5dp"
+    android:padding="5dp"
     android:gravity="center_horizontal"
     android:orientation="vertical" >
 
@@ -42,7 +44,6 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
             android:gravity="center_horizontal"
             android:orientation="horizontal" >
 
@@ -76,8 +77,9 @@
             android:adjustViewBounds="true"
             android:divider="#8f8f8f"
         	android:dividerHeight="1px"
-        	android:layout_marginLeft="10dp"
-    		android:layout_marginRight="10dp"
+        	android:layout_marginLeft="5dp"
+    		android:layout_marginRight="5dp"
+    		android:layout_marginBottom="5dp"
             android:background="@drawable/gray_image_border"
             android:fadeScrollbars="false" />
         
@@ -105,7 +107,6 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
             android:gravity="center_horizontal"
             android:orientation="horizontal" >
 
@@ -134,11 +135,13 @@
             android:adjustViewBounds="true"
             android:divider="#8f8f8f"
         	android:dividerHeight="1px"
-        	android:layout_marginLeft="10dp"
-    		android:layout_marginRight="10dp"
+        	android:layout_marginLeft="5dp"
+    		android:layout_marginRight="5dp"
+            android:layout_marginBottom="5dp"
             android:background="@drawable/gray_image_border"
             android:fadeScrollbars="false" />
         
     </LinearLayout>
 
 </LinearLayout>
+</ScrollView>

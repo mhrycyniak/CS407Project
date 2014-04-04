@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Point;
+import android.os.Environment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -28,17 +29,23 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 public class BuilderListAdapter extends BaseAdapter {
-	//TODO clean and comment better
-	private Activity activity;
+	private Activity activity; // For reference
 	private ScaleGenerator data; // The Scale data, indexed by finals defined in ScaleBuilder
 	private static LayoutInflater inflater = null;
-	public ImageLoader imageLoader; 
+	public ImageLoader imageLoader;
+	private boolean mediaIsMounted; // For enabling/disabling Browse buttons
 
 	public BuilderListAdapter(Activity a, ScaleGenerator d) {
 		activity = a;
 		data = d;
 		inflater = (LayoutInflater)activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		imageLoader = new ImageLoader(activity.getApplicationContext());
+		
+		// Check if mounted, to enable/disable Browse buttons
+		String extState = Environment.getExternalStorageState();
+		if(extState.equals(Environment.MEDIA_MOUNTED)) {
+			mediaIsMounted = true;
+		}
 	}
 
 	@Override
@@ -92,8 +99,6 @@ public class BuilderListAdapter extends BaseAdapter {
 		        		else {
 		        			temp.percentage = ((double)temp.comparativeValue / data.maxComparativeValue);
 		        		}
-		        		//data.sort();
-		        		//TODO do this on close of keyboard, if possible notifyDataSetChanged();
 		        	}
 		        }
 		        public void beforeTextChanged(CharSequence s, int start, int count, int after){}
@@ -104,13 +109,12 @@ public class BuilderListAdapter extends BaseAdapter {
 		        @Override
 		        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 		            if (actionId == EditorInfo.IME_ACTION_DONE) {
-		            	notifyDataSetChanged(); //TODO
+		            	notifyDataSetChanged();
 		                return true;
 		            }
 		            return false;
 		        }
 		    });
-			
 			
 			holder.units = (TextView) convertView.findViewById(R.id.builderRowUnits);
 			
@@ -202,6 +206,10 @@ public class BuilderListAdapter extends BaseAdapter {
 					activity.startActivityForResult(builderIntent, R.id.TAG_BUILDER_IMGLOAD_ID);
 				}
 			});
+			// Disable if media isn't mounted
+			if(!mediaIsMounted) {
+				holder.browseButton.setEnabled(false);
+			}
 
 			convertView.setTag(holder);
 		}
@@ -228,7 +236,7 @@ public class BuilderListAdapter extends BaseAdapter {
 		display.getSize(size);
 		int width = size.x;
 		width = width / 2;
-		imageLoader.setSize(width);
+		imageLoader.setSize(width, width);
 		imageLoader.DisplayImage(data.members.get(position).imageLocation, holder.image);
 
 		return convertView;

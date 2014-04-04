@@ -46,8 +46,6 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 public class ScaleBuilder extends Activity {
-
-	//TODO ACTIVITY CRASHES WITH ORIENTATION CHANGE!!
 	// Monotony for the sake of clarity
 	public static final String KEY_NAME_EDIT = "nameEdit";
 	public static final String KEY_COMPARABLE_LABEL = "comparableLabel";
@@ -58,7 +56,7 @@ public class ScaleBuilder extends Activity {
 
 	ListView list;
 	BuilderListAdapter adapter;
-	private ScaleBuilder ref;
+	private Activity ref;
 	String scaleText = "";
 	String path;
 	ScaleGenerator scale;
@@ -84,9 +82,6 @@ public class ScaleBuilder extends Activity {
 		
 		if (loadNeeded) {
 			loadedPath = intent.getStringExtra("Path");
-
-			//TODO make this dynamic, with menu
-			//String path = Environment.getExternalStorageDirectory().toString() + "/Pictures/Andrew/test_scale.xml";
 			new LoadIndividualScaleTask().execute(loadedPath);
 		} else {
 			// Set up list and adapter
@@ -177,11 +172,10 @@ public class ScaleBuilder extends Activity {
 			headerSave = (Button)findViewById(R.id.builderHeaderSaveButton);
 			headerSave.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					//TODO make this asynctask
 					// Check access to device
 					String extState = Environment.getExternalStorageState();
 					if(!extState.equals(Environment.MEDIA_MOUNTED)) {
-						//TODO make proper error here
+						// This shouldn't be possible
 						Log.e("ERROR", "Storage not mounted");
 						return;
 					}
@@ -189,7 +183,10 @@ public class ScaleBuilder extends Activity {
 					// Check if name is empty
 					String scaleName = scale.scaleName;
 					if (scaleName.equals("")) {
-						//TODO make proper error here
+						Intent intent = new Intent(ref, Popup.class);
+						intent.putExtra("title", "Error");
+						intent.putExtra("text", "No Scale Name Entered");
+						startActivity(intent);
 						Log.e("ERROR", "Scale must have a name");
 						return;
 					}
@@ -211,26 +208,7 @@ public class ScaleBuilder extends Activity {
 							public void onClick(DialogInterface dialog, int id) 
 							{
 								dialog.dismiss();
-								// Save (with Toast confirmation) (check warning flag, possibly)
-								// DEFAULT IS TO OVERWRITE
-								File saveFile = new File(path);
-								FileOutputStream fos;
-								String xmlFile = scale.getXML();
-								//boolean warning = scale.xmlWarningFlag;
-								byte[] data = xmlFile.getBytes();
-								try {
-								    fos = new FileOutputStream(saveFile);
-								    fos.write(data);
-								    fos.flush();
-								    fos.close();
-								} catch (FileNotFoundException e) {
-								    // TODO handle exception
-								} catch (IOException e) {
-								    // TODO handle exception
-								}
-
-								Toast toast = Toast.makeText(getApplicationContext(), "File Saved" , Toast.LENGTH_LONG);
-								toast.show();
+								new SaveScaleTask().execute(path);
 							}
 						});
 						builder.setNegativeButton("No", new DialogInterface.OnClickListener() 
@@ -247,36 +225,19 @@ public class ScaleBuilder extends Activity {
 						
 						return;
 					}
-					
-					// (Non-overwrite) Save (with Toast confirmation) (check warning flag, possibly)
-					// DEFAULT IS TO OVERWRITE
-					File saveFile = new File(path);
-					FileOutputStream fos;
-					String xmlFile = scale.getXML();
-					//boolean warning = scale.xmlWarningFlag;
-					byte[] data = xmlFile.getBytes();
-					try {
-					    fos = new FileOutputStream(saveFile);
-					    fos.write(data);
-					    fos.flush();
-					    fos.close();
-					} catch (FileNotFoundException e) {
-					    // TODO handle exception
-					} catch (IOException e) {
-					    // TODO handle exception
-					}
-
-					Toast toast = Toast.makeText(getApplicationContext(), "File Saved" , Toast.LENGTH_LONG);
-					toast.show();
+					new SaveScaleTask().execute(path);
 				}
 			});
-
+			// Check if mounted, to enable/disable Save button
+			String extState = Environment.getExternalStorageState();
+			if(!extState.equals(Environment.MEDIA_MOUNTED)) {
+				headerSave.setEnabled(false);
+			}
 	}
 
 	@Override
 	protected void onStop() {
 	    super.onStop();
-	    // TODO Save scale for Resume option
 	    // Check access to device
 		String extState = Environment.getExternalStorageState();
 		if(!extState.equals(Environment.MEDIA_MOUNTED)) {
@@ -289,23 +250,44 @@ public class ScaleBuilder extends Activity {
 		path = path + "/" + getResources().getString(R.string.app_name) + "/"
 				+ getResources().getString(R.string.resume_backup_filename);
 		
-		// Try to write the file
-		File saveFile = new File(path);
-		FileOutputStream fos;
-		String xmlFile = scale.getXML();
-		byte[] data = xmlFile.getBytes();
-		try {
-		    fos = new FileOutputStream(saveFile);
-		    fos.write(data);
-		    fos.flush();
-		    fos.close();
-		} catch (Exception e) {
-		    // No big deal if the resume save didn't work for whatever reason
-		}
+		new SaveScaleTask().execute(path);
 	}
 
-// TODO clean this up and (maybe) modify the error popups etc.
+	private class SaveScaleTask extends
+	AsyncTask<String, Void, String> {
 
+		@Override
+		protected String doInBackground(String... arg0) {
+			File saveFile = new File(arg0[0]);
+			FileOutputStream fos;
+			String xmlFile = scale.getXML();
+			byte[] data = xmlFile.getBytes();
+			try {
+			    fos = new FileOutputStream(saveFile);
+			    fos.write(data);
+			    fos.flush();
+			    fos.close();
+			} catch (FileNotFoundException e) {
+			    Log.e("SaveScaleTask", "FileNotFoundException");
+			} catch (IOException e) {
+				Log.e("SaveScaleTask", "IOException");
+			}
+
+			String filename = saveFile.getName();
+			// Don't display Toast if this is the onStop() save
+			if (arg0[0].equals(Environment.getExternalStorageDirectory().toString() + "/" 
+					+ getResources().getString(R.string.app_name) + "/"
+					+ getResources().getString(R.string.resume_backup_filename))) {
+				return null;
+			}
+			return filename;
+		}
+		protected void onPostExecute(String filename) {
+			if (filename != null)
+				Toast.makeText(getApplicationContext(), filename + " saved" , Toast.LENGTH_LONG).show();
+		}
+	}
+	
 	private class LoadIndividualScaleTask extends
 	AsyncTask<String, Void, String> {
 

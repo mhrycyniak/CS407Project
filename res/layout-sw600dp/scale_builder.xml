@@ -75,17 +75,17 @@
             android:id="@+id/builderHeaderAddButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Add Item" />
+            android:text="Add New Item" />
         <Button
             android:id="@+id/builderHeaderSortButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sort" />
+            android:text="Sort Items" />
         <Button
             android:id="@+id/builderHeaderSaveButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Save" />
+            android:text="Save Scale" />
         </LinearLayout>
     </LinearLayout>
 </RelativeLayout>

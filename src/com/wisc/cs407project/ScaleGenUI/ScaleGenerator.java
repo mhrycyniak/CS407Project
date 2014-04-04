@@ -25,7 +25,6 @@ public class ScaleGenerator {
 	public Long maxComparativeValue; // Used for updating percentages
 	public String scaleMetric;	// What is being compared
 	public String scaleName;
-	public boolean xmlWarningFlag;
 
 	public ScaleGenerator() {
 		members = new ArrayList<ScaleObject>();
@@ -35,7 +34,6 @@ public class ScaleGenerator {
 	}
 
 	public void loadScale(String xmlScale) throws IOException, SAXException, ParserConfigurationException {
-		//TODO clean and comment it better
 		Document docScale;
 
 		//// The source of the thrown exceptions:
@@ -126,8 +124,6 @@ public class ScaleGenerator {
 		if (maxUpdate) {
 			refactorMaxValue(maxComparativeValue);
 		}
-		// Maintain sorted order
-		//sort();
 	}
 	
 	public void refactorMaxValue(long newMax) {
@@ -173,7 +169,6 @@ public class ScaleGenerator {
 	}
 	
 	public String getXML() {
-		xmlWarningFlag = false;
 		// We want scales stored in sorted order
 		sort();
 		String result = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>";
@@ -183,7 +178,6 @@ public class ScaleGenerator {
 			result = result + getObjectXML(object);
 		}
 		result = result + "</scale>\n";
-		Log.d("XML generated", result);
 		return result;
 	}
 	
@@ -193,10 +187,6 @@ public class ScaleGenerator {
 		result = result + "\t\t<units>" + scaleMetric + "</units>\n";
 		result = result + "\t\t<max>" + maxComparativeValue.toString() + "</max>\n";
 		result = result + "\t</scaleInfo>\n";
-		// Flag if necessary
-		if (scaleMetric.equals("") || scaleName.equals("")) {
-			xmlWarningFlag = true;
-		}
 		return result;
 	}
 	
@@ -208,10 +198,6 @@ public class ScaleGenerator {
 		result = result + "\t\t<percentage>" + object.percentage.toString() + "</percentage>\n";
 		result = result + "\t\t<picture>" + object.imageLocation + "</picture>\n";
 		result = result + "\t</scaleItem>\n";
-		// Flag if necessary
-		if (object.name.equals("") || object.text.equals("") || object.imageLocation.equals("")) {
-			xmlWarningFlag = true;
-		}
 		return result;
 	}
 

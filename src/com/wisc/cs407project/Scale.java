@@ -51,43 +51,8 @@ public class Scale extends Activity {
 			startActivity(recordIntent);
 			break;
 		case R.id.scaleBuilder:
-			//TODO may need to change this so back button doesn't re-open popup
 			Intent builderIntent = new Intent(this, ScaleExplorerPopup.class);
-			//startActivityForResult(builderIntent, R.id.TAG_BUILDER_IMGLOAD_ID);
 			startActivity(builderIntent);
-			
-			/*
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-			builder.setTitle("What would you like to do?");
-
-			// Add the buttons
-			builder.setPositiveButton("Edit Scale", new DialogInterface.OnClickListener() 
-			{
-				public void onClick(DialogInterface dialog, int id) 
-				{
-					//TODO Next thing: make a popup for this
-					Intent builderIntent = new Intent(v.getContext(), ScaleBuilder.class);
-					builderIntent.putExtra("Load", true);
-					//builderIntent.putExtra("Path", path);
-					startActivity(builderIntent);
-					//Intent builderIntent = new Intent(v.getContext(), ExplorerPopup.class);
-					//startActivity(builderIntent);
-				}
-			});
-			builder.setNegativeButton("New Scale", new DialogInterface.OnClickListener() 
-			{
-				public void onClick(DialogInterface dialog, int id) 
-				{
-					Intent builderIntent = new Intent(v.getContext(), ScaleBuilder.class);
-					builderIntent.putExtra("Load", false);
-					startActivity(builderIntent);
-				}
-			});
-
-			// Create and show
-			builder.create();
-			builder.show(); */
 			break;
 		default:
 		}

@@ -2,16 +2,16 @@ package com.wisc.cs407project;
 
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
+import java.io.File;
+
+import android.os.Bundle;
+import android.os.Environment;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Color;
-import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
-import android.view.View;
-import android.widget.Toast;
+
 
 public class Scale extends Activity {
 
@@ -47,6 +47,9 @@ public class Scale extends Activity {
 		actionbar.addTab(recordTab);
 		actionbar.addTab(pathTab);
 		actionbar.addTab(scaleTab);
+		if (!appDirectorySetup()) {
+			//TODO no storage access, possibly post warning message
+		}
 	}
 
 	@Override
@@ -55,6 +58,7 @@ public class Scale extends Activity {
 		getMenuInflater().inflate(R.menu.settings, menu);
 		return true;
 	}
+
 
 	class TabsListener implements ActionBar.TabListener {
 		public Fragment fragment;
@@ -75,6 +79,38 @@ public class Scale extends Activity {
 		@Override
 		public void onTabUnselected(Tab tab, FragmentTransaction ft) {
 			ft.remove(fragment);
+		}
+	}
+
+	public boolean appDirectorySetup() {
+		// Check if mounted, get storage directory
+		String extState = Environment.getExternalStorageState();
+		if(!extState.equals(Environment.MEDIA_MOUNTED)) {
+			Log.d("ERROR", "Storage not mounted");
+			return false;
+		}
+		else {
+			String basePath = Environment.getExternalStorageDirectory().toString();
+			// Make sure there's an app directory
+			String temp = basePath + "/" + getResources().getString(R.string.app_name);
+			if (!(new File(temp).isDirectory())) {
+				File tempFile = new File(temp);
+				tempFile.mkdir();
+			}
+			// TODO only use if we decide to make saving images locally an option
+			// Make sure it has an image directory
+			//temp = basePath + getResources().getString(R.string.app_image_directory);
+			//if (!(new File(temp).isDirectory())) {
+			//	File tempFile = new File(temp);
+			//	tempFile.mkdir();
+			//	}
+			// Make sure it has a scales directory
+			temp = basePath + getResources().getString(R.string.app_scale_directory);
+			if (!(new File(temp).isDirectory())) {
+				File tempFile = new File(temp);
+				tempFile.mkdir();
+				}
+			return true;
 		}
 	}
 }

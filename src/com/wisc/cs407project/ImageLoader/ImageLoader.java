@@ -22,6 +22,10 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/*
+This file has been modified from it's original source.
+ */
+
 package com.wisc.cs407project.ImageLoader;
 
 import java.io.BufferedReader;
@@ -45,6 +49,7 @@ import java.util.concurrent.Executors;
 import org.apache.commons.validator.routines.UrlValidator;
 
 import com.wisc.cs407project.Popup;
+import com.wisc.cs407project.R;
 
 import android.os.Handler;
 import android.content.Context;
@@ -61,17 +66,19 @@ public class ImageLoader {
     private Map<ImageView, String> imageViews=Collections.synchronizedMap(new WeakHashMap<ImageView, String>());
     ExecutorService executorService;
     Handler handler=new Handler();//handler to display images in UI thread
-    //TODO
-    private int REQUIRED_SIZE;
+
+    private static int REQUIRED_WIDTH, REQUIRED_HEIGHT;
     
-    //TODO
-    public ImageLoader(Context context, int imageWidth) {
+
+    public ImageLoader(Context context, int imageWidth, int imageHeight) {
     	this(context);
-    	REQUIRED_SIZE = imageWidth;
+    	REQUIRED_WIDTH = imageWidth;
+    	REQUIRED_HEIGHT = imageHeight;
     }
-    //TODO
-    public void setSize(int imageWidth) {
-    	REQUIRED_SIZE = imageWidth;
+
+    public void setSize(int imageWidth, int imageHeight) {
+    	REQUIRED_WIDTH = imageWidth;
+    	REQUIRED_HEIGHT = imageHeight;
     }
     
     public ImageLoader(Context context){
@@ -79,17 +86,16 @@ public class ImageLoader {
         executorService=Executors.newFixedThreadPool(5);
     }
     
-    //TODO final int stub_id=R.drawable.stub;
     public void DisplayImage(String url, ImageView imageView)
     {
         imageViews.put(imageView, url);
         Bitmap bitmap=memoryCache.get(url);
-        if(bitmap!=null)
+        if(bitmap!=null) {
             imageView.setImageBitmap(bitmap);
-        else
+        	imageView.setBackgroundResource(R.drawable.gray_image_border);
+        } else
         {
             queuePhoto(url, imageView);
-  //TODO          imageView.setImageResource(stub_id);
         }
     }
         
@@ -102,23 +108,23 @@ public class ImageLoader {
     private Bitmap getBitmap(String url) 
     {
         File f=fileCache.getFile(url);
-        
-        //from SD cache
         Bitmap b = decodeFile(f);
-        if(b!=null)
-            return b;
         
-        //TODO from Local Directory
+        //from Local Directory
         BufferedReader in = null;
 		UrlValidator validator = new UrlValidator();
 		if(new File(url).exists()) {
-			b = BitmapFactory.decodeFile(url);
+			b = decodeFile(new File(url));
 			if(b!=null)
 				return b;
 		}
         
         //from web
         try {
+            //check SD cache first
+            if(b!=null)
+                return b;
+            
             Bitmap bitmap=null;
             URL imageUrl = new URL(url);
             HttpURLConnection conn = (HttpURLConnection)imageUrl.openConnection();
@@ -141,7 +147,7 @@ public class ImageLoader {
     }
 
     //decodes image and scales it to reduce memory consumption
-    private Bitmap decodeFile(File f){
+    public static Bitmap decodeFile(File f){
         try {
             //decode image size
             BitmapFactory.Options o = new BitmapFactory.Options();
@@ -151,12 +157,10 @@ public class ImageLoader {
             stream1.close();
             
             //Find the correct scale value. It should be the power of 2.
-//TODO            final int REQUIRED_SIZE=200;
             int width_tmp=o.outWidth, height_tmp=o.outHeight;
             int scale=1;
             while(true){
-            	//TODO
-                if(width_tmp/2<REQUIRED_SIZE || height_tmp/2<REQUIRED_SIZE)
+                if(width_tmp/2<REQUIRED_WIDTH && height_tmp/2<REQUIRED_HEIGHT)
                     break;
                 width_tmp/=2;
                 height_tmp/=2;
@@ -227,12 +231,16 @@ public class ImageLoader {
         public BitmapDisplayer(Bitmap b, PhotoToLoad p){bitmap=b;photoToLoad=p;}
         public void run()
         {
-            if(imageViewReused(photoToLoad))
+            if(imageViewReused(photoToLoad)) {
+            	photoToLoad.imageView.setBackgroundResource(R.drawable.gray_image_border);
                 return;
-            if(bitmap!=null)
+            }
+            if(bitmap!=null) {
                 photoToLoad.imageView.setImageBitmap(bitmap);
- //TODO           else
- //TODO               photoToLoad.imageView.setImageResource(stub_id);
+            	photoToLoad.imageView.setBackgroundResource(R.drawable.gray_image_border);
+            }
+            else
+                photoToLoad.imageView.setBackground(null);
         }
     }
 

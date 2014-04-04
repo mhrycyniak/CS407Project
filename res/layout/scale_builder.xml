@@ -2,24 +2,20 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:layout_marginLeft="5dp"
-    android:layout_marginRight="5dp" >
+    android:orientation="vertical">
 
     <!-- Header -->
 <RelativeLayout
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content" >
+    android:layout_height="wrap_content"
+    android:paddingLeft="5dp"
+    android:paddingRight="5dp"
+    android:background="@drawable/list_header_border" >
     
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@drawable/list_header_border"
-        android:layout_marginLeft="5dp"
-    	android:layout_marginRight="5dp"
-    	android:layout_marginTop="5dp"
-    	android:layout_marginBottom="5dp" >
+        android:orientation="vertical" >
 
         <!-- Header: Scale Name -->
 
@@ -79,17 +75,17 @@
             android:id="@+id/builderHeaderAddButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Add New Item" />
+            android:text="Add Item" />
         <Button
             android:id="@+id/builderHeaderSortButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sort Items" />
+            android:text="Sort" />
         <Button
             android:id="@+id/builderHeaderSaveButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Save Scale" />
+            android:text="Save" />
         </LinearLayout>
     </LinearLayout>
 </RelativeLayout>
@@ -98,8 +94,10 @@
     <ListView
         android:id="@+id/list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_weight="1"
+    	android:paddingLeft="5dp"
+    	android:paddingRight="5dp"
         android:divider="#33b5e5"
         android:dividerHeight="1px"
         android:smoothScrollbar="false" >

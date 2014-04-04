@@ -15,14 +15,16 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
-
+import com.wisc.cs407project.Popup;
 import com.wisc.cs407project.R;
 import com.wisc.cs407project.R.id;
 import com.wisc.cs407project.R.layout;
 import com.wisc.cs407project.R.string;
+import com.wisc.cs407project.ImageLoader.ImageLoader;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -78,7 +80,7 @@ public class ImageExplorerPopup extends Activity {
 				}
 			}
 		});
-		
+
 		// Cancel Button and its Listener
 		cancel = (Button) findViewById(R.id.imageExplorerCancelButton);
 		cancel.setOnClickListener(new OnClickListener() {
@@ -87,9 +89,9 @@ public class ImageExplorerPopup extends Activity {
 				finish();
 			}
 		});
-		
+
 		preview = (ImageView) findViewById(R.id.imageExplorerPreview);
-		
+
 		// Back Button and its Listener
 		back = (Button) findViewById(R.id.imageExplorerBackButton);
 		back.setOnClickListener(new OnClickListener() {
@@ -109,7 +111,7 @@ public class ImageExplorerPopup extends Activity {
 				}
 			}
 		});
-		
+
 		currentDirectory = (EditText) findViewById(R.id.imageExplorerDirectory);
 		list = (ListView) findViewById(R.id.imageExplorerList);
 		// Set ListView listener
@@ -139,7 +141,12 @@ public class ImageExplorerPopup extends Activity {
 		// Check if mounted, get storage directory
 		String extState = Environment.getExternalStorageState();
 		if(!extState.equals(Environment.MEDIA_MOUNTED)) {
-			//TODO make a popup message and close the activity
+			// This really shouldn't happen, since Browse button is disabled when nothing is mounted
+			Intent intent = new Intent(activity, Popup.class);
+			intent.putExtra("title", "Error");
+			intent.putExtra("text", "No External Storage Mounted");
+			startActivity(intent);
+			activity.finish();
 			Log.e("ERROR", "Storage not mounted");
 		}
 		else {
@@ -152,7 +159,6 @@ public class ImageExplorerPopup extends Activity {
 			}
 			//currentDirectory.setText(path + "/");
 			new LoadDirectoryTask().execute(path);
-			Log.d("initial execute; path: ", path);
 		}
 	}
 
@@ -193,17 +199,19 @@ public class ImageExplorerPopup extends Activity {
 				String[] result = new String[1];
 				result[0] = arg0[0];
 				return result;
-			} else {
-				//TODO
-				Log.d("ERROR", "Path is not a directory or an image");
 			}
+			// This shouldn't happen
 			return null;
 		}
 
 		protected void onPostExecute(String[] filesAndDirectory) {
+			if (filesAndDirectory == null) {
+				// This shouldn't happen
+				Log.e("ERROR", "Path is not an image or a directory");
+			}
 			// If an image was selected
 			if (filesAndDirectory.length == 1) {
-				Bitmap image = BitmapFactory.decodeFile(filesAndDirectory[0]);
+				Bitmap image = ImageLoader.decodeFile(new File(filesAndDirectory[0]));
 				if (image != null) {
 					preview.setImageBitmap(image);
 					currentImage = filesAndDirectory[0];
@@ -245,5 +253,25 @@ public class ImageExplorerPopup extends Activity {
 		} else {
 			return false;
 		}
+	}
+
+	@Override
+	public void onConfigurationChanged (Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+
+		// Reset size
+		//Set popup height to approx 1/3 of screen
+		Display display = getWindowManager().getDefaultDisplay();
+		Point size = new Point();
+		display.getSize(size);
+		int height = 2 * (size.y / 5);
+		ViewGroup.LayoutParams params = list.getLayoutParams();
+		params.height = height;
+		list.setLayoutParams(params);
+		list.requestLayout();
+		ViewGroup.LayoutParams params2 = preview.getLayoutParams();
+		params2.height = height;
+		preview.setLayoutParams(params2);
+		preview.requestLayout();
 	}
 }

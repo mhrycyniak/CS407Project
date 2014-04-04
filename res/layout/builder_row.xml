@@ -7,7 +7,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp" >
 
         <!-- Image on the left half -->
 
@@ -15,9 +17,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-    		android:layout_marginTop="5dp"
-    		android:gravity="center_horizontal"
-    		android:layout_marginBottom="5dp" >
+    		android:gravity="center_horizontal" >
 
             <ImageView
                 android:id="@+id/builderRowImage"
@@ -35,9 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:layout_marginLeft="5dp"
-    		android:layout_marginTop="5dp"
-    		android:layout_marginBottom="5dp" >
+            android:paddingLeft="5dp" >
 
             <!-- Name -->
 
@@ -70,20 +68,19 @@
 
                 <EditText
                     android:id="@+id/builderRowComparableEdit"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:singleLine="true"
                     android:inputType="number"
                     android:hint="eg &quot;10&quot;" />
 
                 <TextView
                     android:id="@+id/builderRowUnits"
-                    android:layout_width="fill_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:singleLine="true"
-                    android:gravity="left"
-                    android:text="units" />
+                    android:gravity="left" />
 
                 <!-- Item/Max Ratio Display -->
             </LinearLayout>
@@ -96,7 +93,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Item/Max Ratio: " />
+                    android:text="Item/Max: " />
 
                 <TextView
                     android:id="@+id/builderRowPercentage"
@@ -120,26 +117,32 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+        android:orientation="vertical" >
 
         <EditText
             android:id="@+id/builderRowImageLocationEdit"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:singleLine="true"
             android:inputType="textNoSuggestions"
             android:hint="Enter Web Address or Select Browse" />
-        <Button 
-            android:id="@+id/builderRowImageLoadButton"
-            android:layout_width="wrap_content"
+        
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Load" />
-        <Button
-            android:id="@+id/builderRowImageBrowseButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Browse..." />
+            android:orientation="horizontal"
+            android:gravity="right" >
+        	<Button 
+        	    android:id="@+id/builderRowImageLoadButton"
+        	    android:layout_width="wrap_content"
+       		    android:layout_height="wrap_content"
+            	android:text="Load" />
+        	<Button
+            	android:id="@+id/builderRowImageBrowseButton"
+            	android:layout_width="wrap_content"
+            	android:layout_height="wrap_content"
+            	android:text="Browse..." />
+        </LinearLayout>
     </LinearLayout>
     <!-- The description -->
 

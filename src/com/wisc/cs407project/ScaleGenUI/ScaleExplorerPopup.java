@@ -3,6 +3,7 @@ package com.wisc.cs407project.ScaleGenUI;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -37,22 +39,21 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.ScrollView;
+import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class ScaleExplorerPopup extends Activity {
-
 	Activity activity;
 	Button resume, newScale, loadLocal, loadOnline, back, loadURL;
-	LinearLayout localLoadLayout, onlineLoadLayout;
+	LinearLayout localLoadLayout, onlineLoadLayout, ll;
 	String path = "/";
 	EditText currentDirectory, currentURL;
 	ListView list, list2;
 	ListAdapter adapter;
 	String[] data;
-	boolean currentlyDisconnected;
 	public static final String LAST_ADDRESS = "last_address";
 	SharedPreferences settings;
-	private BroadcastReceiver mConnReceiver;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -62,7 +63,7 @@ public class ScaleExplorerPopup extends Activity {
 		activity = this;
 
 		// Set popup width to 3/4 screen width
-		LinearLayout ll = (LinearLayout)findViewById(R.id.scaleExplorerParentView);
+		ll = (LinearLayout)findViewById(R.id.scaleExplorerParentView);
 		Display display = getWindowManager().getDefaultDisplay();
 		Point size = new Point();
 		display.getSize(size);
@@ -71,7 +72,7 @@ public class ScaleExplorerPopup extends Activity {
 		params.width = width;
 		ll.setLayoutParams(params);
 		ll.requestLayout();
-
+		
 		// Resume Button, Related stuff, and Listener
 		resume = (Button)findViewById(R.id.scaleExplorerResumeButton);
 		// This is where a backup would be
@@ -146,11 +147,15 @@ public class ScaleExplorerPopup extends Activity {
 		loadLocal = (Button)findViewById(R.id.scaleExplorerLoadLocalButton);
 		loadLocal.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				onlineLoadLayout.setVisibility(View.GONE);
-				localLoadLayout.setVisibility(View.VISIBLE);
+				if (localLoadLayout.getVisibility() == View.GONE) { 
+					onlineLoadLayout.setVisibility(View.GONE);
+					localLoadLayout.setVisibility(View.VISIBLE);
+				} else {
+					localLoadLayout.setVisibility(View.GONE);
+				}
 			}
 		});
-		
+
 		// Check if mounted, disable if not, otherwise load the default directory into the list
 		String extState = Environment.getExternalStorageState();
 		if(!extState.equals(Environment.MEDIA_MOUNTED)) {
@@ -164,17 +169,16 @@ public class ScaleExplorerPopup extends Activity {
 				path = betterPath;
 			}
 			new LoadDirectoryTask().execute(path);
-			Log.d("initial execute; path: ", path);
 		}
 
 		// Address display
 		currentURL = (EditText) findViewById(R.id.scaleExplorerURL);
 		// If a previous address has been used, go there automatically
 		settings = getSharedPreferences(LAST_ADDRESS, MODE_PRIVATE);
-        currentURL.setText(settings.getString(LAST_ADDRESS, ""));
-        new LoadScalesTask().execute(currentURL.getText().toString());
-		
-        // Online scales list
+		currentURL.setText(settings.getString(LAST_ADDRESS, ""));
+		new LoadScalesTask().execute(currentURL.getText().toString());
+
+		// Online scales list
 		list2 = (ListView) findViewById(R.id.scaleExplorerList2);
 		// Set ListView listener
 		list2.setOnItemClickListener(new OnItemClickListener() {
@@ -205,18 +209,14 @@ public class ScaleExplorerPopup extends Activity {
 		loadOnline = (Button)findViewById(R.id.scaleExplorerLoadOnlineButton);
 		loadOnline.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				onlineLoadLayout.setVisibility(View.VISIBLE);
-				localLoadLayout.setVisibility(View.GONE);
+				if (onlineLoadLayout.getVisibility() == View.GONE) { 
+					onlineLoadLayout.setVisibility(View.VISIBLE);
+					localLoadLayout.setVisibility(View.GONE);
+				} else {
+					onlineLoadLayout.setVisibility(View.GONE);
+				}
 			}
 		});
-		// Check if connected
-		ConnectivityManager connManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-	    NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-	    NetworkInfo mMobile = connManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-	    // If not, disable the button
-	    if (!mWifi.isAvailable() && !mMobile.isAvailable()) {
-	        loadOnline.setEnabled(false);
-	    }
 
 		// Set popup list heights to 1/3 screen height
 		display.getSize(size);
@@ -230,35 +230,9 @@ public class ScaleExplorerPopup extends Activity {
 		list2.setLayoutParams(params);
 		list2.requestLayout();
 	}
-	
-	@Override
-	public void onResume() {
-		super.onResume();
-		// Listen for network changes, adjust Load from Online button accordingly
-		mConnReceiver = new BroadcastReceiver() {
-			@Override
-			public void onReceive(Context context, Intent intent) {
-				boolean noConnectivity = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
-				// do application-specific task(s) based on the current network state, such
-				if (noConnectivity) {
-					currentlyDisconnected = true;
-					onlineLoadLayout.setEnabled(false);
-				} else if (!noConnectivity) {
-					currentlyDisconnected = false;
-					onlineLoadLayout.setEnabled(true);
-				}
-			}
-		};
-		registerReceiver(mConnReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-	}
-	
-	@Override
-	public void onPause() {
-		super.onPause();
-		unregisterReceiver(mConnReceiver);
-	}
 
-	private class LoadDirectoryTask extends AsyncTask<String, Void, String[]> {
+	private class LoadDirectoryTask extends
+	AsyncTask<String, Void, String[]> {
 
 		@Override
 		protected String[] doInBackground(String... arg0) {
@@ -296,7 +270,7 @@ public class ScaleExplorerPopup extends Activity {
 				result[0] = arg0[0];
 				return result;
 			} else {
-				//TODO
+				// This shouldn't happen
 				Log.e("ERROR", "Path is not a directory or an xml");
 			}
 			return null;
@@ -328,7 +302,7 @@ public class ScaleExplorerPopup extends Activity {
 			}
 		}
 	}
-	
+
 	private class LoadScalesTask extends AsyncTask<String, Void, String[]> {
 
 		@Override
@@ -342,18 +316,20 @@ public class ScaleExplorerPopup extends Activity {
 				path += "Scales.txt";
 				BufferedReader in;
 				in = new BufferedReader(new InputStreamReader(new URL(path).openStream()));
-				
+
 				String str;
 				while ((str = in.readLine()) != null) {
 					int split = str.lastIndexOf('\t');
 					if (split != -1)
 					{
-						String first = str.substring(0, split);
 						String second = str.substring(split+1);
 						scaleList.add(second);
 					}
 				}
 				in.close();
+			} catch (IOException e) {
+				// Abort
+				Log.e("ERROR", "No connection");
 			} catch (Exception e) {
 				// Abort without error
 				this.cancel(true);
@@ -365,23 +341,40 @@ public class ScaleExplorerPopup extends Activity {
 			}
 			// Pass URL
 			result[scaleList.size()] = arg0[0];
-		    
+
 			return result;
 		}
 
 		protected void onPostExecute(String[] scaleListAndDirectory) {
 			// Store the URL
 			SharedPreferences.Editor editor = settings.edit();
-		    editor.putString(LAST_ADDRESS, scaleListAndDirectory[scaleListAndDirectory.length - 1]);
-		    editor.commit();
-		    // Remove it
-		    String[] result = new String[scaleListAndDirectory.length - 1];
-		    for (int i = 0; i < result.length; i++) {
-		    	result[i] = scaleListAndDirectory[i];
-		    }
-		    // Load list of scales
+			editor.putString(LAST_ADDRESS, scaleListAndDirectory[scaleListAndDirectory.length - 1]);
+			editor.commit();
+			// Remove it
+			String[] result = new String[scaleListAndDirectory.length - 1];
+			for (int i = 0; i < result.length; i++) {
+				result[i] = scaleListAndDirectory[i];
+			}
+			// Load list of scales
 			adapter = new ArrayAdapter<String>(activity, R.layout.explorer_list_item, result);
 			list2.setAdapter(adapter);
 		}
+	}
+
+	@Override
+	public void onConfigurationChanged (Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+
+		// Reset size
+		// Set popup width to 3/4 screen width
+		ll = (LinearLayout)findViewById(R.id.scaleExplorerParentView);
+		Display display = getWindowManager().getDefaultDisplay();
+		Point size = new Point();
+		display.getSize(size);
+		int width = (3 * size.x) / 4;
+		ViewGroup.LayoutParams params = ll.getLayoutParams();
+		params.width = width;
+		ll.setLayoutParams(params);
+		ll.requestLayout();
 	}
 }

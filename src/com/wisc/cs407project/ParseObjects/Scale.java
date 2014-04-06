@@ -35,6 +35,10 @@ public class Scale extends ScaleParseObject{
 		return objects;
 	}
 	
+	public String GetObjectId(){
+		return parseObject.getObjectId();
+	}
+	
 	public void AddObject(ScaleObject object){
 		ArrayList<ScaleObject> objects = GetObjects();
 		objects.add(object);

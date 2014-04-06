@@ -30,10 +30,17 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.wisc.cs407project.R;
 
 public class ScaleChooser extends Activity implements OnItemClickListener {
 	private ListView scales;
+	private ArrayAdapter<String> adapter;
+	private ArrayList<com.wisc.cs407project.ParseObjects.Scale> loadedScales;
 	private ScaleChooser ref;
 	private String currentDirectory;
 	private static final String SETTINGSNAME = "WalkSettings";
@@ -49,11 +56,29 @@ public class ScaleChooser extends Activity implements OnItemClickListener {
 		SharedPreferences settings = getSharedPreferences(SETTINGSNAME, 0);
 		//currentDirectory = settings.getString("scaleDirectory", "");
 		currentDirectory = "http://pages.cs.wisc.edu/~hrycynia/cs407project/";
-		if (currentDirectory != "") {
-			new LoadScalesTask().execute(currentDirectory);
-		} else {
-			ChangeDirectoryClicked(null);
-		}
+	
+		List<String> scaleList = new ArrayList<String>();
+		loadedScales = new ArrayList<com.wisc.cs407project.ParseObjects.Scale>();
+		adapter = new ArrayAdapter<String>(ref,
+				android.R.layout.simple_list_item_1, scaleList);
+		scales.setAdapter(adapter);
+		
+		ParseQuery<ParseObject> query = ParseQuery.getQuery(
+				com.wisc.cs407project.ParseObjects.Scale.class.getSimpleName());
+		query.findInBackground(new FindCallback<ParseObject>(){
+			@Override
+			public void done(List<ParseObject> scaleObjects, ParseException exc) {
+				if(exc == null){
+					adapter.clear();
+					loadedScales.clear();
+					for(ParseObject obj : scaleObjects){
+						com.wisc.cs407project.ParseObjects.Scale scale = 
+								new com.wisc.cs407project.ParseObjects.Scale(obj);
+						loadedScales.add(scale);
+						adapter.add(scale.GetName());
+					};
+				}
+			}});
 	}
 
 	public void ChangeDirectoryClicked(View view) {
@@ -77,7 +102,7 @@ public class ScaleChooser extends Activity implements OnItemClickListener {
 				String location = getExternalFilesDir(null).getAbsolutePath() + "/dirs.txt";
 				DirUtils.storeDir(location, currentDirectory);
 				
-				new LoadScalesTask().execute(currentDirectory);
+				//new LoadScalesTask().execute(currentDirectory);
 			}
 		});
 
@@ -86,123 +111,11 @@ public class ScaleChooser extends Activity implements OnItemClickListener {
 		alert.show();
 	}
 
-	private class LoadScalesTask extends AsyncTask<String, Void, List<String>> {
-
-		@Override
-		protected List<String> doInBackground(String... arg0) {
-			List<String> scaleList = new ArrayList<String>();
-			fileName.clear();
-			try {
-				String path = arg0[0];
-				if (!path.endsWith("/")) {
-					path += "/";
-				}
-				path += "Scales.txt";
-				BufferedReader in;
-				UrlValidator validator = new UrlValidator();
-				if(validator.isValid(path)) {
-					in = new BufferedReader(new InputStreamReader(new URL(path).openStream()));
-				} else {
-					in = new BufferedReader(new FileReader(path));
-				}
-	
-				String str;
-				while ((str = in.readLine()) != null) {
-					int split = str.lastIndexOf('\t');
-					if (split != -1)
-					{
-						String first = str.substring(0, split);
-						String second = str.substring(split+1);
-						scaleList.add(first);
-						fileName.put(first, second);
-					}
-				}
-				in.close();
-			} catch (Exception e) {
-			}
-			return scaleList;
-		}
-
-		protected void onPostExecute(List<String> scaleList) {
-			ArrayAdapter<String> adapter = new ArrayAdapter<String>(ref,
-					android.R.layout.simple_list_item_1, scaleList);
-			scales.setAdapter(adapter);
-		}
-	}
-
 	@Override
-	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-		String path = currentDirectory;
-		if (!path.endsWith("/")) {
-			path += "/";
-		}
-		path += fileName.get((String) scales.getItemAtPosition(arg2));
-		new LoadIndividualScaleTask().execute(path);
-	}
-
-	private class LoadIndividualScaleTask extends AsyncTask<String, Void, String> {
-
-		@Override
-		protected String doInBackground(String... arg0) {
-			try {
-				BufferedReader in = null;
-				UrlValidator validator = new UrlValidator();
-				if(validator.isValid(arg0[0])) {
-					in = new BufferedReader(new InputStreamReader(new URL(arg0[0]).openStream()));
-				} else if(new File(arg0[0]).exists()) {
-					in = new BufferedReader(new FileReader(arg0[0]));
-				} else {
-					Intent intent = new Intent(ref, Popup.class);
-					intent.putExtra("title", "Error");
-					intent.putExtra("text", "Invalid Directory Location");
-					startActivity(intent);
-				}
-				
-				String str;
-				String fullFile = "";
-				while ((str = in.readLine()) != null) {
-					fullFile += str + "\n";
-				}
-				in.close();
-				return fullFile;
-			} catch (Exception e) {
-			}
-			return null;
-		}
-
-		protected void onPostExecute(String scaleItem) {
-			if (scaleItem != null) {
-				try {
-					DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-					Document doc = docBuilder.parse(new ByteArrayInputStream(scaleItem.getBytes()));
-					NodeList items = doc.getElementsByTagName("scaleItem");
-					if (items.getLength() < 2)
-					{
-						Intent intent = new Intent(ref, Popup.class);
-						intent.putExtra("title", "Error");
-						intent.putExtra("text", "The requested scale does not contain enough scale items.");
-						startActivity(intent);
-					}
-					else {
-						Intent intent = new Intent();
-						intent.putExtra("scaleItem", scaleItem);
-						setResult(1, intent);
-						finish();
-					}
-				}
-				catch (Exception e)
-				{
-					Intent intent = new Intent(ref, Popup.class);
-					intent.putExtra("title", "Error");
-					intent.putExtra("text", "The requested scale is not in the correct format.");
-					startActivity(intent);
-				}
-			} else {
-				Intent intent = new Intent(ref, Popup.class);
-				intent.putExtra("title", "Error");
-				intent.putExtra("text", "The requested scale does not exist.");
-				startActivity(intent);
-			}
-		}
+	public void onItemClick(AdapterView<?> arg0, View arg1, int index, long arg3) {
+		Intent intent = new Intent();
+		intent.putExtra("scaleItem", loadedScales.get(index).GetObjectId());
+		setResult(1, intent);
+		finish();
 	}
 }

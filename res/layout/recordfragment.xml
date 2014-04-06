@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <fragment
+        android:id="@+id/mapRecord"
+        android:name="com.google.android.gms.maps.MapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <RelativeLayout
+        android:id="@+id/drawLayout"
+        android:layout_width="230dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:background="@android:color/black" >
+
+        <Button
+            android:id="@+id/recordPath"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Record Path" />
+
+        <Button
+            android:id="@+id/drawPath"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/recordPath"
+            android:text="Draw Path" />
+    </RelativeLayout>
+
+</FrameLayout>

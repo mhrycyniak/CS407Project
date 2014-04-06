@@ -2,7 +2,6 @@ package com.wisc.cs407project;
 
 import com.wisc.cs407project.ParseObjects.*;
 import android.app.Application;
-import android.util.Log;
 
 import com.parse.Parse;
 import com.parse.ParseObject;

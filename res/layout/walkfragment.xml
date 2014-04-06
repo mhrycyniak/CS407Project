@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <fragment
+        android:id="@+id/mapWalk"
+        android:name="com.google.android.gms.maps.MapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout1"
+        android:layout_width="230dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:background="@android:color/black" >
+
+        <Button
+            android:id="@+id/choosePath"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@+id/view"
+            android:text="Path" />
+
+        <View
+            android:id="@+id/view"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_centerHorizontal="true" />
+
+        <Button
+            android:id="@+id/chooseScale"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@+id/view"
+            android:text="Scale" />
+
+        <Button
+            android:id="@+id/walkPath"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/chooseScale"
+            android:text="Walk Path" />
+    </RelativeLayout>
+    
+    <LinearLayout 
+        android:id="@+id/linearLayout1"
+        android:layout_width="230dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:background="@android:color/black"
+        android:visibility="gone" >
+        
+        <Button
+            android:id="@+id/stopWalk"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Stop Walk" />
+        
+        
+    </LinearLayout>
+
+</FrameLayout>

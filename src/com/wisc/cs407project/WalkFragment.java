@@ -20,69 +20,177 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.CameraUpdate;
-import com.wisc.cs407project.R;
-
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.view.MenuItem;
 import android.util.DisplayMetrics;
-
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Toast;
 
-public class Map extends FragmentActivity implements OnMarkerClickListener {
-	public List<ScaleObject> scaleItemList = new ArrayList<ScaleObject>();
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+
+public class WalkFragment extends Fragment implements OnMarkerClickListener {
 	private GoogleMap map;
+	private Button pathButton;
+	private Button scaleButton;
+	private Button walkButton;
+	private Button stopButton;
+	private String scaleItem;
+	private String pathURL;
+	private boolean localPath;
+	public List<ScaleObject> scaleItemList = new ArrayList<ScaleObject>();
 	public LatLng startingPoint;
+	public LatLng previousPoint;
 	public boolean pathStarted = false;
 	public double distanceTraveled = 0;
 	public double distanceInterval;
-	private Map ref;
 	public Intent intent;
-	private String pathUrl, scaleItem;
-	private boolean localPath;
 	private ScaleLocationListener locationLis;
 	private LocationManager locationMan;
+	private WalkFragment ref;
 	
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.map);
-		ref = this;
-		intent = getIntent();
-		pathUrl = intent.getStringExtra("path");
-		scaleItem = intent.getStringExtra("scaleItem");
-		localPath = intent.getBooleanExtra("localPath", false);
-		
-		Fragment f = getSupportFragmentManager().findFragmentById(R.id.map);
-		SupportMapFragment mf = (SupportMapFragment)f;
-        map = mf.getMap();
-        map.setMyLocationEnabled(true);
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		super.onCreateView(inflater, container, savedInstanceState);
+		final View myFragmentView = inflater.inflate(R.layout.walkfragment, container, false);
+		map = ((MapFragment) getFragmentManager().findFragmentById(R.id.mapWalk)).getMap();
+		map.setMyLocationEnabled(true);
         map.setOnMarkerClickListener(this);
-        locationMan = (LocationManager) this.getSystemService(LOCATION_SERVICE);
-		//locationLis = new ScaleLocationListener(this);
-		locationMan.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 2, locationLis);
-		new LoadIndividualPathTask().execute(pathUrl);
+        ref = this;
+        locationMan = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        Location location = locationMan.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		if (location != null) {
+			map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+			map.animateCamera(CameraUpdateFactory.zoomTo(15));
+		}
+        setHasOptionsMenu(true);
+		
+		     
+		pathButton = (Button) myFragmentView.findViewById(R.id.choosePath);
+		scaleButton = (Button) myFragmentView.findViewById(R.id.chooseScale);
+		walkButton = (Button) myFragmentView.findViewById(R.id.walkPath);
+		stopButton = (Button) myFragmentView.findViewById(R.id.stopWalk);
+		onButtonClick();
+		return myFragmentView;
 	}
 	
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+		Fragment fragment = (getFragmentManager().findFragmentById(R.id.mapWalk));
+		FragmentTransaction ft = getActivity().getFragmentManager().beginTransaction();
+		ft.remove(fragment);
+		ft.commit();
+	}
+	
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (resultCode == 1) {
+			Bundle extra = data.getExtras();
+			scaleItem = extra.getString("scaleItem");
+			if (!scaleItem.isEmpty()) {
+				scaleButton.setBackgroundColor(Color.GRAY);
+			}
+		} else if (resultCode == 2) {
+			Bundle extra = data.getExtras();
+			pathURL = extra.getString("path");
+			localPath = extra.getBoolean("localPath", false);
+			if (pathURL != null) {
+				pathButton.setBackgroundColor(Color.GRAY);
+			}
+		}
+	}
+	
+	public void onButtonClick() {
+		pathButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent pathIntent = new Intent(getActivity(), PathChooser.class);
+				startActivityForResult(pathIntent, 0);
+			}
+		});
+		
+		scaleButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent scaleIntent = new Intent(getActivity(), ScaleChooser.class);
+				startActivityForResult(scaleIntent, 0);
+			}
+		});
+		
+		walkButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (scaleItem != null && pathURL != null) {
+					getActivity().findViewById(R.id.relativeLayout1).setVisibility(View.GONE);
+					getActivity().findViewById(R.id.linearLayout1).setVisibility(View.VISIBLE);
+					locationLis = new ScaleLocationListener(ref);
+					locationMan.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 2, locationLis);
+					new LoadIndividualPathTask().execute(pathURL);
+				} else if (scaleItem != null && pathURL == null) {
+					Toast toast = Toast.makeText(getActivity(), "Please select a path.", Toast.LENGTH_SHORT);
+					toast.setGravity(Gravity.CENTER, 0, 0);
+					toast.show();
+				} else if (scaleItem == null && pathURL != null) {
+					Toast toast = Toast.makeText(getActivity(), "Please select a scale.", Toast.LENGTH_SHORT);
+					toast.setGravity(Gravity.CENTER, 0, 0);
+					toast.show();
+				} else {
+					Toast toast = Toast.makeText(getActivity(), "Please select a path and scale.", Toast.LENGTH_SHORT);
+					toast.setGravity(Gravity.CENTER, 0, 0);
+					toast.show();
+				}
+			}
+		});
+		
+		stopButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				locationMan.removeUpdates(locationLis);
+				locationLis = null;
+				map.clear();
+				getActivity().findViewById(R.id.linearLayout1).setVisibility(View.GONE);
+				getActivity().findViewById(R.id.relativeLayout1).setVisibility(View.VISIBLE);
+				
+				// Move to current location
+				Location location = locationMan.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+				if (location != null) {
+					map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+					map.animateCamera(CameraUpdateFactory.zoomTo(15));
+				}
+			}
+		});
+	}
+
 	private void populate(List<String> coordinates) {
         double maxLat = -90, maxLng = -180, minLat = 90, minLng = 180;
         try {
@@ -142,12 +250,11 @@ public class Map extends FragmentActivity implements OnMarkerClickListener {
             			new LoadImageTask().execute(so);
             		}
             	}
-            	if (so.name == null || so.text == null || so.percentage == null)
-            	{
-					Intent intent = new Intent(ref, Popup.class);
+            	if (so.name == null || so.text == null || so.percentage == null) {
+					Intent intent = new Intent(getActivity(), Popup.class);
 					intent.putExtra("title", "Invalid scale");
 					intent.putExtra("text", "A scale item is missing a name, text, or percentage tag.");
-					ref.startActivityForResult(intent, 0);
+					startActivityForResult(intent, 0);
             	}
             	else
             	{
@@ -198,7 +305,7 @@ public class Map extends FragmentActivity implements OnMarkerClickListener {
         LatLngBounds calcBounds = new LatLngBounds(new LatLng(minLat, minLng), new LatLng(maxLat, maxLng));
         
         DisplayMetrics displaymetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
         int height = displaymetrics.heightPixels;
         int width = displaymetrics.widthPixels;
         CameraUpdate camUpdate = CameraUpdateFactory.newLatLngBounds(calcBounds, width, height, 30);
@@ -213,7 +320,7 @@ public class Map extends FragmentActivity implements OnMarkerClickListener {
 			{
 				if (so.distance - distanceTraveled < distanceInterval)
 				{
-					Intent intent = new Intent(this, Popup.class);
+					Intent intent = new Intent(getActivity(), Popup.class);
 					intent.putExtra("title", so.name);
 					intent.putExtra("image", so.image);
 					intent.putExtra("text", so.text);
@@ -226,35 +333,34 @@ public class Map extends FragmentActivity implements OnMarkerClickListener {
 		return false;
 	}
 	
-	private class LoadImageTask extends
-		AsyncTask<ScaleObject, Void, String> {
+	private class LoadImageTask extends AsyncTask<ScaleObject, Void, String> {
 	
-	@Override
-	protected String doInBackground(ScaleObject... arg0) {
-		try {
-			URL url = new URL(arg0[0].imageLocation);
-			InputStream in = url.openStream();
-			BufferedInputStream buf = new BufferedInputStream(in);
-	        Bitmap myBitmap = BitmapFactory.decodeStream(buf);
-            if (in != null) {
+		@Override
+		protected String doInBackground(ScaleObject... arg0) {
+			try {
+				URL url = new URL(arg0[0].imageLocation);
+				InputStream in = url.openStream();
+				BufferedInputStream buf = new BufferedInputStream(in);
+				Bitmap myBitmap = BitmapFactory.decodeStream(buf);
+				if (in != null) {
                 in.close();
-            }
-            if (buf != null) {
+            	}
+					if (buf != null) {
                 buf.close();
-            }
-	        arg0[0].image = myBitmap;
-		} catch (Exception e) {
+					}
+					arg0[0].image = myBitmap;
+			} catch (Exception e) {
+			}
+			return "";
 		}
-		return "";
 	}
-}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		super.onCreateOptionsMenu(menu);
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		inflater.inflate(R.menu.settings, menu);
+		super.onCreateOptionsMenu(menu, inflater);
 		menu.add(0, 1, 1, "New Scale");
 		menu.add(0, 2, 2, "New Path");
-		return true;
 	}
 	
 	@Override
@@ -262,41 +368,36 @@ public class Map extends FragmentActivity implements OnMarkerClickListener {
 		Intent newIntent;
 		switch (item.getItemId()) {
 		case 1 :
-			getIntent().removeExtra("pathItem"); 
-			getIntent().removeExtra("scaleItem"); 
-			newIntent = new Intent(this, ScaleChooser.class);
+			getActivity().getIntent().removeExtra("pathItem"); 
+			getActivity().getIntent().removeExtra("scaleItem"); 
+			newIntent = new Intent(getActivity(), ScaleChooser.class);
 			newIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(newIntent);
 			return true;
 		case 2 :
-			finish();
+			getActivity().finish();
 			return true;
 		}
 		return true;
 	}
 	
 	@Override
-	protected void onPause(){
-		locationMan.removeUpdates(locationLis);
-		locationLis = null;
+	public void onPause(){
+		if (locationLis != null) {
+			locationMan.removeUpdates(locationLis);
+			locationLis = null;
+		}
 	    super.onPause();
 	} 
 	
 	@Override
-	protected void onResume() {
-		//locationLis = new ScaleLocationListener(this);
+	public void onResume() {
+		locationLis = new ScaleLocationListener(ref);
 		locationMan.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 2, locationLis);
 	    super.onResume();
 	}
-	
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		finish();
-	}
-	
 
-	private class LoadIndividualPathTask extends
-			AsyncTask<String, Void, String> {
+	private class LoadIndividualPathTask extends AsyncTask<String, Void, String> {
 
 		@Override
 		protected String doInBackground(String... arg0) {
@@ -304,17 +405,16 @@ public class Map extends FragmentActivity implements OnMarkerClickListener {
 				BufferedReader in = null;
 				if (localPath)
 				{
-					in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(ref.getFilesDir(), arg0[0]))));
+					in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(getActivity().getFilesDir(), arg0[0]))));
 				}
 				else {
 					UrlValidator validator = new UrlValidator();
 					if(validator.isValid(arg0[0])) {
-						in = new BufferedReader(new InputStreamReader(
-								new URL(arg0[0]).openStream()));;
+						in = new BufferedReader(new InputStreamReader(new URL(arg0[0]).openStream()));;
 					} else if(new File(arg0[0]).exists()) {
 						in = new BufferedReader(new FileReader(arg0[0]));
 					} else {
-						Intent intent = new Intent(ref, Popup.class);
+						Intent intent = new Intent(getActivity(), Popup.class);
 						intent.putExtra("title", "Error");
 						intent.putExtra("text", "Invalid Directory Location");
 						startActivity(intent);
@@ -335,12 +435,10 @@ public class Map extends FragmentActivity implements OnMarkerClickListener {
 		protected void onPostExecute(String pathItem) {
 			if (pathItem != null) {
 				try {
-					DocumentBuilder docBuilder = DocumentBuilderFactory
-							.newInstance().newDocumentBuilder();
+					DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 					Document doc = docBuilder.parse(new ByteArrayInputStream(pathItem.getBytes()));
 					NodeList items = doc.getElementsByTagName("gx:coord");
-					if (items.getLength() < 2)
-					{
+					if (items.getLength() < 2) {
 						items = doc.getElementsByTagName("coordinates");
 						for (int i = 0; i < items.getLength(); i++)
 						{
@@ -354,14 +452,14 @@ public class Map extends FragmentActivity implements OnMarkerClickListener {
 									content = content.substring(content.indexOf('\n')+1);
 								}
 								coordinates.add(content);
-								ref.populate(coordinates);
+								populate(coordinates);
 								return;
 							}
 						}
-						Intent intent = new Intent(ref, Popup.class);
+						Intent intent = new Intent(getActivity(), Popup.class);
 						intent.putExtra("title", "Error");
 						intent.putExtra("text", "The path file does not contain a path.");
-						ref.startActivityForResult(intent, 0);
+						startActivityForResult(intent, 0);
 					}
 					else {
 						List<String> coordinates = new ArrayList<String>();
@@ -369,21 +467,21 @@ public class Map extends FragmentActivity implements OnMarkerClickListener {
 						{
 							coordinates.add(items.item(i).getTextContent().replace(" ",","));
 						}
-						ref.populate(coordinates);
+						populate(coordinates);
 					}
 				}
 				catch (Exception e)
 				{
-					Intent intent = new Intent(ref, Popup.class);
+					Intent intent = new Intent(getActivity(), Popup.class);
 					intent.putExtra("title", "Error");
 					intent.putExtra("text", "The requested path is not in the correct format.");
-					ref.startActivityForResult(intent, 0);
+					startActivityForResult(intent, 0);
 				}
 			} else {
-				Intent intent = new Intent(ref, Popup.class);
+				Intent intent = new Intent(getActivity(), Popup.class);
 				intent.putExtra("title", "Error");
 				intent.putExtra("text", "The requested path does not exist.");
-				ref.startActivityForResult(intent, 0);
+				startActivityForResult(intent, 0);
 			}
 		}
 	}

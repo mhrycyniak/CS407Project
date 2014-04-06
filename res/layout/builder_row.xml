@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp" >
+
+        <!-- Image on the left half -->
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+    		android:gravity="center_horizontal" >
+
+            <ImageView
+                android:id="@+id/builderRowImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:adjustViewBounds="true"
+                android:background="@drawable/gray_image_border" />
+        </LinearLayout>
+
+        <!-- Info on the right -->
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingLeft="5dp" >
+
+            <!-- Name -->
+
+            <TextView
+                android:id="@+id/builderRowNameLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Name:" />
+
+            <EditText
+                android:id="@+id/builderRowNameEdit"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:inputType="textNoSuggestions"
+                android:hint="Enter Item Name" />
+
+            <!-- The comparable data -->
+
+            <TextView
+                android:id="@+id/builderRowComparableLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Measurement:" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <EditText
+                    android:id="@+id/builderRowComparableEdit"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:singleLine="true"
+                    android:inputType="number"
+                    android:hint="eg &quot;10&quot;" />
+
+                <TextView
+                    android:id="@+id/builderRowUnits"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:gravity="left" />
+
+                <!-- Item/Max Ratio Display -->
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Item/Max: " />
+
+                <TextView
+                    android:id="@+id/builderRowPercentage"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="left"
+                    android:text="0.00" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- The image location -->
+
+    <TextView
+        android:id="@+id/builderRowImageLocationLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Image Location:" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <EditText
+            android:id="@+id/builderRowImageLocationEdit"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:inputType="textNoSuggestions"
+            android:hint="Enter Web Address or Select Browse" />
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="right" >
+        	<Button 
+        	    android:id="@+id/builderRowImageLoadButton"
+        	    android:layout_width="wrap_content"
+       		    android:layout_height="wrap_content"
+            	android:text="Load" />
+        	<Button
+            	android:id="@+id/builderRowImageBrowseButton"
+            	android:layout_width="wrap_content"
+            	android:layout_height="wrap_content"
+            	android:text="Browse..." />
+        </LinearLayout>
+    </LinearLayout>
+    <!-- The description -->
+
+    <TextView
+        android:id="@+id/builderRowDescriptionLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Description:" />
+
+    <EditText
+        android:id="@+id/builderRowDescriptionEdit"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter Item Description" />
+
+    <!-- Delete Button -->
+
+    <Button
+        android:id="@+id/builderRowDelete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:text="Delete This Item" />
+
+</LinearLayout>

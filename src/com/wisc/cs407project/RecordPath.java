@@ -49,7 +49,7 @@ public class RecordPath extends FragmentActivity {
          map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
          map.animateCamera(CameraUpdateFactory.zoomTo(15));
         }
-		locationLis = new RecordLocationListener(this);
+		//locationLis = new RecordLocationListener(this);
 		locationMan.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 2, locationLis);
 	}
 	

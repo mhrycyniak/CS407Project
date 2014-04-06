@@ -36,7 +36,7 @@ public class ScaleChooser extends Activity implements OnItemClickListener {
 	private ListView scales;
 	private ScaleChooser ref;
 	private String currentDirectory;
-	private static final String SETTINGSNAME = "ScaleSettings";
+	private static final String SETTINGSNAME = "WalkSettings";
 	private HashMap<String,String> fileName = new HashMap<String,String>();
 
 	@Override
@@ -51,9 +51,7 @@ public class ScaleChooser extends Activity implements OnItemClickListener {
 		currentDirectory = "http://pages.cs.wisc.edu/~hrycynia/cs407project/";
 		if (currentDirectory != "") {
 			new LoadScalesTask().execute(currentDirectory);
-		}
-		else
-		{
+		} else {
 			ChangeDirectoryClicked(null);
 		}
 	}
@@ -72,8 +70,7 @@ public class ScaleChooser extends Activity implements OnItemClickListener {
 		alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int whichButton) {
 				currentDirectory = input.getText().toString();
-				SharedPreferences settings = getSharedPreferences(SETTINGSNAME,
-						0);
+				SharedPreferences settings = getSharedPreferences(SETTINGSNAME, 0);
 				SharedPreferences.Editor editor = settings.edit();
 				editor.putString("scaleDirectory", currentDirectory);
 				editor.commit();
@@ -104,8 +101,7 @@ public class ScaleChooser extends Activity implements OnItemClickListener {
 				BufferedReader in;
 				UrlValidator validator = new UrlValidator();
 				if(validator.isValid(path)) {
-					in = new BufferedReader(new InputStreamReader(
-							new URL(path).openStream()));
+					in = new BufferedReader(new InputStreamReader(new URL(path).openStream()));
 				} else {
 					in = new BufferedReader(new FileReader(path));
 				}
@@ -144,8 +140,7 @@ public class ScaleChooser extends Activity implements OnItemClickListener {
 		new LoadIndividualScaleTask().execute(path);
 	}
 
-	private class LoadIndividualScaleTask extends
-			AsyncTask<String, Void, String> {
+	private class LoadIndividualScaleTask extends AsyncTask<String, Void, String> {
 
 		@Override
 		protected String doInBackground(String... arg0) {
@@ -153,8 +148,7 @@ public class ScaleChooser extends Activity implements OnItemClickListener {
 				BufferedReader in = null;
 				UrlValidator validator = new UrlValidator();
 				if(validator.isValid(arg0[0])) {
-					in = new BufferedReader(new InputStreamReader(
-							new URL(arg0[0]).openStream()));
+					in = new BufferedReader(new InputStreamReader(new URL(arg0[0]).openStream()));
 				} else if(new File(arg0[0]).exists()) {
 					in = new BufferedReader(new FileReader(arg0[0]));
 				} else {
@@ -179,8 +173,7 @@ public class ScaleChooser extends Activity implements OnItemClickListener {
 		protected void onPostExecute(String scaleItem) {
 			if (scaleItem != null) {
 				try {
-					DocumentBuilder docBuilder = DocumentBuilderFactory
-							.newInstance().newDocumentBuilder();
+					DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 					Document doc = docBuilder.parse(new ByteArrayInputStream(scaleItem.getBytes()));
 					NodeList items = doc.getElementsByTagName("scaleItem");
 					if (items.getLength() < 2)
@@ -191,9 +184,10 @@ public class ScaleChooser extends Activity implements OnItemClickListener {
 						startActivity(intent);
 					}
 					else {
-						Intent intent = new Intent(ref, PathChooser.class);
+						Intent intent = new Intent();
 						intent.putExtra("scaleItem", scaleItem);
-						startActivity(intent);
+						setResult(1, intent);
+						finish();
 					}
 				}
 				catch (Exception e)

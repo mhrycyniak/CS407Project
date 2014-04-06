@@ -43,15 +43,15 @@ public class PathChooser extends Activity implements OnItemClickListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.chooser);
-		list = (ListView)findViewById(R.id.listView1);
+		//list = (ListView)findViewById(R.id.listView1);
 		localButton = (Button)findViewById(R.id.local_btn);
 		changeDirectory = (Button)findViewById(R.id.changeDirectory_btn);
 		changeDirectory.setVisibility(View.GONE);
 		localButton.setVisibility(View.VISIBLE);
 		local = true;
 		ref = this;
-		Intent intent = getIntent();
-		scaleItem = intent.getStringExtra("scaleItem");
+		//Intent intent = getIntent();
+		//scaleItem = intent.getStringExtra("scaleItem");
 		paths = (ListView) findViewById(R.id.listView1);
 		paths.setOnItemClickListener(this);
 		LoadLocalPath();
@@ -131,8 +131,7 @@ public class PathChooser extends Activity implements OnItemClickListener {
 				currentDirectory = input.getText().toString();
 				String location = getExternalFilesDir(null).getAbsolutePath() + "/dirs.txt";
 				DirUtils.storeDir(location, currentDirectory);
-				SharedPreferences settings = getSharedPreferences(SETTINGSNAME,
-						0);
+				SharedPreferences settings = getSharedPreferences(SETTINGSNAME, 0);
 				SharedPreferences.Editor editor = settings.edit();
 				editor.putString("pathDirectory", currentDirectory);
 				editor.commit();
@@ -167,8 +166,7 @@ public class PathChooser extends Activity implements OnItemClickListener {
 				BufferedReader in = null;
 				UrlValidator validator = new UrlValidator();
 				if(validator.isValid(path)) {
-					in = new BufferedReader(new InputStreamReader(
-							new URL(path).openStream()));;
+					in = new BufferedReader(new InputStreamReader(new URL(path).openStream()));;
 				} else if(new File(path).exists()) {
 					in = new BufferedReader(new FileReader(path));
 				} else {
@@ -196,8 +194,7 @@ public class PathChooser extends Activity implements OnItemClickListener {
 		}
 
 		protected void onPostExecute(List<String> pathList) {
-			ArrayAdapter<String> adapter = new ArrayAdapter<String>(ref,
-					android.R.layout.simple_list_item_1, pathList);
+			ArrayAdapter<String> adapter = new ArrayAdapter<String>(ref, android.R.layout.simple_list_item_1, pathList);
 			paths.setAdapter(adapter);
 		}
 	}
@@ -205,18 +202,24 @@ public class PathChooser extends Activity implements OnItemClickListener {
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 		String path = "";
-		if (!local)
-		{
+		if (!local) {
 			path += currentDirectory;
 			if (!path.endsWith("/")) {
 				path += "/";
 			}
 		}
+//		path += fileName.get((String) paths.getItemAtPosition(arg2));
+//		Intent intent = new Intent(ref, Map.class);
+//		intent.putExtra("path", path);
+//		intent.putExtra("scaleItem", scaleItem);
+//		intent.putExtra("localPath", local);
+//		startActivity(intent);
+		
 		path += fileName.get((String) paths.getItemAtPosition(arg2));
-		Intent intent = new Intent(ref, Map.class);
+		Intent intent = new Intent();
 		intent.putExtra("path", path);
-		intent.putExtra("scaleItem", scaleItem);
 		intent.putExtra("localPath", local);
-		startActivity(intent);
+		setResult(2, intent);
+		finish();
 	}
 }

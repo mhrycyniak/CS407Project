@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="5dp"
+    android:orientation="vertical" >
+
+    <!-- Title and Current Directory -->
+
+    <TextView
+        android:id="@+id/imageExplorerPopupTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Choose an image to load:"
+        android:textSize="18sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal" >
+
+        <EditText
+            android:id="@+id/imageExplorerDirectory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:cursorVisible="false"
+            android:editable="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:inputType="textUri"
+            android:longClickable="false"
+            android:scrollHorizontally="true"
+            android:singleLine="true" />
+
+        <Button
+            android:id="@+id/imageExplorerBackButton"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Back" />
+    </LinearLayout>
+
+    <!-- Image Preview Label (way up here so listview and imageview heights can be made to match) -->
+            <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Preview:" />
+            
+    <!-- Image Preview and Explorer List -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <!-- Left Side: Preview -->
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingRight="5dp"
+            android:gravity="center_horizontal|top" >"
+
+            <ImageView
+                android:id="@+id/imageExplorerPreview"
+                android:gravity="top"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/imageExplorerList"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:divider="#8f8f8f"
+        	android:dividerHeight="1px"
+            android:background="@drawable/gray_image_border"
+            android:fadeScrollbars="false" />
+    </LinearLayout>
+
+    <!-- Open and Cancel Buttons -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="5dp"
+        android:gravity="right"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/imageExplorerOpenButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Open" />
+
+        <Button
+            android:id="@+id/imageExplorerCancelButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Cancel" />
+    </LinearLayout>
+
+</LinearLayout>

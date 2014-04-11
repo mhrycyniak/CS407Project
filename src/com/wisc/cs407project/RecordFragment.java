@@ -12,14 +12,16 @@ import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -30,7 +32,6 @@ import com.google.android.gms.maps.model.PolylineOptions;
 public class RecordFragment extends Fragment {
 	private GoogleMap map;
 	private Button recordButton;
-	private Button drawButton;
 	private LocationManager locationMan;
 	private RecordLocationListener locationLis;
 	private boolean recording;
@@ -54,7 +55,6 @@ public class RecordFragment extends Fragment {
 		locationMan.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 2, locationLis);
 		
 		recordButton = (Button) myFragmentView.findViewById(R.id.recordPath);
-		drawButton = (Button) myFragmentView.findViewById(R.id.drawPath);
 		recordClicked();
 		return myFragmentView;
 	}
@@ -68,29 +68,59 @@ public class RecordFragment extends Fragment {
 		ft.commit();
 	}
 
-	public void recordClicked() {
-		drawButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				String coordinates = "";
-			}
-		});
-		
+	public void recordClicked() {	
 		recordButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				if (!recording) {
-					recordButton.setText("Finish Recording");
-					locationLis.StartRecording();
-					recording = true;
+					if (locationMan.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+						recordButton.setText("Finish Recording");
+						locationLis.StartRecording();
+						recording = true;
+					} else {
+						Toast toast = Toast.makeText(getActivity(), "Location not available right now.", Toast.LENGTH_SHORT);
+						toast.setGravity(Gravity.CENTER, 0, 0);
+						toast.show();
+					}
+					
 				} else {
+					// Build an alert dialog if the path is not valid.
 					if (!validPath) {
-						Intent intent = new Intent(getActivity(), Popup.class);
-						intent.putExtra("title", "Warning");
-						intent.putExtra("text", "The required minimum of two points has not yet been recorded.");
-						startActivity(intent);
+						// AlertDialog.Builder
+						AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+
+						builder.setMessage("The required minimum of two points has not yet been recorded. Are you sure you want to stop recording?").setTitle("Warning");
+
+						// Add the buttons
+						builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog, int id) {
+										// User wants to stop recording so clear map and reset text.
+										map.clear();
+										recordButton.setText("Record Path");
+										recording = false;
+										validPath = false;
+										
+										// Move to current location
+										Location location = locationMan.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+										if (location != null) {
+											map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+											map.animateCamera(CameraUpdateFactory.zoomTo(15));
+										}
+									}
+								});
+						builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog, int id) {
+										// Do nothing if user still wants to continue recording.
+									}
+								});
+
+						// Create and show
+						builder.create();
+						builder.show();
 						return;
 					}
+					
+					// Stop recording path.
 					final String output = locationLis.StopRecording();
 					AlertDialog.Builder alertBuilder = new AlertDialog.Builder(getActivity());
 
@@ -118,7 +148,18 @@ public class RecordFragment extends Fragment {
 
 					alertBuilder.setNegativeButton("Discard", new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int whichButton) {
-							getActivity().finish();
+							// Discard recorded path by clearing map and resetting text.
+							map.clear();
+							recordButton.setText("Record Path");
+							recording = false;
+							validPath = false;
+							
+							// Move to current location
+							Location location = locationMan.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+							if (location != null) {
+								map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+								map.animateCamera(CameraUpdateFactory.zoomTo(15));
+							}
 						}
 					});
 					

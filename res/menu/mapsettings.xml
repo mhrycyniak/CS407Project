@@ -1,0 +1,15 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item 
+        android:title="Map View"
+        android:id="@+id/normalView" />
+    
+    <item 
+        android:title="Satellite View"
+        android:id="@+id/satelliteView" />
+    
+    <item 
+        android:title="Hybrid View"
+        android:id="@+id/hybridView" />
+
+</menu>

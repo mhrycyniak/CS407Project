@@ -80,6 +80,8 @@ public class RecordFragment extends Fragment {
 					} else {
 						Toast toast = Toast.makeText(getActivity(), "Location not available right now.", Toast.LENGTH_SHORT);
 						toast.setGravity(Gravity.CENTER, 0, 0);
+						View view = toast.getView();
+						view.setBackgroundResource(R.color.grey);
 						toast.show();
 					}
 					

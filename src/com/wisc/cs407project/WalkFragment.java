@@ -141,14 +141,14 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 				    }
 				  }
 				});
-				scaleButton.setBackgroundColor(Color.GRAY);
+				scaleButton.setBackgroundResource(R.color.green);
 			}
 		} else if (resultCode == 2) {
 			Bundle extra = data.getExtras();
 			pathURL = extra.getString("path");
 			localPath = extra.getBoolean("localPath", false);
 			if (pathURL != null) {
-				pathButton.setBackgroundColor(Color.GRAY);
+				pathButton.setBackgroundResource(R.color.green);
 			}
 		}
 	}
@@ -182,14 +182,20 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 				} else if (scaleItem != null && pathURL == null) {
 					Toast toast = Toast.makeText(getActivity(), "Please select a path.", Toast.LENGTH_SHORT);
 					toast.setGravity(Gravity.CENTER, 0, 0);
+					View view = toast.getView();
+					view.setBackgroundResource(R.color.grey);
 					toast.show();
 				} else if (scaleItem == null && pathURL != null) {
 					Toast toast = Toast.makeText(getActivity(), "Please select a scale.", Toast.LENGTH_SHORT);
 					toast.setGravity(Gravity.CENTER, 0, 0);
+					View view = toast.getView();
+					view.setBackgroundResource(R.color.grey);
 					toast.show();
 				} else {
 					Toast toast = Toast.makeText(getActivity(), "Please select a path and scale.", Toast.LENGTH_SHORT);
 					toast.setGravity(Gravity.CENTER, 0, 0);
+					View view = toast.getView();
+					view.setBackgroundResource(R.color.grey);
 					toast.show();
 				}
 			}
@@ -215,9 +221,9 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 				getActivity().findViewById(R.id.linearLayout1).setVisibility(View.GONE);
 				getActivity().findViewById(R.id.relativeLayout1).setVisibility(View.VISIBLE);
 				
-				// Need to change this
-				scaleButton.setBackgroundResource(android.R.drawable.btn_default);
-				pathButton.setBackgroundResource(android.R.drawable.btn_default);
+				// Change buttons back to default color
+				scaleButton.setBackgroundResource(R.color.grey);
+				pathButton.setBackgroundResource(R.color.grey);
 				
 				// Move to current location
 				Location location = locationMan.getLastKnownLocation(LocationManager.GPS_PROVIDER);
@@ -380,28 +386,25 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		inflater.inflate(R.menu.settings, menu);
 		super.onCreateOptionsMenu(menu, inflater);
-		menu.add(0, 1, 1, "New Scale");
-		menu.add(0, 2, 2, "New Path");
+		inflater.inflate(R.menu.mapsettings, menu);
 	}
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		Intent newIntent;
-		switch (item.getItemId()) {
-		case 1 :
-			getActivity().getIntent().removeExtra("pathItem"); 
-			getActivity().getIntent().removeExtra("scaleItem"); 
-			newIntent = new Intent(getActivity(), ScaleChooser.class);
-			newIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(newIntent);
+		super.onOptionsItemSelected(item);
+		switch(item.getItemId()) {
+		case R.id.normalView:
+			map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 			return true;
-		case 2 :
-			getActivity().finish();
+		case R.id.satelliteView:
+			map.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+			return true;
+		case R.id.hybridView:
+			map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 			return true;
 		}
-		return true;
+		return false;
 	}
 	
 	@Override

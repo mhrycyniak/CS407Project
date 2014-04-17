@@ -19,6 +19,7 @@
 
         <Button
             android:id="@+id/recordPath"
+            android:background="@color/grey"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Record Path" />

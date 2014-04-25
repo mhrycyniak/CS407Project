@@ -117,9 +117,12 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 	public void onDestroyView() {
 		super.onDestroyView();
 		Fragment fragment = (getFragmentManager().findFragmentById(R.id.mapWalk));
-		FragmentTransaction ft = getActivity().getFragmentManager().beginTransaction();
-		ft.remove(fragment);
-		ft.commit();
+		// Avoids trying to commit after parent activity is already destroyed
+		if (fragment.isResumed()) {
+			FragmentTransaction ft = getActivity().getFragmentManager().beginTransaction();
+			ft.remove(fragment);
+			ft.commit();
+		}
 	}
 	
 	@Override

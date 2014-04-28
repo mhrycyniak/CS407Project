@@ -12,6 +12,7 @@ import android.widget.Button;
 import com.wisc.cs407project.ScaleGenUI.ScaleExplorerPopup;
 
 public class ScaleFragment extends Fragment {
+	
 	private Button scaleBuilderButton;
 	
 	@Override

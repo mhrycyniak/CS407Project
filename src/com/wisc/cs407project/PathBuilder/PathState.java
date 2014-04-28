@@ -3,17 +3,18 @@ package com.wisc.cs407project.PathBuilder;
 import java.util.ArrayList;
 
 import android.graphics.Color;
+import android.util.Log;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.wisc.cs407project.MapUtils;
 
 public class PathState {
-	private ArrayList<PathStateObject> stateList;
+	public ArrayList<PathStateObject> stateList;
 	public PathStateObject currentState;
 	private Polyline currentLeadingLine;
 	private Polyline currentLaggingLine;
@@ -29,6 +30,7 @@ public class PathState {
 		if (coords.isEmpty()) {
 			return;
 		}
+		Log.d("state added", "f");
 		// Clear current state display
 		clearCurrent(maintainLeading);
 		ArrayList<LatLng> newLeadLine = new ArrayList<LatLng>();
@@ -65,19 +67,22 @@ public class PathState {
 		if (maintainLeading == null) {
 			currentLeadingMarker = refMap.addMarker(new MarkerOptions()
 			.position(currentState.leadingMarker)
+			.icon(BitmapDescriptorFactory.fromResource(com.wisc.cs407project.R.drawable.draggable_marker))
 			.draggable(true));
 		}
 	}
 	
 	public void revertState() {
+		Log.d("state removed", "f");
+		clearCurrent(null);
 		// If we're at the initial state
 		if (stateList.isEmpty()) {
 			return;
 		}
-		clearCurrent(null);
 		stateList.remove(stateList.size() - 1);
 		// If we revert to the initial state
 		if (stateList.isEmpty()) {
+			currentState = null;
 			return;
 		}
 		// Otherwise, re-add previousState
@@ -98,10 +103,22 @@ public class PathState {
 	}
 	
 	private void clearCurrent(Marker maintainLeading) {
-		if (currentLeadingLine != null) currentLeadingLine.remove();
-		if (currentLaggingLine != null) currentLaggingLine.remove();
-		if (currentLeadingMarker != null && maintainLeading == null) currentLeadingMarker.remove();
-		if (currentLaggingMarker != null) currentLaggingMarker.remove();
+		if (currentLeadingLine != null){
+			currentLeadingLine.remove();
+			currentLeadingLine = null;
+		}
+		if (currentLaggingLine != null){
+			currentLaggingLine.remove();
+			currentLaggingLine = null;
+		}
+		if (currentLeadingMarker != null && maintainLeading == null){
+			currentLeadingMarker.remove();
+			currentLeadingMarker = null;
+		}
+		if (currentLaggingMarker != null){
+			currentLaggingMarker.remove();
+			currentLaggingMarker = null;
+		}
 	}
 	
 	public void prepareForRefactor() {
@@ -114,5 +131,23 @@ public class PathState {
 		if (currentLaggingMarker != null) currentLaggingMarker.remove();
 		stateList.remove(stateList.size() - 1);
 		currentState = stateList.get(stateList.size() - 1);
+	}
+	
+	public String getPath() {
+		String result = "";
+		if (stateList.isEmpty()) {
+			return result;
+		}
+		LatLng previousAdded = null;
+		for(PathStateObject leg : stateList) {
+			if (!leg.mainLine.isEmpty()) {
+				for (LatLng point : leg.mainLine) {
+					if(previousAdded == null || (previousAdded != null && !previousAdded.equals(point))) {
+						result += "\n"+ point.longitude + ","+ point.latitude +",0";
+					}
+				}
+			}
+		}
+		return result;
 	}
 }

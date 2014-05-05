@@ -6,8 +6,10 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,12 +31,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -437,7 +439,9 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 			try {
 				BufferedReader in = null;
 				if (localPath) {
-					in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(getActivity().getFilesDir(), arg0[0]))));
+					// Paths directory
+					String directoryPath = Environment.getExternalStorageDirectory().toString() + getResources().getString(R.string.app_path_directory);
+					in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(directoryPath, arg0[0]))));
 				}
 				else {
 					UrlValidator validator = new UrlValidator();
@@ -466,48 +470,62 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 
 		protected void onPostExecute(String pathItem) {
 			if (pathItem != null) {
-				try {
-					DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-					Document doc = docBuilder.parse(new ByteArrayInputStream(pathItem.getBytes()));
-					NodeList items = doc.getElementsByTagName("gx:coord");
-					if (items.getLength() < 2) {
-						items = doc.getElementsByTagName("coordinates");
-						for (int i = 0; i < items.getLength(); i++)
-						{
-							if (items.item(i).getFirstChild()!= null && items.item(i).getFirstChild().getNodeValue().trim().contains("\n"))
-							{
-								String content = items.item(i).getFirstChild().getNodeValue().trim();
-								List<String> coordinates = new ArrayList<String>();
-								while (content.contains("\n"))
-								{
-									coordinates.add(content.substring(0, content.indexOf('\n')).trim());
-									content = content.substring(content.indexOf('\n')+1);
-								}
-								coordinates.add(content);
-								populate(coordinates);
-								return;
+				// Local paths are formatted differently
+				if (localPath) {
+					BufferedReader reader = new BufferedReader(new StringReader(pathItem));
+					List<String> coordinates = new ArrayList<String>();
+					String line = null;
+					try {
+						while((line = reader.readLine()) != null) {
+							if (line != "") {
+								coordinates.add(line);
 							}
 						}
+						populate(coordinates);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				} else {
+					try {
+						DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+						Document doc = docBuilder.parse(new ByteArrayInputStream(pathItem.getBytes()));
+						NodeList items = doc.getElementsByTagName("gx:coord");
+						if (items.getLength() < 2) {
+							items = doc.getElementsByTagName("coordinates");
+							for (int i = 0; i < items.getLength(); i++) {
+								if (items.item(i).getFirstChild()!= null && items.item(i).getFirstChild().getNodeValue().trim().contains("\n"))
+								{
+									String content = items.item(i).getFirstChild().getNodeValue().trim();
+									List<String> coordinates = new ArrayList<String>();
+									while (content.contains("\n")) {
+										coordinates.add(content.substring(0, content.indexOf('\n')).trim());
+										content = content.substring(content.indexOf('\n')+1);
+									}
+									coordinates.add(content);
+									populate(coordinates);
+									return;
+								}
+							}
+							Intent intent = new Intent(getActivity(), Popup.class);
+							intent.putExtra("title", "Error");
+							intent.putExtra("text", "The path file does not contain a path.");
+							startActivityForResult(intent, 0);
+						}
+						else {
+							List<String> coordinates = new ArrayList<String>();
+							for (int i =0; i < items.getLength(); i++) {
+								coordinates.add(items.item(i).getTextContent().replace(" ",","));
+							}
+							populate(coordinates);
+						}
+					}
+					catch (Exception e) {
 						Intent intent = new Intent(getActivity(), Popup.class);
 						intent.putExtra("title", "Error");
-						intent.putExtra("text", "The path file does not contain a path.");
+						intent.putExtra("text", "The requested path is not in the correct format.");
 						startActivityForResult(intent, 0);
 					}
-					else {
-						List<String> coordinates = new ArrayList<String>();
-						for (int i =0; i < items.getLength(); i++)
-						{
-							coordinates.add(items.item(i).getTextContent().replace(" ",","));
-						}
-						populate(coordinates);
-					}
-				}
-				catch (Exception e)
-				{
-					Intent intent = new Intent(getActivity(), Popup.class);
-					intent.putExtra("title", "Error");
-					intent.putExtra("text", "The requested path is not in the correct format.");
-					startActivityForResult(intent, 0);
 				}
 			} else {
 				Intent intent = new Intent(getActivity(), Popup.class);

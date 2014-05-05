@@ -28,7 +28,7 @@ public class Scale extends Activity {
 
 		// Create tabs and give them titles
 		ActionBar.Tab walkTab = actionbar.newTab().setText(getString(R.string.walk_path));
-		ActionBar.Tab recordTab = actionbar.newTab().setText(getString(R.string.record_path));
+		ActionBar.Tab recordTab = actionbar.newTab().setText(getString(R.string.create_path));
 		// ActionBar.Tab pathTab = actionbar.newTab().setText(getString(R.string.path_settings));
 		ActionBar.Tab scaleTab = actionbar.newTab().setText(getString(R.string.scale_settings));
 

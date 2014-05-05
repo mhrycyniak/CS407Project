@@ -35,6 +35,14 @@ public class Scale extends ScaleParseObject{
 		return objects;
 	}
 	
+	public ScaleObject GetObject(int i){
+		try{
+			return new ScaleObject(GetObjectsIds().get(i));
+		}catch(Exception e){
+			return null;
+		}
+	}
+	
 	public String GetObjectId(){
 		return parseObject.getObjectId();
 	}
@@ -51,6 +59,11 @@ public class Scale extends ScaleParseObject{
 		objects.remove(object.parseObject.getObjectId());
 		SetObjects(objects);
 		this.push();
+	}
+	
+	public ArrayList<String> GetObjectsIds(){
+		return convertJSONStringArrayToArrayList(
+				parseObject.getJSONArray(this.Objects));
 	}
 	
 	public void SetObjects(ArrayList<ScaleObject> objects){

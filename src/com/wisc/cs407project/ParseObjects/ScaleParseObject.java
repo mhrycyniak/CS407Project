@@ -80,6 +80,10 @@ public class ScaleParseObject {
 		});
 	}
 	
+	public void push(SaveCallback callback){
+		parseObject.saveInBackground(callback);
+	}
+	
 	public void delete()
 	{
 		parseObject.deleteEventually();

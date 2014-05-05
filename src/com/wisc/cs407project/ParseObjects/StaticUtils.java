@@ -8,6 +8,64 @@ import android.util.Log;
 
 public class StaticUtils {
 	
+	public static void CreatePlanetScale(){
+		final Scale PlanetScale = new Scale();
+		PlanetScale.SetName("Planets");
+		PlanetScale.push(new SaveCallback(){
+			@Override
+			public void done(ParseException arg0) {
+				if(arg0 == null){
+					AddObj(PlanetScale, "Mercury", 
+							"The closest planet to the Sun and the smallest planet in the Solar System, it has no natural satellites.",
+							0.01295681063,
+							"http://moonlady.com/wp-content/uploads/2013/02/Mercury.jpg");	
+					AddObj(PlanetScale, "Neptune",
+							"The most distant planet from earth in our solar system and the smallest of the gas giants.",
+							1,
+							"http://solarsystem.nasa.gov/multimedia/gallery/Neptune_Full.jpg");
+					AddObj(PlanetScale, "Uranus",
+							"The coldest planet in our solar system with temperatures as low as -224C",
+							0.63787375415,
+							"http://www.crystalinks.com/uranus.jpg");
+					AddObj(PlanetScale, "Saturn",
+							"The least dense planet in the solar system. It has 62 moons, including some believed to possibly contain life.",
+							0.31561461794,
+							"http://nssdc.gsfc.nasa.gov/image/planetary/saturn/saturn_false.jpg");
+					AddObj(PlanetScale, "Jupiter",
+							"The largest and densest of the inner planets.",
+							0.17275747508,
+							"http://plus.maths.org/issue36/features/davies/mars.jpg");
+					AddObj(PlanetScale, "Mars",
+							"The largest and densest of the inner planets.",
+							0.04983388704,
+							"http://plus.maths.org/issue36/features/davies/mars.jpg");
+					AddObj(PlanetScale, "Earth",
+							"The largest and densest of the inner planets.",
+							0.03322259136,
+							"http://www.openthefuture.com/images/sunset.jpg");
+					AddObj(PlanetScale, "Venus",
+							"This planet is much drier than Earth, and its atmosphere is ninety times as dense.",
+							0.02325581395,
+							"http://www.windows2universe.org/venus/images/venus_med.jpg");
+				}				
+			}});
+	}
+	
+	private static void AddObj(final Scale scale, final String name, final String text, 
+			final double percent, final String image){		
+		final ScaleObject Obj = new ScaleObject();				
+		Obj.push(new SaveCallback() {
+			  public void done(ParseException e) {
+				Obj.SetName(name);
+				Obj.SetText(text);
+				Obj.SetPercentage(percent);
+				Obj.SetImageLocation(image);
+				Obj.push();
+				scale.AddObject(Obj);
+			  }
+			});			
+	}
+	
 	public static void CreateDinoScale(){
 		final Scale DinoScale = new Scale();
 		DinoScale.SetName("Dinos!");

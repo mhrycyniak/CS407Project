@@ -8,7 +8,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
 
-public class ScaleObject extends ScaleParseObject{
+public class ScaleObject extends ScaleParseObject implements Comparable<ScaleObject>{
 	private static String Text = "text";
 	private static String Name = "name";
 	private static String Percentage = "percentage";
@@ -19,6 +19,15 @@ public class ScaleObject extends ScaleParseObject{
 	public LatLng position;
 	public double distance;
 	public boolean opened;
+	
+	// Added this field to be used with ScaleGenerator
+		public Long comparativeValue;
+		
+		// NOTE: Only use this if you are sure both objects have comparativeValues and not just percentages.
+		@Override
+		public int compareTo(ScaleObject another) {
+			return comparativeValue.compareTo(another.comparativeValue);
+		}
 	
 	public ScaleObject()
 	{

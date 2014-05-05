@@ -18,6 +18,6 @@ public class Cs407Application extends Application {
 		//testObject.put("foo", "bar");
 		//testObject.saveInBackground();
 		
-		//StaticUtils.CreateDinoScale();
+		//StaticUtils.CreatePlanetScale();
 	}	
 }

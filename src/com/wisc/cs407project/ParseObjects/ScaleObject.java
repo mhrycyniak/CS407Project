@@ -26,7 +26,7 @@ public class ScaleObject extends ScaleParseObject implements Comparable<ScaleObj
 		// NOTE: Only use this if you are sure both objects have comparativeValues and not just percentages.
 		@Override
 		public int compareTo(ScaleObject another) {
-			return comparativeValue.compareTo(another.comparativeValue);
+			return this.GetPercentage() > another.GetPercentage() ? 1 : -1;
 		}
 	
 	public ScaleObject()

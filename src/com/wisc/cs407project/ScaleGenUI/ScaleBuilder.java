@@ -38,6 +38,7 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.Button;
@@ -283,8 +284,13 @@ public class ScaleBuilder extends Activity {
 			return filename;
 		}
 		protected void onPostExecute(String filename) {
-			if (filename != null)
-				Toast.makeText(getApplicationContext(), filename + " saved" , Toast.LENGTH_LONG).show();
+			if (filename != null) {
+				Toast toast = Toast.makeText(getApplicationContext(), filename + " saved", Toast.LENGTH_LONG);
+				toast.setGravity(Gravity.CENTER, 0, 0);
+				View view = toast.getView();
+				view.setBackgroundResource(R.color.grey);
+				toast.show();
+			}
 		}
 	}
 	

@@ -17,18 +17,21 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.validator.routines.UrlValidator;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import android.annotation.SuppressLint;
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -63,7 +66,7 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.wisc.cs407project.ParseObjects.ScaleObject;
 
-public class WalkFragment extends Fragment implements OnMarkerClickListener {
+public class WalkFragment extends Fragment implements OnMarkerClickListener, LocationListener {
 	private GoogleMap map;
 	private Button pathButton;
 	private Button scaleButton;
@@ -79,9 +82,11 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener {
 	public double distanceTraveled = 0;
 	public double distanceInterval;
 	public Intent intent;
-	private ScaleLocationListener locationLis;
+	//private ScaleLocationListener locationLis;
 	private LocationManager locationMan;
 	private WalkFragment ref;
+	private NotificationManager mNotificationMgr;
+	private boolean inFocus;
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -112,9 +117,12 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener {
 	public void onDestroyView() {
 		super.onDestroyView();
 		Fragment fragment = (getFragmentManager().findFragmentById(R.id.mapWalk));
-		FragmentTransaction ft = getActivity().getFragmentManager().beginTransaction();
-		ft.remove(fragment);
-		ft.commit();
+		// Avoids trying to commit after parent activity is already destroyed
+		if (fragment.isResumed()) {
+			FragmentTransaction ft = getActivity().getFragmentManager().beginTransaction();
+			ft.remove(fragment);
+			ft.commit();
+		}
 	}
 	
 	@Override
@@ -136,14 +144,14 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener {
 				    }
 				  }
 				});
-				scaleButton.setBackgroundColor(Color.GRAY);
+				scaleButton.setBackgroundResource(R.color.green);
 			}
 		} else if (resultCode == 2) {
 			Bundle extra = data.getExtras();
 			pathURL = extra.getString("path");
 			localPath = extra.getBoolean("localPath", false);
 			if (pathURL != null) {
-				pathButton.setBackgroundColor(Color.GRAY);
+				pathButton.setBackgroundResource(R.color.green);
 			}
 		}
 	}
@@ -171,20 +179,26 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener {
 				if (scaleItem != null && pathURL != null) {
 					getActivity().findViewById(R.id.relativeLayout1).setVisibility(View.GONE);
 					getActivity().findViewById(R.id.linearLayout1).setVisibility(View.VISIBLE);
-					locationLis = new ScaleLocationListener(ref);
-					locationMan.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 2, locationLis);
+					//locationLis = new ScaleLocationListener(ref);
+					locationMan.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 2, ref);
 					new LoadIndividualPathTask().execute(pathURL);
 				} else if (scaleItem != null && pathURL == null) {
 					Toast toast = Toast.makeText(getActivity(), "Please select a path.", Toast.LENGTH_SHORT);
 					toast.setGravity(Gravity.CENTER, 0, 0);
+					View view = toast.getView();
+					view.setBackgroundResource(R.color.grey);
 					toast.show();
 				} else if (scaleItem == null && pathURL != null) {
 					Toast toast = Toast.makeText(getActivity(), "Please select a scale.", Toast.LENGTH_SHORT);
 					toast.setGravity(Gravity.CENTER, 0, 0);
+					View view = toast.getView();
+					view.setBackgroundResource(R.color.grey);
 					toast.show();
 				} else {
 					Toast toast = Toast.makeText(getActivity(), "Please select a path and scale.", Toast.LENGTH_SHORT);
 					toast.setGravity(Gravity.CENTER, 0, 0);
+					View view = toast.getView();
+					view.setBackgroundResource(R.color.grey);
 					toast.show();
 				}
 			}
@@ -193,11 +207,26 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener {
 		stopButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				locationMan.removeUpdates(locationLis);
-				locationLis = null;
+				locationMan.removeUpdates(ref);
+				
+				// Reset all variables for walk.
+				pathStarted = false;
+				scaleItem = null;
+				pathURL = null;
+				startingPoint = null;
+				previousPoint = null;
+				distanceTraveled = 0;
+				distanceInterval = 0;
+				
+				//locationLis = null;
+				// Clear map
 				map.clear();
 				getActivity().findViewById(R.id.linearLayout1).setVisibility(View.GONE);
 				getActivity().findViewById(R.id.relativeLayout1).setVisibility(View.VISIBLE);
+				
+				// Change buttons back to default color
+				scaleButton.setBackgroundResource(R.color.grey);
+				pathButton.setBackgroundResource(R.color.grey);
 				
 				// Move to current location
 				Location location = locationMan.getLastKnownLocation(LocationManager.GPS_PROVIDER);
@@ -284,7 +313,8 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener {
         			so.position = points.get(i);
         		}
         		//scaleItemList.add(so);
-            	
+        		// Scale object not opened yet
+        		so.opened = false;
             }
         }
         catch (Exception e) {
@@ -359,44 +389,45 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener {
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		inflater.inflate(R.menu.settings, menu);
 		super.onCreateOptionsMenu(menu, inflater);
-		menu.add(0, 1, 1, "New Scale");
-		menu.add(0, 2, 2, "New Path");
+		inflater.inflate(R.menu.mapsettings, menu);
 	}
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		Intent newIntent;
-		switch (item.getItemId()) {
-		case 1 :
-			getActivity().getIntent().removeExtra("pathItem"); 
-			getActivity().getIntent().removeExtra("scaleItem"); 
-			newIntent = new Intent(getActivity(), ScaleChooser.class);
-			newIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(newIntent);
+		super.onOptionsItemSelected(item);
+		switch(item.getItemId()) {
+		case R.id.normalView:
+			map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 			return true;
-		case 2 :
-			getActivity().finish();
+		case R.id.satelliteView:
+			map.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+			return true;
+		case R.id.hybridView:
+			map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 			return true;
 		}
-		return true;
+		return false;
 	}
 	
 	@Override
-	public void onPause(){
-		if (locationLis != null) {
-			locationMan.removeUpdates(locationLis);
-			locationLis = null;
-		}
-	    super.onPause();
+	public void onDestroy(){
+		super.onDestroy();
+		locationMan.removeUpdates(this);
 	} 
 	
 	@Override
+	public void onPause() {
+		super.onPause();
+		inFocus = false;
+	}
+	
+	@Override
 	public void onResume() {
-		locationLis = new ScaleLocationListener(ref);
-		locationMan.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 2, locationLis);
-	    super.onResume();
+		super.onResume();
+		//locationLis = new ScaleLocationListener(ref);
+		locationMan.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 2, this);
+		inFocus = true;
 	}
 
 	private class LoadIndividualPathTask extends AsyncTask<String, Void, String> {
@@ -405,8 +436,7 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener {
 		protected String doInBackground(String... arg0) {
 			try {
 				BufferedReader in = null;
-				if (localPath)
-				{
+				if (localPath) {
 					in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(getActivity().getFilesDir(), arg0[0]))));
 				}
 				else {
@@ -487,5 +517,107 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener {
 			}
 		}
 	}
+
+	@Override
+	public void onLocationChanged(Location loc) {
+		if (startingPoint != null) {
+			if (!pathStarted) {
+				if (MapUtils.getDistance(loc.getLatitude(), loc.getLongitude(), startingPoint.latitude, startingPoint.longitude) < 30) {
+					// Display starting notification
+					if (!inFocus) {
+						startNotification();
+					} else {
+						Intent intent = new Intent(getActivity(), Popup.class);
+						intent.putExtra("title", "Path started");
+						intent.putExtra("text", "You have reached the paths starting point. Continue along the path to explore your chosen scale.");
+						startActivity(intent);
+					}
+					previousPoint = new LatLng(loc.getLatitude(), loc.getLongitude());
+					pathStarted = true;					
+				}
+			}
+			else {
+				distanceTraveled += MapUtils.getDistance(loc.getLatitude(), loc.getLongitude(), previousPoint.latitude, previousPoint.longitude);
+				for (com.wisc.cs407project.ParseObjects.ScaleObject so : scaleItemList) {
+					if (!so.opened && Math.abs(distanceTraveled - so.distance) < distanceInterval && MapUtils.getDistance(so.position.latitude, so.position.longitude, loc.getLatitude(), loc.getLongitude()) < 30) {
+						so.opened = true;
+						// Display notification that user has reached a scale when app is not focused.
+						if (!inFocus) {
+							scaleNotification(so.GetName());
+						}
+						Intent intent = new Intent(getActivity(), Popup.class);
+						intent.putExtra("title", so.GetName());
+						intent.putExtra("image", so.image);
+						intent.putExtra("text", so.GetText());
+						startActivity(intent);
+					}
+				}
+			}
+		}
+		previousPoint = new LatLng(loc.getLatitude(), loc.getLongitude());
+	}
+
+	@Override
+	public void onProviderDisabled(String provider) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onProviderEnabled(String provider) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onStatusChanged(String provider, int status, Bundle extras) {
+		// TODO Auto-generated method stub
+		
+	}
 	
+	@SuppressLint("NewApi")
+	private void startNotification() {
+		// Prepare intent which is triggered if the notification is clicked.
+		Intent intent = new Intent(getActivity(), Scale.class);
+		//intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		PendingIntent contentIntent = PendingIntent.getActivity(getActivity(), 0, intent, 0);
+
+		// Build notification
+		Notification notification = new Notification.Builder(getActivity())
+				.setContentTitle("Walk Through Time")
+				.setContentText("You have reached the paths starting point. Click to view the map.")
+				.setSmallIcon(R.drawable.ic_launcher)
+				.setContentIntent(contentIntent)
+				.setAutoCancel(true)
+				.setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_LIGHTS)
+				.build();
+
+
+		// Display the notification
+		mNotificationMgr = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+		mNotificationMgr.notify(0, notification);
+	}
+	
+	@SuppressLint("NewApi")
+	private void scaleNotification(String name) {
+		// Prepare intent which is triggered if the notification is clicked.
+		Intent intent = new Intent(getActivity(), Scale.class);
+		//intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		PendingIntent contentIntent = PendingIntent.getActivity(getActivity(), 0, intent, 0);
+
+		// Build notification
+		Notification notification = new Notification.Builder(getActivity())
+				.setContentTitle("Walk Through Time")
+				.setContentText("You have reached the following scale: " + name + ". Click to view the map.")
+				.setSmallIcon(R.drawable.ic_launcher)
+				.setContentIntent(contentIntent)
+				.setAutoCancel(true)
+				.setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_LIGHTS)
+				.build();
+
+
+		// Display the notification
+		mNotificationMgr = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+		mNotificationMgr.notify(1, notification);
+	}
 }

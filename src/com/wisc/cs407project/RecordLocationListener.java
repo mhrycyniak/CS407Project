@@ -5,6 +5,7 @@ import android.app.Fragment;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -19,9 +20,10 @@ public class RecordLocationListener extends Activity implements LocationListener
 	}
 	public void onLocationChanged(Location loc) {
 		LatLng currentPoint = new LatLng(loc.getLatitude(), loc.getLongitude());
-		if (isRecording) {
+		if (isRecording && previousPoint != null) {
 			coordinates += "\n"+currentPoint.longitude + ","+ currentPoint.latitude +",0";
 			recordActivity.addEdge(previousPoint, currentPoint);
+			//Log.d("onLocationChanged points null test", Boolean.toString(previousPoint == null) + " : " + (Boolean.toString(currentPoint == null)));
 		}
 		previousPoint = currentPoint;
 	}

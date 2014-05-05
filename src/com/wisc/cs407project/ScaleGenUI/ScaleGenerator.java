@@ -22,15 +22,20 @@ import android.util.Log;
 public class ScaleGenerator {
 
 	public ArrayList<ScaleObject> members; // The scale members
+	public ArrayList<com.wisc.cs407project.ParseObjects.ScaleObject> parseMembers;
 	public Long maxComparativeValue; // Used for updating percentages
 	public String scaleMetric;	// What is being compared
 	public String scaleName;
+	public com.wisc.cs407project.ParseObjects.Scale scale;
 
 	public ScaleGenerator() {
 		members = new ArrayList<ScaleObject>();
+		parseMembers = new ArrayList<com.wisc.cs407project.ParseObjects.ScaleObject>();
 		maxComparativeValue = (long)0;
 		scaleMetric = "";
 		scaleName = "";
+		scale = new com.wisc.cs407project.ParseObjects.Scale();
+		scale.push();
 	}
 
 	public void loadScale(String xmlScale) throws IOException, SAXException, ParserConfigurationException {
@@ -110,6 +115,17 @@ public class ScaleGenerator {
 		}
 	}
 
+	public void addParse(com.wisc.cs407project.ParseObjects.ScaleObject... objects){
+		for (com.wisc.cs407project.ParseObjects.ScaleObject object : objects){
+			parseMembers.add(0, object);
+		}		
+	}
+	
+	public void parsePreSave(){
+		scale.SetObjects(parseMembers);
+		scale.push();
+	}
+	
 	public void add(ScaleObject... objects) {
 		boolean maxUpdate = false;
 		for (ScaleObject object : objects) {
@@ -131,6 +147,10 @@ public class ScaleGenerator {
 		for (ScaleObject object : members) {
 			object.percentage = ((double)object.comparativeValue / maxComparativeValue);
 		}
+		for(int i=0; i<members.size(); i++){
+			parseMembers.get(i).SetPercentage(members.get(i).percentage);
+			parseMembers.get(i).push();
+		}
 	}
 	
 	public void refactorMaxValue() {
@@ -146,8 +166,16 @@ public class ScaleGenerator {
 	
 	public void addNew() {
 		ScaleObject object = new ScaleObject();
+		com.wisc.cs407project.ParseObjects.ScaleObject parseObject 
+			= new com.wisc.cs407project.ParseObjects.ScaleObject();
+		parseObject.SetName("");
+		parseObject.SetPercentage(0);
+		parseObject.SetText("");
+		parseObject.SetImageLocation("http://www.q2s.ntnu.no/include/images/persgall/148_no-photo.jpg");
+		parseObject.push();
 		object.percentage = (double)0;
 		object.comparativeValue = (long)0;
+		addParse(parseObject);
 		add(object);
 	}
 

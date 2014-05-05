@@ -79,6 +79,8 @@ public class BuilderListAdapter extends BaseAdapter {
 		        	// Avoid a potentially infinite change loop
 		        	if (!data.members.get(holder.position).name.equals(s)) {
 		        		data.members.get(holder.position).name = s.toString();
+		        		data.parseMembers.get(holder.position).SetName(s.toString());
+		        		data.parseMembers.get(holder.position).push();
 		        	}
 		        }
 		        public void beforeTextChanged(CharSequence s, int start, int count, int after){}
@@ -91,14 +93,18 @@ public class BuilderListAdapter extends BaseAdapter {
 		        public void afterTextChanged(Editable s) {
 		        	// Avoid a potentially infinite change loop
 		        	ScaleObject temp = data.members.get(holder.position);
+		        	com.wisc.cs407project.ParseObjects.ScaleObject parseTemp = 
+		        			data.parseMembers.get(holder.position);
 		        	if (!temp.comparativeValue.equals(ScaleGenerator.convertToLong(s.toString()))) {
-		        		temp.comparativeValue = ScaleGenerator.convertToLong(s.toString());
+		        		temp.comparativeValue = ScaleGenerator.convertToLong(s.toString());	
 		        		if (temp.comparativeValue > data.maxComparativeValue){
 		        			data.refactorMaxValue(temp.comparativeValue);
 		        		}
 		        		else {
 		        			temp.percentage = ((double)temp.comparativeValue / data.maxComparativeValue);
 		        		}
+		        		parseTemp.SetPercentage(temp.percentage);
+		        		parseTemp.push();
 		        	}
 		        }
 		        public void beforeTextChanged(CharSequence s, int start, int count, int after){}
@@ -125,6 +131,8 @@ public class BuilderListAdapter extends BaseAdapter {
 		        	// Avoid a potentially infinite change loop
 		        	if (!data.members.get(holder.position).text.equals(s)) {
 		        		data.members.get(holder.position).text = s.toString();
+		        		data.parseMembers.get(holder.position).SetText(s.toString());
+		        		data.parseMembers.get(holder.position).push();
 		        	}
 		        }
 		        public void beforeTextChanged(CharSequence s, int start, int count, int after){}
@@ -138,6 +146,8 @@ public class BuilderListAdapter extends BaseAdapter {
 		        	// Avoid a potentially infinite change loop
 		        	if (!data.members.get(holder.position).imageLocation.equals(s)) {
 		        		data.members.get(holder.position).imageLocation = s.toString();
+		        		data.parseMembers.get(holder.position).SetImageLocation(s.toString());
+		        		data.parseMembers.get(holder.position).push();
 		        	}
 		        }
 		        public void beforeTextChanged(CharSequence s, int start, int count, int after){}

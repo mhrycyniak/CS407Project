@@ -180,9 +180,13 @@ public class BuilderListAdapter extends BaseAdapter {
 								newMaxNeeded = true;
 							}
 							data.members.remove(holder.position);
+							data.parseMembers.get(holder.position).delete();
+							data.parseMembers.get(holder.position).push();
+							data.parseMembers.remove(holder.position);
 							if (newMaxNeeded) {
 								data.refactorMaxValue();
 							}
+							data.parsePreSave();
 							notifyDataSetChanged();
 						}
 					});

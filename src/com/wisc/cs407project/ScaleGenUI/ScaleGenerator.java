@@ -148,7 +148,7 @@ public class ScaleGenerator {
 			object.percentage = ((double)object.comparativeValue / maxComparativeValue);
 		}
 		for(int i=0; i<members.size(); i++){
-			parseMembers.get(i).SetPercentage(members.get(i).percentage);
+			parseMembers.get(i).SetPercentage(maxComparativeValue == 0? 0 : members.get(i).percentage);
 			parseMembers.get(i).push();
 		}
 	}
@@ -185,6 +185,9 @@ public class ScaleGenerator {
 			for (int i = 0; i < members.size(); i++) {
 				// If match, remove and adjust the loop index to avoid skipping the next member
 				if (members.get(i).name.equals(name)) {
+					parseMembers.get(i).delete();
+					parseMembers.get(i).push();
+					parseMembers.remove(i);
 					members.remove(i);
 					i--;
 				}
@@ -193,6 +196,7 @@ public class ScaleGenerator {
 	}
 	
 	public void sort() {
+		Collections.sort(parseMembers);
 		Collections.sort(members);
 	}
 	

@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -70,6 +71,8 @@ public class ScaleParseObject {
 
 	public void push()
 	{
+		if(parseObject == null)
+			return;
 		parseObject.saveEventually(new SaveCallback()
 		{
 			public void done(ParseException e)
@@ -81,6 +84,8 @@ public class ScaleParseObject {
 	}
 	
 	public void push(SaveCallback callback){
+		if(parseObject == null)
+			return;
 		parseObject.saveInBackground(callback);
 	}
 	

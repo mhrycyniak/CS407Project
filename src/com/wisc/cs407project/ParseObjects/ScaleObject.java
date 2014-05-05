@@ -51,28 +51,32 @@ public class ScaleObject extends ScaleParseObject implements Comparable<ScaleObj
 	//note after calling set you need to call .push() for changes to be saved
 	
 	public void SetText(String text){
-		parseObject.put(this.Text, text);
+		if(parseObject != null)
+			parseObject.put(this.Text, text);
 	}
 	public String GetText(){
 		return parseObject.getString(this.Text);
 	}
 	
 	public void SetName(String name){
-		parseObject.put(this.Name, name);
+		if(parseObject != null)
+			parseObject.put(this.Name, name);
 	}
 	public String GetName(){
 		return parseObject.getString(this.Name);
 	}
 	
 	public void SetPercentage(double percent){
-		parseObject.put(this.Percentage, percent);
+		if(parseObject != null)
+			parseObject.put(this.Percentage, percent);
 	}
 	public double GetPercentage(){
 		return parseObject.getDouble(this.Percentage);
 	}
 	
 	public void SetImageLocation(String imageLocation){
-		parseObject.put(this.ImageLocation, imageLocation);
+		if(parseObject != null)
+			parseObject.put(this.ImageLocation, imageLocation);
 	}
 	public String GetImageLocation(){
 		return parseObject.getString(this.ImageLocation);

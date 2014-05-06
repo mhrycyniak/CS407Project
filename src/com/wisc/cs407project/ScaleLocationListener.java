@@ -37,7 +37,7 @@ public class ScaleLocationListener extends Activity implements LocationListener 
 						so.opened = true;
 						Intent intent = new Intent(mapActivity.getActivity(), Popup.class);
 						intent.putExtra("title", so.GetName());
-						intent.putExtra("image", so.image);
+						Popup.image = so.image;
 						intent.putExtra("text", so.GetText());
 						mapActivity.startActivity(intent);
 					}

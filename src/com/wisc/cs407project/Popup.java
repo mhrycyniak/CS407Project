@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -14,20 +15,16 @@ import android.widget.TextView;
 import com.wisc.cs407project.R;
 
 public class Popup extends Activity {
+	public static Bitmap image;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-	    requestWindowFeature(Window.FEATURE_NO_TITLE);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.popup);
 		Intent intent = getIntent();
 		String title = intent.getStringExtra("title");
 		String text = intent.getStringExtra("text");
-		Parcelable imageParcel = intent.getParcelableExtra("image");
-		Bitmap image = null;
-		if (imageParcel != null)
-		{
-			image = (Bitmap)imageParcel;
-		}
+		
 		if (image != null)
 		{
 			ImageView imageView = (ImageView) findViewById(R.id.popup_image);

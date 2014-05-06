@@ -1,10 +1,17 @@
 package com.wisc.cs407project.ParseObjects;
 
+import java.io.BufferedInputStream;
+import java.io.InputStream;
+import java.net.URL;
+
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.parse.GetDataCallback;
+import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
@@ -17,8 +24,8 @@ public class ScaleObject extends ScaleParseObject implements Comparable<ScaleObj
 	private static String Image = "imageId";
 	
 	public Marker marker;
-	public Bitmap image;
 	public LatLng position;
+	public Bitmap image;
 	public double distance;
 	public boolean opened;
 	
@@ -83,8 +90,43 @@ public class ScaleObject extends ScaleParseObject implements Comparable<ScaleObj
 			parseObject.put(Image, file);
 		}
 	}
-	public ParseFile GetImage(){
-		return parseObject.getParseFile(Image);
+	public void GetImage(){
+		ParseFile file = parseObject.getParseFile(Image);
+		
+		if(file == null && !this.GetImageLocation().equals("")){
+			try{
+				URL url = new URL(GetImageLocation());
+				InputStream in = url.openStream();
+				BufferedInputStream buf = new BufferedInputStream(in);
+				Bitmap myBitmap = BitmapFactory.decodeStream(buf);
+				if (in != null) {
+					in.close();
+	        	}
+				if (buf != null) {
+					buf.close();
+				}
+				image = myBitmap;
+			}
+			catch(Exception e){
+				e.printStackTrace();
+			}
+			return;
+		}
+		
+		final ScaleObject o = this;
+		file.getDataInBackground(new GetDataCallback(){
+
+			@Override
+			public void done(byte[] data, ParseException e) {
+				if(e == null){
+					Log.d("data length", ""+data.length);
+					o.image = BitmapFactory.decodeByteArray(data, 0, data.length);
+					Log.d("crash?", "no");
+				}
+				else{
+					e.printStackTrace();
+				}
+			}});
 	}
 	
 	public void SetImageLocation(String imageLocation){

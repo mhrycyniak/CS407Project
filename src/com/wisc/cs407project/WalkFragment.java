@@ -355,8 +355,8 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 				if (so.distance - distanceTraveled < distanceInterval)
 				{
 					Intent intent = new Intent(getActivity(), Popup.class);
-					intent.putExtra("title", so.GetName());
-					intent.putExtra("image", so.image);
+					intent.putExtra("title", so.GetName());			
+					Popup.image = so.image;
 					intent.putExtra("text", so.GetText());
 					startActivity(intent);
 					return true;
@@ -372,17 +372,7 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 		@Override
 		protected String doInBackground(ScaleObject... arg0) {
 			try {
-				URL url = new URL(arg0[0].GetImageLocation());
-				InputStream in = url.openStream();
-				BufferedInputStream buf = new BufferedInputStream(in);
-				Bitmap myBitmap = BitmapFactory.decodeStream(buf);
-				if (in != null) {
-                in.close();
-            	}
-					if (buf != null) {
-                buf.close();
-					}
-					arg0[0].image = myBitmap;
+				arg0[0].GetImage();
 			} catch (Exception e) {
 			}
 			return "";
@@ -565,7 +555,7 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 						}
 						Intent intent = new Intent(getActivity(), Popup.class);
 						intent.putExtra("title", so.GetName());
-						intent.putExtra("image", so.image);
+						Popup.image = so.image;
 						intent.putExtra("text", so.GetText());
 						startActivity(intent);
 					}

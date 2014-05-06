@@ -29,6 +29,7 @@ This file has been modified from it's original source.
 package com.wisc.cs407project.ImageLoader;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -48,6 +49,9 @@ import java.util.concurrent.Executors;
 
 import org.apache.commons.validator.routines.UrlValidator;
 
+import com.parse.ParseException;
+import com.parse.ParseFile;
+import com.parse.SaveCallback;
 import com.wisc.cs407project.Popup;
 import com.wisc.cs407project.R;
 
@@ -86,22 +90,57 @@ public class ImageLoader {
         executorService=Executors.newFixedThreadPool(5);
     }
     
-    public void DisplayImage(String url, ImageView imageView)
+    public static void SaveParseImage(String url, Bitmap bitmap, final com.wisc.cs407project.ParseObjects.ScaleObject parseObject){
+    	final String parseName = url.substring(url.lastIndexOf("/")+1);
+    	if(!parseObject.updateImage)
+    		return;
+    	ByteArrayOutputStream stream = new ByteArrayOutputStream();
+    	Bitmap.CompressFormat format = null;
+    	if(parseName.contains(".jpg") || parseName.contains(".jpeg")){
+    		format = Bitmap.CompressFormat.JPEG;
+    	}
+    	else if(parseName.contains(".png")){
+    		format = Bitmap.CompressFormat.PNG;
+    	}
+    	else if(parseName.contains(".webp")){
+    		format = Bitmap.CompressFormat.WEBP;
+    	}
+    	else{
+    		return;
+    	}
+        bitmap.compress(format, 100, stream);
+        byte[] data = stream.toByteArray();
+        final ParseFile file = new ParseFile(parseName, data);
+        file.saveInBackground(new SaveCallback(){
+
+			@Override
+			public void done(ParseException e) {
+				if(e==null){
+					parseObject.SetImage(file);
+				}
+				else{
+					Log.d("problem saving file", parseName);
+				}
+			}});
+    }
+    
+    public void DisplayImage(String url, ImageView imageView, com.wisc.cs407project.ParseObjects.ScaleObject parseObject)
     {
         imageViews.put(imageView, url);
         Bitmap bitmap=memoryCache.get(url);
         if(bitmap!=null) {
+        	SaveParseImage(url, bitmap, parseObject);
             imageView.setImageBitmap(bitmap);
         	imageView.setBackgroundResource(R.drawable.gray_image_border);
         } else
         {
-            queuePhoto(url, imageView);
+            queuePhoto(url, imageView, parseObject);
         }
     }
         
-    private void queuePhoto(String url, ImageView imageView)
+    private void queuePhoto(String url, ImageView imageView, com.wisc.cs407project.ParseObjects.ScaleObject parseObject)
     {
-        PhotoToLoad p=new PhotoToLoad(url, imageView);
+        PhotoToLoad p=new PhotoToLoad(url, imageView, parseObject);
         executorService.submit(new PhotosLoader(p));
     }
     
@@ -187,9 +226,11 @@ public class ImageLoader {
     {
         public String url;
         public ImageView imageView;
-        public PhotoToLoad(String u, ImageView i){
+        public com.wisc.cs407project.ParseObjects.ScaleObject parseObject;
+        public PhotoToLoad(String u, ImageView i, com.wisc.cs407project.ParseObjects.ScaleObject p){
             url=u; 
             imageView=i;
+            parseObject = p;
         }
     }
     
@@ -202,9 +243,11 @@ public class ImageLoader {
         @Override
         public void run() {
             try{
-                if(imageViewReused(photoToLoad))
-                    return;
+            	//TODO add back
+                //if(imageViewReused(photoToLoad))
+                //    return;
                 Bitmap bmp=getBitmap(photoToLoad.url);
+                SaveParseImage(photoToLoad.url, bmp, photoToLoad.parseObject);
                 memoryCache.put(photoToLoad.url, bmp);
                 if(imageViewReused(photoToLoad))
                     return;
@@ -231,6 +274,7 @@ public class ImageLoader {
         public BitmapDisplayer(Bitmap b, PhotoToLoad p){bitmap=b;photoToLoad=p;}
         public void run()
         {
+        	
             if(imageViewReused(photoToLoad)) {
             	photoToLoad.imageView.setBackgroundResource(R.drawable.gray_image_border);
                 return;

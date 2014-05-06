@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
 
@@ -13,6 +14,7 @@ public class ScaleObject extends ScaleParseObject implements Comparable<ScaleObj
 	private static String Name = "name";
 	private static String Percentage = "percentage";
 	private static String ImageLocation = "imageLocation";
+	private static String Image = "imageId";
 	
 	public Marker marker;
 	public Bitmap image;
@@ -74,11 +76,25 @@ public class ScaleObject extends ScaleParseObject implements Comparable<ScaleObj
 		return parseObject.getDouble(this.Percentage);
 	}
 	
+	public boolean updateImage = false;
+	public void SetImage(ParseFile file){
+		if(parseObject != null){
+			updateImage = false;
+			parseObject.put(Image, file);
+		}
+	}
+	public ParseFile GetImage(){
+		return parseObject.getParseFile(Image);
+	}
+	
 	public void SetImageLocation(String imageLocation){
-		if(parseObject != null)
+		if(parseObject != null){
+			updateImage = true;
 			parseObject.put(this.ImageLocation, imageLocation);
+		}
 	}
 	public String GetImageLocation(){
-		return parseObject.getString(this.ImageLocation);
+		String s = parseObject.getString(this.ImageLocation);
+		return s == null ? "" : s;
 	}
 }

@@ -482,17 +482,7 @@ public class RecordFragment extends Fragment {
 						builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
 								// User wants to stop recording so clear map and reset text.
-								map.clear();
-								recordButton.setText("Record Path");
-								recording = false;
-								validPath = false;
-
-								// Move to current location
-								Location location = locationMan.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-								if (location != null) {
-									map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
-									map.animateCamera(CameraUpdateFactory.zoomTo(15));
-								}
+								resetFragment();
 							}
 						});
 						builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -508,9 +498,8 @@ public class RecordFragment extends Fragment {
 					}
 
 					// Stop recording path.
-					final String output = locationLis.StopRecording();
-					save(output);
-
+					builtPath = locationLis.StopRecording();
+					save(builtPath);
 				}
 			}
 		});
@@ -538,20 +527,7 @@ public class RecordFragment extends Fragment {
 		alertBuilder.setNegativeButton("Discard", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int whichButton) {
 				// Discard recorded path by clearing map and resetting text.
-				// TODO resetting needs to be fixed here
-				if (inRecordMode) {
-					map.clear();
-					recordButton.setText("Record Path");
-					recording = false;
-					validPath = false;
-
-					// Move to current location
-					Location location = locationMan.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-					if (location != null) {
-						map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
-						map.animateCamera(CameraUpdateFactory.zoomTo(15));
-					}
-				}
+				resetFragment();
 			}
 		});
 
@@ -774,8 +750,7 @@ public class RecordFragment extends Fragment {
 		}
 	}
 
-	private class SavePathTask extends
-	AsyncTask<String, Void, String> {
+	private class SavePathTask extends AsyncTask<String, Void, String> {
 
 		@Override
 		protected String doInBackground(String... arg0) {
@@ -804,6 +779,7 @@ public class RecordFragment extends Fragment {
 		}
 		protected void onPostExecute(String filename) {
 			if (filename != null) {
+				resetFragment();
 				Toast toast = Toast.makeText(getActivity(), filename + " saved", Toast.LENGTH_LONG);
 				toast.setGravity(Gravity.CENTER, 0, 0);
 				View view = toast.getView();

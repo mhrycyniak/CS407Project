@@ -83,6 +83,14 @@
             android:name="com.wisc.cs407project.DirChooser"
             android:label="@string/app_name" />
         
+        <activity
+            android:name="com.wisc.cs407project.Settings"
+            android:label="Settings" />
+        
+        <activity
+            android:name="com.wisc.cs407project.DeletePath"
+            android:label="Delete Path" />
+        
         <activity android:name="com.google.android.gms.maps.SupportMapFragment"/>
             <meta-data
             android:name="com.google.android.gms.version"

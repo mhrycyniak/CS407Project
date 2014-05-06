@@ -263,7 +263,7 @@ containing a value of this type.
         public static final int TAG_BUILDER_IMGLOAD_ID=0x7f050007;
         public static final int TAG_BUILDER_IMGLOAD_POSITION_ID=0x7f050005;
         public static final int TAG_BUILDER_IMGLOAD_TEXT_ID=0x7f050006;
-        public static final int action_settings=0x7f050057;
+        public static final int action_settings=0x7f050059;
         public static final int builderHeaderAddButton=0x7f050039;
         public static final int builderHeaderName=0x7f050036;
         public static final int builderHeaderNameLabel=0x7f050035;
@@ -286,15 +286,17 @@ containing a value of this type.
         public static final int builderRowPercentage=0x7f05000e;
         public static final int builderRowUnits=0x7f05000d;
         public static final int changeDirectory_btn=0x7f050018;
-        public static final int choosePath=0x7f05004e;
-        public static final int chooseScale=0x7f050050;
+        public static final int choosePath=0x7f050050;
+        public static final int chooseScale=0x7f050052;
+        public static final int deletePath=0x7f05004c;
+        public static final int deleteScale=0x7f05004d;
         public static final int dismiss_btn=0x7f050026;
         public static final int drawLayout=0x7f05002d;
         public static final int drawPathButton=0x7f05002f;
         public static final int explorerTextItem=0x7f050019;
         public static final int fragment_container=0x7f050021;
         public static final int hybrid=0x7f050004;
-        public static final int hybridView=0x7f050056;
+        public static final int hybridView=0x7f050058;
         public static final int imageExplorerBackButton=0x7f05001c;
         public static final int imageExplorerCancelButton=0x7f050020;
         public static final int imageExplorerDirectory=0x7f05001b;
@@ -302,23 +304,23 @@ containing a value of this type.
         public static final int imageExplorerOpenButton=0x7f05001f;
         public static final int imageExplorerPopupTitle=0x7f05001a;
         public static final int imageExplorerPreview=0x7f05001d;
-        public static final int linearLayout1=0x7f050052;
+        public static final int linearLayout1=0x7f050054;
         public static final int list=0x7f05003c;
         public static final int listView1=0x7f050016;
         public static final int local_btn=0x7f050017;
         public static final int map=0x7f050033;
         public static final int map2=0x7f050022;
         public static final int mapRecord=0x7f050027;
-        public static final int mapWalk=0x7f05004c;
+        public static final int mapWalk=0x7f05004e;
         public static final int none=0x7f050000;
         public static final int normal=0x7f050001;
-        public static final int normalView=0x7f050054;
+        public static final int normalView=0x7f050056;
         public static final int popup_image=0x7f050024;
         public static final int popup_title=0x7f050023;
         public static final int popup_txt=0x7f050025;
         public static final int recordPath=0x7f05002e;
         public static final int recordbutton=0x7f050034;
-        public static final int relativeLayout1=0x7f05004d;
+        public static final int relativeLayout1=0x7f05004f;
         public static final int rfFromEditText=0x7f05002a;
         public static final int rfLocationButton=0x7f050028;
         public static final int rfLocationGoButton=0x7f05002c;
@@ -328,7 +330,7 @@ containing a value of this type.
         public static final int rfToEditText=0x7f05002b;
         public static final int rfUndoButton=0x7f050032;
         public static final int satellite=0x7f050002;
-        public static final int satelliteView=0x7f050055;
+        public static final int satelliteView=0x7f050057;
         public static final int scaleBuilder=0x7f05004b;
         public static final int scaleExplorerBackButton=0x7f050044;
         public static final int scaleExplorerDirectory=0x7f050043;
@@ -344,10 +346,10 @@ containing a value of this type.
         public static final int scaleExplorerResumeButton=0x7f05003f;
         public static final int scaleExplorerScroll=0x7f05003d;
         public static final int scaleExplorerURL=0x7f050048;
-        public static final int stopWalk=0x7f050053;
+        public static final int stopWalk=0x7f050055;
         public static final int terrain=0x7f050003;
-        public static final int view=0x7f05004f;
-        public static final int walkPath=0x7f050051;
+        public static final int view=0x7f050051;
+        public static final int walkPath=0x7f050053;
     }
     public static final class integer {
         public static final int google_play_services_version=0x7f070000;
@@ -366,7 +368,8 @@ containing a value of this type.
         public static final int scale_builder=0x7f03000a;
         public static final int scale_explorer_popup=0x7f03000b;
         public static final int scalefragment=0x7f03000c;
-        public static final int walkfragment=0x7f03000d;
+        public static final int settings=0x7f03000d;
+        public static final int walkfragment=0x7f03000e;
     }
     public static final class menu {
         public static final int mapsettings=0x7f0a0000;

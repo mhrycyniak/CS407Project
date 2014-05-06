@@ -1,18 +1,19 @@
 package com.wisc.cs407project;
 
-import android.app.ActionBar;
-import android.app.ActionBar.Tab;
 import java.io.File;
 
-import android.os.Bundle;
-import android.os.Environment;
+import android.app.ActionBar;
+import android.app.ActionBar.Tab;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 
 
 public class Scale extends Activity {
@@ -59,6 +60,18 @@ public class Scale extends Activity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.scale, menu);
 		return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		super.onOptionsItemSelected(item);
+		switch(item.getItemId()) {
+		case R.id.action_settings:
+			Intent settings = new Intent(this, Settings.class);
+			startActivity(settings);
+			return true;
+		}
+		return false;
 	}
 
 

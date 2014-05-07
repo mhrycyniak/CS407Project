@@ -352,7 +352,9 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 		{
 			if (marker.equals(so.marker))
 			{
-				if (so.distance - distanceTraveled < distanceInterval)
+				//TODO is there a reason clicking on it when you're not near it shouldn't 
+				//show the info?
+				//if (so.distance - distanceTraveled < distanceInterval)
 				{
 					Intent intent = new Intent(getActivity(), Popup.class);
 					intent.putExtra("title", so.GetName());			
@@ -361,7 +363,7 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 					startActivity(intent);
 					return true;
 				}
-				break;
+				//break;
 			}
 		}
 		return false;
@@ -434,17 +436,30 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 					in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(directoryPath, arg0[0]))));
 				}
 				else {
-					UrlValidator validator = new UrlValidator();
-					if(validator.isValid(arg0[0])) {
-						in = new BufferedReader(new InputStreamReader(new URL(arg0[0]).openStream()));;
-					} else if(new File(arg0[0]).exists()) {
-						in = new BufferedReader(new FileReader(arg0[0]));
-					} else {
-						Intent intent = new Intent(getActivity(), Popup.class);
-						intent.putExtra("title", "Error");
-						intent.putExtra("text", "Invalid Directory Location");
-						startActivity(intent);
+					ParseObject path = null;
+					//Log.d("name", arg0[0]);
+					for(ParseObject object : PathChooser.parsePaths){
+						if(object.getString("name").equals(arg0[0])){
+							path = object;
+							// TODO change because bad if two paths have same name
+							break;
+						}
 					}
+					String data = new String(path.getParseFile("file").getData());
+					localPath = !data.contains("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+					//Log.d("data", data);
+					return data;
+//					UrlValidator validator = new UrlValidator();
+//					if(validator.isValid(arg0[0])) {
+//						in = new BufferedReader(new InputStreamReader(new URL(arg0[0]).openStream()));;
+//					} else if(new File(arg0[0]).exists()) {
+//						in = new BufferedReader(new FileReader(arg0[0]));
+//					} else {
+//						Intent intent = new Intent(getActivity(), Popup.class);
+//						intent.putExtra("title", "Error");
+//						intent.putExtra("text", "Invalid Directory Location");
+//						startActivity(intent);
+//					}
 				}
 				String str;
 				String fullFile = "";
@@ -483,7 +498,9 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 						NodeList items = doc.getElementsByTagName("gx:coord");
 						if (items.getLength() < 2) {
 							items = doc.getElementsByTagName("coordinates");
+							Log.d("num items", ""+items.getLength());
 							for (int i = 0; i < items.getLength(); i++) {
+								Log.d("item "+i, items.item(i).getFirstChild() == null ? "null" : items.item(i).getFirstChild().getNodeValue());
 								if (items.item(i).getFirstChild()!= null && items.item(i).getFirstChild().getNodeValue().trim().contains("\n"))
 								{
 									String content = items.item(i).getFirstChild().getNodeValue().trim();
@@ -511,13 +528,14 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 						}
 					}
 					catch (Exception e) {
+						e.printStackTrace();
 						Intent intent = new Intent(getActivity(), Popup.class);
 						intent.putExtra("title", "Error");
 						intent.putExtra("text", "The requested path is not in the correct format.");
 						startActivityForResult(intent, 0);
 					}
 				}
-			} else {
+			} else {				
 				Intent intent = new Intent(getActivity(), Popup.class);
 				intent.putExtra("title", "Error");
 				intent.putExtra("text", "The requested path does not exist.");

@@ -19,5 +19,11 @@ public class Cs407Application extends Application {
 		//testObject.saveInBackground();
 		
 		//StaticUtils.CreatePlanetScale();
+//		StaticUtils.CreatePath(StaticUtils.WashAve, "Path down Washington Ave.kml");
+//		StaticUtils.CreatePath(StaticUtils.Lap, "A Lap.kml");
+//		StaticUtils.CreatePath(StaticUtils.route2, "Route 2.kml");
+//		StaticUtils.CreatePath(StaticUtils.samplePath, "Sample Path.kml");
+//		StaticUtils.CreatePath(StaticUtils.straightPath, "A Straight Path.kml");
+		
 	}	
 }

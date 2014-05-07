@@ -29,6 +29,7 @@ public class Popup extends Activity {
 		{
 			ImageView imageView = (ImageView) findViewById(R.id.popup_image);
 			imageView.setImageBitmap(image);
+			image = null;
 		}
 		if (title != null)
 		{

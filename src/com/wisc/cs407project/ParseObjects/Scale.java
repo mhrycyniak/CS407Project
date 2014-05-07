@@ -78,6 +78,8 @@ public class Scale extends ScaleParseObject{
 		parseObject.put(this.Name, name);
 	}
 	public String GetName(){
-		return parseObject.getString(this.Name);
+		String name = parseObject.getString(this.Name);
+		name = name == null ? "" : name;
+		return name;
 	}
 }

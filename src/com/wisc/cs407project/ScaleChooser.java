@@ -39,7 +39,6 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.wisc.cs407project.R;
-import com.wisc.cs407project.PathChooser.LoadPathsTask;
 
 public class ScaleChooser extends Activity implements OnItemClickListener {
 	private ListView scales;
@@ -60,12 +59,11 @@ public class ScaleChooser extends Activity implements OnItemClickListener {
 		changeDirectory = (Button)findViewById(R.id.changeDirectory_btn);
 		changeDirectory.setVisibility(View.GONE);
 		localButton.setVisibility(View.VISIBLE);
+		local = true;
+		localButton.setText("Change To Online Scales");	
 		ref = this;
 		scales = (ListView) findViewById(R.id.listView1);
 		scales.setOnItemClickListener(this);
-		SharedPreferences settings = getSharedPreferences(SETTINGSNAME, 0);
-		//currentDirectory = settings.getString("scaleDirectory", "");
-		//currentDirectory = "http://pages.cs.wisc.edu/~hrycynia/cs407project/";
 		currentDirectory = Environment.getExternalStorageDirectory().toString() +
 				getResources().getString(R.string.app_scale_directory) + "/";
 		if (currentDirectory != "") {

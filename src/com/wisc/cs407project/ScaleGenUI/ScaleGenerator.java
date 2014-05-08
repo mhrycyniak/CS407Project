@@ -22,20 +22,15 @@ import android.util.Log;
 public class ScaleGenerator {
 
 	public ArrayList<ScaleObject> members; // The scale members
-	public ArrayList<com.wisc.cs407project.ParseObjects.ScaleObject> parseMembers;
 	public Long maxComparativeValue; // Used for updating percentages
 	public String scaleMetric;	// What is being compared
 	public String scaleName;
-	public com.wisc.cs407project.ParseObjects.Scale scale;
 
 	public ScaleGenerator() {
 		members = new ArrayList<ScaleObject>();
-		parseMembers = new ArrayList<com.wisc.cs407project.ParseObjects.ScaleObject>();
 		maxComparativeValue = (long)0;
 		scaleMetric = "";
 		scaleName = "";
-		scale = new com.wisc.cs407project.ParseObjects.Scale();
-		scale.push();
 	}
 
 	public void loadScale(String xmlScale) throws IOException, SAXException, ParserConfigurationException {
@@ -65,11 +60,6 @@ public class ScaleGenerator {
 							scaleMetric = subChild.getTextContent();
 						} else if (nodeName.equals("max")) {
 							maxComparativeValue = convertToLong(subChild.getTextContent());
-						} else if (nodeName.equals("parseScale")){
-							scale.delete();
-							scale.push();
-							scale = new com.wisc.cs407project.ParseObjects.Scale(subChild.getTextContent());
-							//scale.pull();
 						}
 					}
 				}
@@ -81,7 +71,6 @@ public class ScaleGenerator {
 		for (int i = 0; i < scaleItems.getLength(); i++) {
 			Element scaleItem = (Element) scaleItems.item(i);
 			ScaleObject item = new ScaleObject();
-			com.wisc.cs407project.ParseObjects.ScaleObject parseItem = null;
 			NodeList children = scaleItem.getChildNodes();
 			
 			// Load item info
@@ -100,10 +89,7 @@ public class ScaleGenerator {
 							item.percentage = convertToDouble(child.getTextContent());
 						} else if(nodeName.equals("picture")) {
 							item.imageLocation = child.getTextContent();
-						} else if(nodeName.equals("parseid")) {
-							parseItem = new com.wisc.cs407project.ParseObjects.ScaleObject(child.getTextContent());
-							//parseItem.pull();
-						}
+						} 
 					}
 				}
 			}
@@ -121,21 +107,9 @@ public class ScaleGenerator {
 			}
 			// Add the item
 			members.add(item);
-			parseMembers.add(parseItem);
 		}
 	}
 
-	public void addParse(com.wisc.cs407project.ParseObjects.ScaleObject... objects){
-		for (com.wisc.cs407project.ParseObjects.ScaleObject object : objects){
-			parseMembers.add(0, object);
-		}		
-	}
-	
-	public void parsePreSave(){
-		scale.SetObjects(parseMembers);
-		scale.push();
-	}
-	
 	public void add(ScaleObject... objects) {
 		boolean maxUpdate = false;
 		for (ScaleObject object : objects) {
@@ -157,10 +131,6 @@ public class ScaleGenerator {
 		for (ScaleObject object : members) {
 			object.percentage = ((double)object.comparativeValue / maxComparativeValue);
 		}
-		for(int i=0; i<members.size(); i++){
-			parseMembers.get(i).SetPercentage(maxComparativeValue == 0? 0 : members.get(i).percentage);
-			parseMembers.get(i).push();
-		}
 	}
 	
 	public void refactorMaxValue() {
@@ -176,16 +146,8 @@ public class ScaleGenerator {
 	
 	public void addNew() {
 		ScaleObject object = new ScaleObject();
-		com.wisc.cs407project.ParseObjects.ScaleObject parseObject 
-			= new com.wisc.cs407project.ParseObjects.ScaleObject();
-		parseObject.SetName("");
-		parseObject.SetPercentage(0);
-		parseObject.SetText("");
-		parseObject.SetImageLocation("http://www.q2s.ntnu.no/include/images/persgall/148_no-photo.jpg");
-		parseObject.push();
 		object.percentage = (double)0;
 		object.comparativeValue = (long)0;
-		addParse(parseObject);
 		add(object);
 	}
 
@@ -195,9 +157,6 @@ public class ScaleGenerator {
 			for (int i = 0; i < members.size(); i++) {
 				// If match, remove and adjust the loop index to avoid skipping the next member
 				if (members.get(i).name.equals(name)) {
-					parseMembers.get(i).delete();
-					parseMembers.get(i).push();
-					parseMembers.remove(i);
 					members.remove(i);
 					i--;
 				}
@@ -206,7 +165,6 @@ public class ScaleGenerator {
 	}
 	
 	public void sort() {
-		Collections.sort(parseMembers);
 		Collections.sort(members);
 	}
 	
@@ -216,11 +174,8 @@ public class ScaleGenerator {
 		String result = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>";
 		result = result + "\n<scale>\n";
 		result = result + getHeaderXML();
-		result += "\n\t<parsedata>\n";
-		result += "\t\t<parseScale>" + scale.GetObjectId() + "</parseScale>\n";
-		result += "\n\t</parsedata>\n";
 		for (int i=0; i<members.size(); i++) {
-			result = result + getObjectXML(members.get(i), parseMembers.get(i));
+			result = result + getObjectXML(members.get(i));
 		}
 		result = result + "</scale>\n";
 		return result;
@@ -231,19 +186,17 @@ public class ScaleGenerator {
 		result = result + "\t\t<name>" + scaleName + "</name>\n";
 		result = result + "\t\t<units>" + scaleMetric + "</units>\n";
 		result = result + "\t\t<max>" + maxComparativeValue.toString() + "</max>\n";
-		result += "\t\t<parseScale>" + scale.GetObjectId() + "</parseScale>\n";
 		result = result + "\t</scaleInfo>\n";
 		return result;
 	}
 	
-	private String getObjectXML(ScaleObject object, com.wisc.cs407project.ParseObjects.ScaleObject parseObject) {
+	private String getObjectXML(ScaleObject object) {
 		String result = "\n\t<scaleItem>\n";
 		result = result + "\t\t<name>" + object.name + "</name>\n";
 		result = result + "\t\t<description>" + object.text + "</description>\n";
 		result = result + "\t\t<measurement>" + object.comparativeValue.toString() + "</measurement>\n";
 		result = result + "\t\t<percentage>" + object.percentage.toString() + "</percentage>\n";
 		result = result + "\t\t<picture>" + object.imageLocation + "</picture>\n";
-		result = result + "\t\t<parseid>" + parseObject.Id() + "</parseid>\n";
 		result = result + "\t</scaleItem>\n";
 		return result;
 	}

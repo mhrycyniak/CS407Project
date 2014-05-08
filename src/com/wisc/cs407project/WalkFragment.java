@@ -19,6 +19,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.validator.routines.UrlValidator;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import android.annotation.SuppressLint;
@@ -66,7 +67,6 @@ import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.wisc.cs407project.ParseObjects.ScaleObject;
 
 public class WalkFragment extends Fragment implements OnMarkerClickListener, LocationListener {
 	private GoogleMap map;
@@ -74,7 +74,7 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 	private Button scaleButton;
 	private Button walkButton;
 	private Button stopButton;
-	private com.wisc.cs407project.ParseObjects.Scale scaleItem;
+	private String scaleItem;
 	private String pathURL;
 	private boolean localPath;
 	public List<ScaleObject> scaleItemList = new ArrayList<ScaleObject>();
@@ -132,20 +132,8 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 		super.onActivityResult(requestCode, resultCode, data);
 		if (resultCode == 1) {
 			Bundle extra = data.getExtras();
-			String id = extra.getString("scaleItem");			
-			if (!id.isEmpty()) {
-				ParseQuery<ParseObject> query = ParseQuery.getQuery(
-						com.wisc.cs407project.ParseObjects.Scale.class.getSimpleName());
-				query.getInBackground(id, new GetCallback<ParseObject>() {
-				  public void done(ParseObject object, ParseException e) {
-				    if (e == null) {
-				      scaleItem = new com.wisc.cs407project.ParseObjects.Scale(object);
-				      scaleItemList = scaleItem.GetObjects();
-				    } else {
-				      // something went wrong
-				    }
-				  }
-				});
+			scaleItem = extra.getString("scaleItem");			
+			if (!scaleItem.isEmpty()) {				
 				scaleButton.setBackgroundResource(R.color.green);
 			}
 		} else if (resultCode == 2) {
@@ -275,46 +263,64 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
             map.addMarker(new MarkerOptions().position(startingPoint).title("Starting Point").icon(bitmapDescriptor));
             distanceInterval = totalDist * 0.05;
             map.addPolyline(path);
-            //DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-			//Document docScale = docBuilder.parse(new ByteArrayInputStream(scaleItem.getBytes()));
-            //NodeList scaleItems = docScale.getElementsByTagName("scaleItem");
-           // ArrayList<ScaleObject> scaleItems = scaleItem.GetObjects();
-            Log.d("scale items", ""+scaleItemList.size());
+            // add
+            DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            			Document docScale = docBuilder.parse(new ByteArrayInputStream(scaleItem.getBytes()));
+                        NodeList scaleItems = docScale.getElementsByTagName("scaleItem");
+                        for (int i = 0; i < scaleItems.getLength(); i++) {
+                        	NodeList children = scaleItems.item(i).getChildNodes();
+                        	ScaleObject so = new ScaleObject();
+                        	for (int j = 0; j < children.getLength(); j++)
+                        	{
+                        		Node child = children.item(j);
+                        		String nodeName = child.getNodeName();
+                        		if (nodeName.equals("name")) {
+                        			so.name = child.getTextContent();
+                        		}
+                        		else if (nodeName.equals("description")) {
+                        			so.text = child.getTextContent();
+                        		}
+                        		else if (nodeName.equals("percentage")) {
+                        			so.percentage = Double.parseDouble(child.getTextContent());
+                        		}
+                        		else if (nodeName.equals("picture")) {
+                        			so.imageLocation = child.getTextContent();
+                        			new LoadImageTask().execute(so);
+                        		}
+                        	}
+                        	if (so.name == null || so.text == null || so.percentage == null) {
+            					Intent intent = new Intent(getActivity(), Popup.class);
+            				intent.putExtra("title", "Invalid scale");
+            					intent.putExtra("text", "A scale item is missing a name, text, or percentage tag.");
+            					startActivityForResult(intent, 0);
+                        	}
+                        	else
+                        	{
+                        		double dist = so.percentage * totalDist;
+                        		so.distance = dist;
+                        		double cummDist = 0;
+                        		int step = 0;
+                        		while (step < steps.size() && cummDist + steps.get(step) < dist)
+                        		{
+                        			cummDist += steps.get(step);
+                        			step++;
+                        		}
+                        		if (step != steps.size())
+                        		{
+                        			double percentageOfStep = (dist - cummDist)/steps.get(step);
+                        			double lat = points.get(step).latitude + (points.get(step+1).latitude - points.get(step).latitude)*percentageOfStep;
+                        			double lon = points.get(step).longitude + (points.get(step+1).longitude - points.get(step).longitude)*percentageOfStep;
+                        			so.position = new LatLng(lat, lon);
+                        			so.marker = map.addMarker(new MarkerOptions().position(so.position).title(so.name));
+                        		}
+                        		else
+                        		{
+                        			so.marker = map.addMarker(new MarkerOptions().position(points.get(i)).title(so.name));
+                        			so.position = points.get(i);
+                        		}
+                        		scaleItemList.add(so);
+                        	}
             
-            for (int i = 0; i < scaleItemList.size(); i++) {
-            	
-            	ScaleObject so = scaleItemList.get(i);
-            	new LoadImageTask().execute(so);
-            	           	
-            	Log.d("item", ""+i);
-            	
-            	double dist = so.GetPercentage() * totalDist;
-        		so.distance = dist;
-        		Log.d("dist", ""+so.distance);
-        		
-        		double cummDist = 0;
-        		int step = 0;
-        		while (step < steps.size() && cummDist + steps.get(step) < dist)
-        		{
-        			cummDist += steps.get(step);
-        			step++;
-        		}
-        		Log.d("step", ""+step);
-        		if (step != steps.size())
-        		{
-        			double percentageOfStep = (dist - cummDist)/steps.get(step);
-        			double lat = points.get(step).latitude + (points.get(step+1).latitude - points.get(step).latitude)*percentageOfStep;
-        			double lon = points.get(step).longitude + (points.get(step+1).longitude - points.get(step).longitude)*percentageOfStep;
-        			so.position = new LatLng(lat, lon);
-        			Log.d("point "+i+":", lat + ", " + lon);
-        			so.marker = map.addMarker(new MarkerOptions().position(so.position).title(so.GetName()));
-        		}
-        		else
-        		{
-        			so.marker = map.addMarker(new MarkerOptions().position(points.get(i)).title(so.GetName()));
-        			so.position = points.get(i);
-        		}
-        		//scaleItemList.add(so);
         		// Scale object not opened yet
         		so.opened = false;
             }
@@ -357,9 +363,9 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 				//if (so.distance - distanceTraveled < distanceInterval)
 				{
 					Intent intent = new Intent(getActivity(), Popup.class);
-					intent.putExtra("title", so.GetName());			
+					intent.putExtra("title", so.name);			
 					Popup.image = so.image;
-					intent.putExtra("text", so.GetText());
+					intent.putExtra("text", so.text);
 					startActivity(intent);
 					return true;
 				}
@@ -373,13 +379,23 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 	
 		@Override
 		protected String doInBackground(ScaleObject... arg0) {
-			try {
-				arg0[0].GetImage();
-			} catch (Exception e) {
-			}
-			return "";
-		}
-	}
+  			try {
+ 				URL url = new URL(arg0[0].imageLocation);
+  				InputStream in = url.openStream();
+  				BufferedInputStream buf = new BufferedInputStream(in);
+  				Bitmap myBitmap = BitmapFactory.decodeStream(buf);
+  				if (in != null) {
+                  in.close();
+              	}
+  					if (buf != null) {
+                  buf.close();
+  					}
+  					arg0[0].image = myBitmap;
+  			} catch (Exception e) {
+  			}
+  			return "";
+  		}
+  	}
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -564,17 +580,17 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 			}
 			else {
 				distanceTraveled += MapUtils.getDistance(loc.getLatitude(), loc.getLongitude(), previousPoint.latitude, previousPoint.longitude);
-				for (com.wisc.cs407project.ParseObjects.ScaleObject so : scaleItemList) {
+				for (ScaleObject so : scaleItemList) {
 					if (!so.opened && Math.abs(distanceTraveled - so.distance) < distanceInterval && MapUtils.getDistance(so.position.latitude, so.position.longitude, loc.getLatitude(), loc.getLongitude()) < 30) {
 						so.opened = true;
 						// Display notification that user has reached a scale when app is not focused.
 						if (!inFocus) {
-							scaleNotification(so.GetName());
+							scaleNotification(so.name);
 						}
 						Intent intent = new Intent(getActivity(), Popup.class);
-						intent.putExtra("title", so.GetName());
+						intent.putExtra("title", so.name);
 						Popup.image = so.image;
-						intent.putExtra("text", so.GetText());
+						intent.putExtra("text", so.text);
 						startActivity(intent);
 					}
 				}

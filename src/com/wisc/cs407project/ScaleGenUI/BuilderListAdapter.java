@@ -79,8 +79,6 @@ public class BuilderListAdapter extends BaseAdapter {
 		        	// Avoid a potentially infinite change loop
 		        	if (!data.members.get(holder.position).name.equals(s)) {
 		        		data.members.get(holder.position).name = s.toString();
-		        		data.parseMembers.get(holder.position).SetName(s.toString());
-		        		data.parseMembers.get(holder.position).push();
 		        	}
 		        }
 		        public void beforeTextChanged(CharSequence s, int start, int count, int after){}
@@ -93,8 +91,6 @@ public class BuilderListAdapter extends BaseAdapter {
 		        public void afterTextChanged(Editable s) {
 		        	// Avoid a potentially infinite change loop
 		        	ScaleObject temp = data.members.get(holder.position);
-		        	com.wisc.cs407project.ParseObjects.ScaleObject parseTemp = 
-		        			data.parseMembers.get(holder.position);
 		        	if (!temp.comparativeValue.equals(ScaleGenerator.convertToLong(s.toString()))) {
 		        		temp.comparativeValue = ScaleGenerator.convertToLong(s.toString());	
 		        		if (temp.comparativeValue > data.maxComparativeValue){
@@ -103,8 +99,6 @@ public class BuilderListAdapter extends BaseAdapter {
 		        		else {
 		        			temp.percentage = ((double)temp.comparativeValue / data.maxComparativeValue);
 		        		}
-		        		parseTemp.SetPercentage(temp.percentage);
-		        		parseTemp.push();
 		        	}
 		        }
 		        public void beforeTextChanged(CharSequence s, int start, int count, int after){}
@@ -131,8 +125,6 @@ public class BuilderListAdapter extends BaseAdapter {
 		        	// Avoid a potentially infinite change loop
 		        	if (!data.members.get(holder.position).text.equals(s)) {
 		        		data.members.get(holder.position).text = s.toString();
-		        		data.parseMembers.get(holder.position).SetText(s.toString());
-		        		data.parseMembers.get(holder.position).push();
 		        	}
 		        }
 		        public void beforeTextChanged(CharSequence s, int start, int count, int after){}
@@ -146,8 +138,6 @@ public class BuilderListAdapter extends BaseAdapter {
 		        	// Avoid a potentially infinite change loop
 		        	if (!data.members.get(holder.position).imageLocation.equals(s)) {
 		        		data.members.get(holder.position).imageLocation = s.toString();
-		        		data.parseMembers.get(holder.position).SetImageLocation(s.toString());
-		        		data.parseMembers.get(holder.position).push();
 		        	}
 		        }
 		        public void beforeTextChanged(CharSequence s, int start, int count, int after){}
@@ -180,13 +170,9 @@ public class BuilderListAdapter extends BaseAdapter {
 								newMaxNeeded = true;
 							}
 							data.members.remove(holder.position);
-							data.parseMembers.get(holder.position).delete();
-							data.parseMembers.get(holder.position).push();
-							data.parseMembers.remove(holder.position);
 							if (newMaxNeeded) {
 								data.refactorMaxValue();
 							}
-							data.parsePreSave();
 							notifyDataSetChanged();
 						}
 					});
@@ -252,7 +238,7 @@ public class BuilderListAdapter extends BaseAdapter {
 		width = width / 2;
 		imageLoader.setSize(width, width);
 		//Log.d("redisplay image", data.members.get(position).imageLocation);
-		imageLoader.DisplayImage(data.members.get(position).imageLocation, holder.image, data.parseMembers.get(position));
+		imageLoader.DisplayImage(data.members.get(position).imageLocation, holder.image);
 
 		return convertView;
 	}

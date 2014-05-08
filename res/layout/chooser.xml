@@ -19,7 +19,6 @@
         android:text="Change To Online Paths"
         android:visibility="gone" />
     <Button
-        android:visibility="gone"
         android:id="@+id/changeDirectory_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

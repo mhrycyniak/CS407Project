@@ -100,8 +100,6 @@ public class ScaleBuilder extends Activity {
 		        	// Avoid a potentially infinite change loop
 		        	if (!scale.scaleName.equals(s)) {
 		        		scale.scaleName = s.toString();
-		        		scale.scale.SetName(s.toString());
-		        		scale.scale.push();
 		        	}
 		        }
 		        public void beforeTextChanged(CharSequence s, int start, int count, int after){}
@@ -261,8 +259,6 @@ public class ScaleBuilder extends Activity {
 
 		@Override
 		protected String doInBackground(String... arg0) {
-			scale.parsePreSave();
-			
 			File saveFile = new File(arg0[0]);
 			FileOutputStream fos;
 			String xmlFile = scale.getXML();

@@ -56,6 +56,7 @@ import com.wisc.cs407project.Popup;
 import com.wisc.cs407project.R;
 
 import android.os.Handler;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -124,23 +125,22 @@ public class ImageLoader {
 			}});
     }
     
-    public void DisplayImage(String url, ImageView imageView, com.wisc.cs407project.ParseObjects.ScaleObject parseObject)
+    public void DisplayImage(String url, ImageView imageView)
     {
         imageViews.put(imageView, url);
         Bitmap bitmap=memoryCache.get(url);
         if(bitmap!=null) {
-        	SaveParseImage(url, bitmap, parseObject);
             imageView.setImageBitmap(bitmap);
         	imageView.setBackgroundResource(R.drawable.gray_image_border);
         } else
         {
-            queuePhoto(url, imageView, parseObject);
+            queuePhoto(url, imageView);
         }
     }
         
-    private void queuePhoto(String url, ImageView imageView, com.wisc.cs407project.ParseObjects.ScaleObject parseObject)
+    private void queuePhoto(String url, ImageView imageView)
     {
-        PhotoToLoad p=new PhotoToLoad(url, imageView, parseObject);
+        PhotoToLoad p=new PhotoToLoad(url, imageView);
         executorService.submit(new PhotosLoader(p));
     }
     
@@ -226,11 +226,9 @@ public class ImageLoader {
     {
         public String url;
         public ImageView imageView;
-        public com.wisc.cs407project.ParseObjects.ScaleObject parseObject;
-        public PhotoToLoad(String u, ImageView i, com.wisc.cs407project.ParseObjects.ScaleObject p){
+        public PhotoToLoad(String u, ImageView i){
             url=u; 
             imageView=i;
-            parseObject = p;
         }
     }
     
@@ -247,7 +245,6 @@ public class ImageLoader {
                 //if(imageViewReused(photoToLoad))
                 //    return;
                 Bitmap bmp=getBitmap(photoToLoad.url);
-                SaveParseImage(photoToLoad.url, bmp, photoToLoad.parseObject);
                 memoryCache.put(photoToLoad.url, bmp);
                 if(imageViewReused(photoToLoad))
                     return;
@@ -267,7 +264,8 @@ public class ImageLoader {
     }
     
     //Used to display bitmap in the UI thread
-    class BitmapDisplayer implements Runnable
+    @SuppressLint("NewApi")
+	class BitmapDisplayer implements Runnable
     {
         Bitmap bitmap;
         PhotoToLoad photoToLoad;

@@ -32,13 +32,13 @@ public class ScaleLocationListener extends Activity implements LocationListener 
 			}
 			else {
 				mapActivity.distanceTraveled += MapUtils.getDistance(loc.getLatitude(), loc.getLongitude(), mapActivity.previousPoint.latitude, mapActivity.previousPoint.longitude);
-				for (com.wisc.cs407project.ParseObjects.ScaleObject so : mapActivity.scaleItemList) {
+				for (ScaleObject so : mapActivity.scaleItemList) {
 					if (!so.opened && Math.abs(mapActivity.distanceTraveled - so.distance) < mapActivity.distanceInterval && MapUtils.getDistance(so.position.latitude, so.position.longitude, loc.getLatitude(), loc.getLongitude()) < 30) {
 						so.opened = true;
 						Intent intent = new Intent(mapActivity.getActivity(), Popup.class);
-						intent.putExtra("title", so.GetName());
+						intent.putExtra("title", so.name);
 						Popup.image = so.image;
-						intent.putExtra("text", so.GetText());
+						intent.putExtra("text", so.text);
 						mapActivity.startActivity(intent);
 					}
 				}

@@ -63,7 +63,6 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.wisc.cs407project.ParseObjects.ScaleObject;
 import com.wisc.cs407project.PathBuilder.PathExplorerPopup;
 import com.wisc.cs407project.PathBuilder.PathState;
 import com.wisc.cs407project.PathBuilder.Route;

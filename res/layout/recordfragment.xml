@@ -53,7 +53,8 @@
                     <EditText
                         android:id="@+id/rfFromEditText"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:inputType="textNoSuggestions" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -64,7 +65,8 @@
                     <EditText
                         android:id="@+id/rfToEditText"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:inputType="textNoSuggestions" />
 
                     <RelativeLayout
                         android:layout_width="match_parent"
@@ -113,6 +115,15 @@
                     android:layout_weight="1"
                     android:background="@color/grey"
                     android:text="Draw Path" />
+                
+                <Button
+                    android:id="@+id/loadPathButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="1dp"
+                    android:layout_weight="1"
+                    android:background="@color/grey"
+                    android:text="Load Path" />
             </LinearLayout>
 
             <LinearLayout

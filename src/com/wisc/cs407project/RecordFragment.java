@@ -1,17 +1,25 @@
 package com.wisc.cs407project;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.json.JSONObject;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
@@ -28,6 +36,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -47,22 +56,28 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.wisc.cs407project.ParseObjects.ScaleObject;
+import com.wisc.cs407project.PathBuilder.PathExplorerPopup;
 import com.wisc.cs407project.PathBuilder.PathState;
 import com.wisc.cs407project.PathBuilder.Route;
 import com.wisc.cs407project.PathBuilder.RouteJSONParser;
+import com.wisc.cs407project.ScaleGenUI.ScaleExplorerFragment;
 
 public class RecordFragment extends Fragment {
 	private GoogleMap map;
 	private EditText fromText, toText;
 	private LinearLayout searchBox;
-	private Button recordButton, drawButton, modeButton, saveButton, undoButton, locationButton, goButton;
+	private Button recordButton, drawButton, modeButton, saveButton, undoButton, locationButton, goButton, loadButton;
 	private LocationManager locationMan;
 	private RecordLocationListener locationLis;
-	private boolean recording, validPath, drawing, markerPlaced, locationOpen, warningsShown;//, atLeastTwoPoints;
+	private boolean recording, validPath, drawing, markerPlaced, locationOpen, warningsShown, localLoad, isResumeLoad;//, atLeastTwoPoints;
 	private boolean inRecordMode = true;
 
 	private LatLng dragOffset;
@@ -73,10 +88,113 @@ public class RecordFragment extends Fragment {
 	private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			// Reset everything
-			resetFragment();
+			String action = intent.getAction();
+			if(action.equals("RESET_RECORD_FRAGMENT")) {
+				// Reset everything
+				resetFragment();
+			} else if(action.equals("LOAD_RECORD_FRAGMENT")) {
+				// TODO perform load
+				
+				String loadFile = intent.getStringExtra("kmlFile");
+				localLoad = intent.getBooleanExtra("isLocalLoad", true);
+				isResumeLoad = intent.getBooleanExtra("isResumeLoad", false);
+				
+				// TODO resetfragment, set proper display
+				resetFragment();
+
+				// Initialize the path drawing buttons, etc
+				drawButton.setVisibility(View.GONE);
+				recordButton.setVisibility(View.GONE);
+				loadButton.setVisibility(View.GONE);
+				modeButton.setVisibility(View.VISIBLE);
+				drawing = true;
+				modeClicked();
+				saveButton.setVisibility(View.VISIBLE);
+				saveClicked();
+				undoButton.setVisibility(View.VISIBLE);
+				undoClicked();
+				map.setMyLocationEnabled(false);
+				inRecordMode = false;
+				markerDragged();
+				locationButton.setVisibility(View.VISIBLE);
+				locationClicked();
+				goClicked();
+				// Initialize (or reset) state trackers
+				markerPlaced = false;
+				state = new PathState(map);				
+				loadPathFromString(loadFile);
+			}
 		}
 	};
+
+	private void loadPathFromString(String kmlFile) {
+		if (kmlFile != null) {
+			// Local paths are formatted differently
+			if (localLoad) {
+				BufferedReader reader = new BufferedReader(new StringReader(kmlFile));
+				List<String> coordinates = new ArrayList<String>();
+				String line = null;
+				try {
+					while((line = reader.readLine()) != null) {
+						if (line != "") {
+							coordinates.add(line);
+						}
+					}
+					populate(coordinates);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			} else {
+				try {
+					DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+					Document doc = docBuilder.parse(new ByteArrayInputStream(kmlFile.getBytes()));
+					NodeList items = doc.getElementsByTagName("gx:coord");
+					if (items.getLength() < 2) {
+						items = doc.getElementsByTagName("coordinates");
+						Log.d("num items", ""+items.getLength());
+						for (int i = 0; i < items.getLength(); i++) {
+							Log.d("item "+i, items.item(i).getFirstChild() == null ? "null" : items.item(i).getFirstChild().getNodeValue());
+							if (items.item(i).getFirstChild()!= null && items.item(i).getFirstChild().getNodeValue().trim().contains("\n"))
+							{
+								String content = items.item(i).getFirstChild().getNodeValue().trim();
+								List<String> coordinates = new ArrayList<String>();
+								while (content.contains("\n")) {
+									coordinates.add(content.substring(0, content.indexOf('\n')).trim());
+									content = content.substring(content.indexOf('\n')+1);
+								}
+								coordinates.add(content);
+								populate(coordinates);
+								return;
+							}
+						}
+						Intent intent = new Intent(getActivity(), Popup.class);
+						intent.putExtra("title", "Error");
+						intent.putExtra("text", "The path file does not contain a path.");
+						startActivityForResult(intent, 0);
+					}
+					else {
+						List<String> coordinates = new ArrayList<String>();
+						for (int i =0; i < items.getLength(); i++) {
+							coordinates.add(items.item(i).getTextContent().replace(" ",","));
+						}
+						populate(coordinates);
+					}
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+					Intent intent = new Intent(getActivity(), Popup.class);
+					intent.putExtra("title", "Error");
+					intent.putExtra("text", "The requested path is not in the correct format.");
+					startActivityForResult(intent, 0);
+				}
+			}
+		} else {				
+			Intent intent = new Intent(getActivity(), Popup.class);
+			intent.putExtra("title", "Error");
+			intent.putExtra("text", "The requested path does not exist.");
+			startActivityForResult(intent, 0);
+		}
+	}
 
 	private void resetFragment() {
 		// Reset everything
@@ -105,11 +223,15 @@ public class RecordFragment extends Fragment {
 		recordClicked();
 		drawButton.setVisibility(View.VISIBLE);
 		drawClicked();
+		loadButton.setVisibility(View.VISIBLE);
+		loadClicked();
 		modeButton.setVisibility(View.GONE);
 		saveButton.setVisibility(View.GONE);
 		undoButton.setVisibility(View.GONE); 
 		locationButton.setVisibility(View.GONE);
 		searchBox.setVisibility(View.GONE);
+
+		state = new PathState(map);
 	}
 
 	@Override
@@ -135,6 +257,8 @@ public class RecordFragment extends Fragment {
 		recordClicked();
 		drawButton = (Button) myFragmentView.findViewById(R.id.drawPathButton);
 		drawClicked();
+		loadButton = (Button) myFragmentView.findViewById(R.id.loadPathButton);
+		loadClicked();
 		modeButton = (Button) myFragmentView.findViewById(R.id.rfModeButton);
 		modeButton.setVisibility(View.GONE);
 		saveButton = (Button) myFragmentView.findViewById(R.id.rfSaveButton);
@@ -162,8 +286,10 @@ public class RecordFragment extends Fragment {
 	@Override
 	public void onResume() {
 		// Register to receive messages.
-		LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mMessageReceiver,
-				new IntentFilter("RESET_RECORD_FRAGMENT"));
+		IntentFilter filter = new IntentFilter();
+		filter.addAction("RESET_RECORD_FRAGMENT");
+		filter.addAction("LOAD_RECORD_FRAGMENT");
+		LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mMessageReceiver, filter);
 		super.onResume();
 	}
 	@Override
@@ -201,10 +327,20 @@ public class RecordFragment extends Fragment {
 						marker.setPosition(state.currentState.leadingMarker);
 					}
 					else {
-						state.refactor();
-						String dirUrl = getDirectionsUrl(state.currentState.leadingMarker, new LatLng(marker.getPosition().latitude - dragOffset.latitude, marker.getPosition().longitude - dragOffset.longitude));
-						// Draw route
-						new DownloadTask().execute(dirUrl);
+						// Ignore Google's repositioning
+						marker.setPosition(new LatLng(marker.getPosition().latitude - dragOffset.latitude, marker.getPosition().longitude - dragOffset.longitude));
+
+						boolean routeNeeded = state.refactor();
+						// If there was a lagging marker to build a route from
+						if (routeNeeded) {
+							String dirUrl = getDirectionsUrl(state.currentState.leadingMarker, new LatLng(marker.getPosition().latitude - dragOffset.latitude, marker.getPosition().longitude - dragOffset.longitude));
+							// Draw route
+							new DownloadTask().execute(dirUrl);
+						} else {
+							ArrayList<LatLng> newLine = new ArrayList<LatLng>();
+							newLine.add(marker.getPosition());
+							state.addState(false, newLine, null);
+						}
 					}
 				}
 			}
@@ -261,7 +397,7 @@ public class RecordFragment extends Fragment {
 			}
 		});
 	}
-	// TODO make asynctasks not crash with screen flip
+
 	private void undoLast() {
 		state.revertState();
 		if (locationOpen) {
@@ -286,7 +422,7 @@ public class RecordFragment extends Fragment {
 		goButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
+
 				if (markerPlaced && !fromText.getText().toString().equals(Double.toString(state.currentState.leadingMarker.latitude) + "," + Double.toString(state.currentState.leadingMarker.longitude))) {
 					AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
 
@@ -362,6 +498,19 @@ public class RecordFragment extends Fragment {
 		});
 	}
 
+	private void loadClicked() {
+		loadButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				FragmentTransaction ft = getActivity().getFragmentManager().beginTransaction();
+				ft.addToBackStack(null).commit();
+				
+				Intent builderIntent = new Intent(getActivity(), PathExplorerPopup.class);
+				startActivity(builderIntent);
+			}
+		});
+	}
+
 	private void drawClicked() {
 		drawButton.setOnClickListener(new OnClickListener() {
 			@Override
@@ -369,12 +518,12 @@ public class RecordFragment extends Fragment {
 
 				FragmentTransaction ft = getActivity().getFragmentManager().beginTransaction();
 				ft.addToBackStack(null).commit();
-				// TODO add "what to do when pressed"
 
 
 				// Initialize the path drawing buttons, etc
 				drawButton.setVisibility(View.GONE);
 				recordButton.setVisibility(View.GONE);
+				loadButton.setVisibility(View.GONE);
 				modeButton.setVisibility(View.VISIBLE);
 				drawing = true;
 				modeClicked();
@@ -459,6 +608,7 @@ public class RecordFragment extends Fragment {
 
 						recordButton.setText("Finish Recording");
 						drawButton.setVisibility(View.GONE);
+						loadButton.setVisibility(View.GONE);
 						locationLis.StartRecording();
 						recording = true;
 						inRecordMode = true;
@@ -735,16 +885,16 @@ public class RecordFragment extends Fragment {
 				}
 				// Display Copyrights and Warnings only once per program run
 				if (!warningsShown) {
-				final Toast toast = Toast.makeText(getActivity(), copyrights + warnings, Toast.LENGTH_SHORT);
-				toast.setGravity(Gravity.BOTTOM, 0, saveButton.getHeight() + 20);
-				View view = toast.getView();
-				view.setBackgroundResource(R.color.grey);
-				//toast.show();
-				new CountDownTimer(9000, 1000) {
-				    public void onTick(long millisUntilFinished) {toast.show();}
-				    public void onFinish() {toast.show();}
-				}.start();
-				warningsShown = true;
+					final Toast toast = Toast.makeText(getActivity(), copyrights + warnings, Toast.LENGTH_SHORT);
+					toast.setGravity(Gravity.BOTTOM, 0, saveButton.getHeight() + 20);
+					View view = toast.getView();
+					view.setBackgroundResource(R.color.grey);
+					//toast.show();
+					new CountDownTimer(9000, 1000) {
+						public void onTick(long millisUntilFinished) {toast.show();}
+						public void onFinish() {toast.show();}
+					}.start();
+					warningsShown = true;
 				}
 			}
 		}
@@ -772,7 +922,7 @@ public class RecordFragment extends Fragment {
 			// Don't display Toast if this is the onStop() save
 			if (arg0[0].equals(Environment.getExternalStorageDirectory().toString() + "/" 
 					+ getResources().getString(R.string.app_name) + "/"
-					+ getResources().getString(R.string.resume_backup_filename))) {
+					+ getResources().getString(R.string.resume_path_backup_filename))) {
 				return null;
 			}
 			return filename;
@@ -791,5 +941,27 @@ public class RecordFragment extends Fragment {
 
 	private String replaceSpaces(String input) {
 		return input.replace(' ', '+');
+	}
+
+	private void populate(List<String> coordinates) {
+
+		ArrayList<LatLng> points = new ArrayList<LatLng>();
+
+		for (String point : coordinates) {
+			String[] coordinate = point.split(",");
+			points.add(new LatLng(Double.parseDouble(coordinate[1]), Double.parseDouble(coordinate[0])));
+		}
+		state.addState(true, points, null);
+		validPath = true;
+		if (state.currentState.leadingMarker != null && state.currentState.laggingMarker != null) {
+			LatLngBounds.Builder llb = new LatLngBounds.Builder();
+			for (LatLng point : points) {
+				llb.include(point);
+			}
+			LatLngBounds bounds = llb.build();
+			//Change the padding as per needed
+			CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 100);
+			map.animateCamera(cu);
+		}
 	}
 }

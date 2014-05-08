@@ -2,6 +2,8 @@ package com.wisc.cs407project;
 
 import java.io.File;
 
+import com.wisc.cs407project.ScaleGenUI.ScaleExplorerFragment;
+
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.app.Activity;
@@ -36,8 +38,8 @@ public class Scale extends Activity {
 		// Create fragments
 		WalkFragment walkFragment = new WalkFragment();
 		RecordFragment recordFragment = new RecordFragment();
-		PathFragment pathFragment = new PathFragment();
-		ScaleFragment scaleFragment = new ScaleFragment();
+		//PathFragment pathFragment = new PathFragment();
+		ScaleExplorerFragment scaleFragment = new ScaleExplorerFragment();
 
 		// Tab listener
 		walkTab.setTabListener(new TabsListener(walkFragment));

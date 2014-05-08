@@ -11,8 +11,9 @@
     <string name="walk_path">Walk Path</string>
     <string name="create_path">Create Path</string>
     <string name="path_settings">Paths</string>
-    <string name="scale_settings">Scales</string>
-    <string name="resume_backup_filename">last_edited_scale_file.xml</string>
+    <string name="scale_settings">Create Scale</string>
+    <string name="resume_scale_backup_filename">last_edited_scale_file.xml</string>
+    <string name="resume_path_backup_filename">last_edited_path_file.kml</string>
     <item type="id" name="TAG_BUILDER_IMGLOAD_POSITION_ID"/>
     <item type="id" name="TAG_BUILDER_IMGLOAD_TEXT_ID"/>
     <item type="id" name="TAG_BUILDER_IMGLOAD_ID"/>

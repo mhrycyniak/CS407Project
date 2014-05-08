@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
-import com.wisc.cs407project.ScaleGenUI.ScaleExplorerPopup;
+import com.wisc.cs407project.ScaleGenUI.ScaleExplorerFragment;
 
 public class ScaleFragment extends Fragment {
 	
@@ -32,7 +32,7 @@ public class ScaleFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				//TODO may need to change this so back button doesn't re-open popup
-				Intent builderIntent = new Intent(getActivity(), ScaleExplorerPopup.class);
+				Intent builderIntent = new Intent(getActivity(), ScaleExplorerFragment.class);
 				//startActivityForResult(builderIntent, R.id.TAG_BUILDER_IMGLOAD_ID);
 				startActivity(builderIntent);
 			}

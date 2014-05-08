@@ -61,11 +61,16 @@
         </activity>
         
         <activity 
-            android:name="com.wisc.cs407project.ScaleGenUI.ScaleExplorerPopup"
+            android:name="com.wisc.cs407project.ScaleGenUI.ScaleExplorerFragment"
             android:configChanges="orientation|screenSize"
             android:theme="@android:style/Theme.Dialog"
             android:noHistory="true" >
         </activity>
+        
+        <activity android:name="com.wisc.cs407project.PathBuilder.PathExplorerPopup"
+            android:configChanges="orientation|screenSize"
+            android:theme="@android:style/Theme.Dialog"
+            android:noHistory="true" />
         
         <activity
             android:name="com.wisc.cs407project.ScaleChooser"

@@ -251,7 +251,7 @@ public class ScaleBuilder extends Activity {
 		// Build the save path
 		String path = Environment.getExternalStorageDirectory().toString();
 		path = path + "/" + getResources().getString(R.string.app_name) + "/"
-				+ getResources().getString(R.string.resume_backup_filename);
+				+ getResources().getString(R.string.resume_scale_backup_filename);
 		
 		new SaveScaleTask().execute(path);
 	}
@@ -282,7 +282,7 @@ public class ScaleBuilder extends Activity {
 			// Don't display Toast if this is the onStop() save
 			if (arg0[0].equals(Environment.getExternalStorageDirectory().toString() + "/" 
 					+ getResources().getString(R.string.app_name) + "/"
-					+ getResources().getString(R.string.resume_backup_filename))) {
+					+ getResources().getString(R.string.resume_scale_backup_filename))) {
 				return null;
 			}
 			return filename;

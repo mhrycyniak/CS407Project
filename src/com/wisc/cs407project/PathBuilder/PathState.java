@@ -125,12 +125,31 @@ public class PathState {
 		if (currentLeadingLine != null) currentLeadingLine.remove();
 	}
 	
-	public void refactor() {
-		if (currentLaggingLine != null) currentLaggingLine.remove();
-		if (currentLeadingMarker != null) currentLeadingMarker.remove();
-		if (currentLaggingMarker != null) currentLaggingMarker.remove();
-		stateList.remove(stateList.size() - 1);
-		currentState = stateList.get(stateList.size() - 1);
+	// Returns true if a refactored route should be fetched
+	public boolean refactor() {
+		if (stateList.size() > 1) {
+			if (currentLaggingLine != null) currentLaggingLine.remove();
+			if (currentLeadingMarker != null) currentLeadingMarker.remove();
+			if (currentLaggingMarker != null) currentLaggingMarker.remove();
+			stateList.remove(stateList.size() - 1);
+			currentState = stateList.get(stateList.size() - 1);
+			return true;
+		} else if (stateList.size() == 1 && currentLaggingMarker != null) {
+			ArrayList<LatLng> newLine = new ArrayList<LatLng>();
+			newLine.add(currentLaggingMarker.getPosition());
+			if (currentLaggingLine != null) currentLaggingLine.remove();
+			if (currentLeadingMarker != null) currentLeadingMarker.remove();
+			currentLaggingMarker.remove();
+			stateList.remove(stateList.size() - 1);
+			this.addState(false, newLine, null);
+			return true;
+		} else {
+			if (currentLaggingLine != null) currentLaggingLine.remove();
+			if (currentLeadingMarker != null) currentLeadingMarker.remove();
+			if (currentLaggingMarker != null) currentLaggingMarker.remove();
+			stateList.remove(stateList.size() - 1);
+			return false;
+		}
 	}
 	
 	public String getPath() {

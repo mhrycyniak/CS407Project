@@ -1,40 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/scaleExplorerScroll"
-    android:layout_width="match_parent"
+    android:id="@+id/pathExplorerScroll"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_gravity="top" >
+    android:layout_gravity="center_horizontal" >
 <LinearLayout
-    android:id="@+id/scaleExplorerParentView"
+    android:id="@+id/pathExplorerParentView"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:padding="5dp"
-    android:layout_gravity="center_horizontal"
+    android:gravity="center_horizontal"
     android:orientation="vertical" >
 
     <Button
-        android:id="@+id/scaleExplorerResumeButton"
+        android:id="@+id/pathExplorerResumeButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="Resume Last Edit" />
 
     <Button
-        android:id="@+id/scaleExplorerNewButton"
+        android:id="@+id/pathExplorerLoadLocalButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Create New Scale" />
-
-    <Button
-        android:id="@+id/scaleExplorerLoadLocalButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Load Scale from File" />
+        android:text="Load Path from File" />
 
     <!-- Load Local Layout -->
 
     <LinearLayout
-        android:id="@+id/scaleExplorerLoadLocalLayout"
+        android:id="@+id/pathExplorerLoadLocalLayout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
@@ -48,7 +42,7 @@
             android:orientation="horizontal" >
 
             <EditText
-                android:id="@+id/scaleExplorerDirectory"
+                android:id="@+id/pathExplorerDirectory"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -62,7 +56,7 @@
                 android:singleLine="true" />
 
             <Button
-                android:id="@+id/scaleExplorerBackButton"
+                android:id="@+id/pathExplorerBackButton"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:text="Back" />
@@ -71,7 +65,7 @@
         <!-- Local ListView -->
         
         <ListView
-            android:id="@+id/scaleExplorerList"
+            android:id="@+id/pathExplorerList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
@@ -89,15 +83,15 @@
     <!-- Load Online Button -->
 
     <Button
-        android:id="@+id/scaleExplorerLoadOnlineButton"
+        android:id="@+id/pathExplorerLoadOnlineButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Find Scale Online" />
+        android:text="Find Path Online" />
     
     <!-- Load Online Layout -->
     
     <LinearLayout
-        android:id="@+id/scaleExplorerLoadOnlineLayout"
+        android:id="@+id/pathExplorerLoadOnlineLayout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
@@ -111,7 +105,7 @@
             android:orientation="horizontal" >
 
             <EditText
-                android:id="@+id/scaleExplorerURL"
+                android:id="@+id/pathExplorerURL"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -120,7 +114,7 @@
                 android:singleLine="true" />
 
             <Button
-                android:id="@+id/scaleExplorerLoadButton"
+                android:id="@+id/pathExplorerLoadButton"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:text="Load" />
@@ -129,7 +123,7 @@
         <!-- Local ListView -->
         
         <ListView
-            android:id="@+id/scaleExplorerList2"
+            android:id="@+id/pathExplorerList2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"

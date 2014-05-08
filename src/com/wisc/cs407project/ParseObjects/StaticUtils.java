@@ -1,34 +1,18 @@
 package com.wisc.cs407project.ParseObjects;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-
+import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.SaveCallback;
-import com.wisc.cs407project.PathChooser;
-import com.wisc.cs407project.Popup;
-import com.wisc.cs407project.R;
-
-import android.content.Intent;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
-import android.os.Environment;
 import android.util.Log;
 
 
@@ -74,6 +58,21 @@ public class StaticUtils {
 		final String name = originalLocation.replaceAll("\\W+", "");
 		final String fileName = name + fileExt;
 		
+		ParseQuery<ParseObject> query = ParseQuery.getQuery("Image");
+		query.whereEqualTo("name", name);
+		query.whereEqualTo("scaleitem", scaleName);
+		query.findInBackground(new FindCallback<ParseObject>(){
+			@Override
+			public void done(List<ParseObject> l, ParseException e) {
+				if(l==null || l.size()<=0){
+					createImage(fileName, data, name, scaleName);
+				}
+			}});
+		
+		
+	}
+	
+	private static void createImage(final String fileName, final byte[] data, final String name, final String scaleName){
 		final ParseObject parseObject = new ParseObject("Image");
 		parseObject.saveInBackground(new SaveCallback(){
 			@Override
@@ -102,7 +101,7 @@ public class StaticUtils {
 			}});
 	}
 	
-	public static void CreateScale(final byte[] data, String originalName, final SaveCallback success){
+	public static void CreateScale(final byte[] data, String originalName, final SaveCallback success, final Activity ref){
 		String fileExt = "";
 		int dot = originalName.lastIndexOf(".");
 		if(dot < 0){
@@ -114,8 +113,54 @@ public class StaticUtils {
 		
 		String firstPart = originalName.substring(0, dot);
 		firstPart = firstPart.substring(firstPart.lastIndexOf("/")+1);
-		final String name = firstPart.replaceAll("\\W+", "")+fileExt;
-		//TODO check if duplicating
+		final String name = firstPart.replaceAll("\\W _+", "")+fileExt;
+		int d = name.lastIndexOf(".");
+		d = d < 0 ? name.length() : d;
+		final String scaleName = name.substring(0, d);
+		
+		ParseQuery<ParseObject> query = ParseQuery.getQuery("ScaleFile");
+		query.whereEqualTo("name", scaleName);
+		query.findInBackground(new FindCallback<ParseObject>(){
+			@Override
+			public void done(List<ParseObject> l, ParseException e) {
+				if(l==null || l.size()<=0){
+					createScale(name, data, scaleName, success);
+				}
+				else{
+					final ParseObject duplicate = l.get(0);
+					AlertDialog.Builder builder = new AlertDialog.Builder(ref);
+					builder.setTitle("A scale by this name already exists. Do you want to overwrite it?");
+					// Add the buttons
+					builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() 
+					{
+						public void onClick(DialogInterface dialog, int id) 
+						{
+							dialog.dismiss();
+							try {
+								duplicate.delete();
+							} catch (ParseException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							createScale(name, data, scaleName, success);
+						}
+					});
+					builder.setNegativeButton("No", new DialogInterface.OnClickListener() 
+					{
+						public void onClick(DialogInterface dialog, int id) 
+						{
+							dialog.dismiss();
+						}
+					});
+
+					// Create and show
+					builder.create();
+					builder.show(); 
+				}
+			}});
+		 
+	}
+	private static void createScale(final String name, final byte[] data, final String scaleName, final SaveCallback success){
 		final ParseObject parseObject = new ParseObject("ScaleFile");
 		parseObject.saveInBackground(new SaveCallback(){
 			@Override
@@ -127,9 +172,7 @@ public class StaticUtils {
 						@Override
 						public void done(ParseException e) {
 							if(e==null){
-								int dot = name.lastIndexOf(".");
-								dot = dot < 0 ? name.length() : dot;
-								parseObject.put("name", name.substring(0, dot));
+								parseObject.put("name", scaleName);
 								parseObject.put("file", file);
 								try {
 									parseObject.saveInBackground(success);
@@ -145,6 +188,7 @@ public class StaticUtils {
 			}});
 	}
 	
+	
 	public static void CreatePath(final String content, String originalName){	
 		
 		String fileExt = "";
@@ -157,7 +201,7 @@ public class StaticUtils {
 		}
 		
 		String firstPart = originalName.substring(0, dot);
-		final String name = firstPart.replaceAll("\\W+", "")+fileExt;
+		final String name = firstPart.replaceAll("\\W _+", "")+fileExt;
 		final ParseObject parseObject = new ParseObject("PathFile");
 		parseObject.saveInBackground(new SaveCallback(){
 			@Override

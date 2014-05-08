@@ -291,12 +291,12 @@ public class ScaleBuilder extends Activity {
 			StaticUtils.CreateScale(data, path, new SaveCallback(){
 				@Override
 				public void done(ParseException arg0) {
-					Toast toast = Toast.makeText(getApplicationContext(), StaticUtils.GetFileName(path) + " saved", Toast.LENGTH_LONG);
+					Toast toast = Toast.makeText(getApplicationContext(), StaticUtils.GetFileName(path) + " uploaded", Toast.LENGTH_LONG);
 					toast.setGravity(Gravity.CENTER, 0, 0);
 					View view = toast.getView();
 					view.setBackgroundResource(R.color.grey);
 					toast.show();
-				}});
+				}}, ScaleBuilder.this);
 			
 			for(ScaleObject object : scale.members){
 				StaticUtils.CreateImage(object.image, object.name, object.imageLocation);

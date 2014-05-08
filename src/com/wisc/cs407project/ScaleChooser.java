@@ -33,11 +33,17 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.wisc.cs407project.R;
 import com.wisc.cs407project.PathChooser.LoadPathsTask;
 
 public class ScaleChooser extends Activity implements OnItemClickListener {
 	private ListView scales;
+	List<ParseObject> parseScales;
 	private ScaleChooser ref;
 	private String currentDirectory;
 	private static final String SETTINGSNAME = "WalkSettings";
@@ -123,20 +129,46 @@ public class ScaleChooser extends Activity implements OnItemClickListener {
 		protected List<String> doInBackground(String... arg0) {
 			List<String> scaleList = new ArrayList<String>();
 			fileName.clear();
-			try {
-				File directory = new File(arg0[0]);
-				File[] xmlFiles = directory.listFiles(new FilenameFilter(){
-					@Override
-					public boolean accept(File dir, String filename) {
-						return filename.substring(filename.length()-4).equals(".xml");
-					}});
-				for(File file : xmlFiles){					
-					scaleList.add(file.getName());
-					fileName.put(file.getName(), file.getName());
+			if(local){
+				try {
+					File directory = new File(arg0[0]);
+					File[] xmlFiles = directory.listFiles(new FilenameFilter(){
+						@Override
+						public boolean accept(File dir, String filename) {
+							return filename.substring(filename.length()-4).equals(".xml");
+						}});
+					for(File file : xmlFiles){					
+						scaleList.add(file.getName());
+						fileName.put(file.getName(), file.getName());
+					}
+					
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-				
-			} catch (Exception e) {
-				e.printStackTrace();
+			}
+			else{
+				scaleList.add("Loading...");
+				parseScales = null;
+				ParseQuery<ParseObject> query = ParseQuery.getQuery("ScaleFile");	
+				query.findInBackground(new FindCallback<ParseObject>(){
+					@Override
+					public void done(List<ParseObject> list, ParseException e) {
+						if(e == null){
+							parseScales = list;
+							List<String> nameList = new ArrayList<String>();
+							for(ParseObject object : list){
+								nameList.add(object.getString("name"));
+							}
+							ArrayAdapter<String> adapter = new ArrayAdapter<String>(ref, android.R.layout.simple_list_item_1, nameList);
+							scales.setAdapter(adapter);
+						}
+						else{
+							Intent intent = new Intent(ref, Popup.class);
+							intent.putExtra("title", "Error");
+							intent.putExtra("text", "Couldn't load online scales");
+							startActivity(intent);
+						}
+					}});
 			}
 			return scaleList;
 		}
@@ -150,12 +182,25 @@ public class ScaleChooser extends Activity implements OnItemClickListener {
 
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-		String path = currentDirectory;
-		if (!path.endsWith("/")) {
-			path += "/";
+		if(local){
+			String path = currentDirectory;
+			if (!path.endsWith("/")) {
+				path += "/";
+			}
+			path += fileName.get((String) scales.getItemAtPosition(arg2));
+			new LoadIndividualScaleTask().execute(path);
 		}
-		path += fileName.get((String) scales.getItemAtPosition(arg2));
-		new LoadIndividualScaleTask().execute(path);
+		else if(parseScales != null){
+			try {
+				LoadScale(new String(parseScales.get(arg2).getParseFile("file").getData()));
+			} catch (ParseException e) {
+				Intent intent = new Intent(ref, Popup.class);
+				intent.putExtra("title", "Error");
+				intent.putExtra("text", "The requested scale is not in the correct format.");
+				startActivity(intent);
+				e.printStackTrace();
+			}
+		}
 	}
 
 	private class LoadIndividualScaleTask extends AsyncTask<String, Void, String> {
@@ -189,38 +234,42 @@ public class ScaleChooser extends Activity implements OnItemClickListener {
 		}
 
 		protected void onPostExecute(String scaleItem) {
-			if (scaleItem != null) {
-				try {
-					DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-					Document doc = docBuilder.parse(new ByteArrayInputStream(scaleItem.getBytes()));
-					NodeList items = doc.getElementsByTagName("scaleItem");
-					if (items.getLength() < 2)
-					{
-						Intent intent = new Intent(ref, Popup.class);
-						intent.putExtra("title", "Error");
-						intent.putExtra("text", "The requested scale does not contain enough scale items.");
-						startActivity(intent);
-					}
-					else {
-						Intent intent = new Intent();
-						intent.putExtra("scaleItem", scaleItem);
-						setResult(1, intent);
-						finish();
-					}
-				}
-				catch (Exception e)
+			LoadScale(scaleItem);
+		}
+	}
+	
+	public void LoadScale(String scaleItem){
+		if (scaleItem != null) {
+			try {
+				DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+				Document doc = docBuilder.parse(new ByteArrayInputStream(scaleItem.getBytes()));
+				NodeList items = doc.getElementsByTagName("scaleItem");
+				if (items.getLength() < 2)
 				{
 					Intent intent = new Intent(ref, Popup.class);
 					intent.putExtra("title", "Error");
-					intent.putExtra("text", "The requested scale is not in the correct format.");
+					intent.putExtra("text", "The requested scale does not contain enough scale items.");
 					startActivity(intent);
 				}
-			} else {
+				else {
+					Intent intent = new Intent();
+					intent.putExtra("scaleItem", scaleItem);
+					setResult(1, intent);
+					finish();
+				}
+			}
+			catch (Exception e)
+			{
 				Intent intent = new Intent(ref, Popup.class);
 				intent.putExtra("title", "Error");
-				intent.putExtra("text", "The requested scale does not exist.");
+				intent.putExtra("text", "The requested scale is not in the correct format.");
 				startActivity(intent);
 			}
+		} else {
+			Intent intent = new Intent(ref, Popup.class);
+			intent.putExtra("title", "Error");
+			intent.putExtra("text", "The requested scale does not exist.");
+			startActivity(intent);
 		}
 	}
 }

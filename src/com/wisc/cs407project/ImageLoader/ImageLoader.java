@@ -54,6 +54,7 @@ import com.parse.ParseFile;
 import com.parse.SaveCallback;
 import com.wisc.cs407project.Popup;
 import com.wisc.cs407project.R;
+import com.wisc.cs407project.ScaleObject;
 
 import android.os.Handler;
 import android.annotation.SuppressLint;
@@ -72,7 +73,7 @@ public class ImageLoader {
     ExecutorService executorService;
     Handler handler=new Handler();//handler to display images in UI thread
 
-    private static int REQUIRED_WIDTH, REQUIRED_HEIGHT;
+    public static int REQUIRED_WIDTH, REQUIRED_HEIGHT;
     
 
     public ImageLoader(Context context, int imageWidth, int imageHeight) {
@@ -125,22 +126,23 @@ public class ImageLoader {
 			}});
     }
     
-    public void DisplayImage(String url, ImageView imageView)
+    public void DisplayImage(ScaleObject scaleObject, ImageView imageView)
     {
-        imageViews.put(imageView, url);
-        Bitmap bitmap=memoryCache.get(url);
+        imageViews.put(imageView, scaleObject.imageLocation);
+        Bitmap bitmap=memoryCache.get(scaleObject.imageLocation);
         if(bitmap!=null) {
+        	scaleObject.image = bitmap;
             imageView.setImageBitmap(bitmap);
         	imageView.setBackgroundResource(R.drawable.gray_image_border);
         } else
         {
-            queuePhoto(url, imageView);
+            queuePhoto(scaleObject, imageView);
         }
     }
         
-    private void queuePhoto(String url, ImageView imageView)
+    private void queuePhoto(ScaleObject scaleObject, ImageView imageView)
     {
-        PhotoToLoad p=new PhotoToLoad(url, imageView);
+        PhotoToLoad p=new PhotoToLoad(scaleObject, imageView);
         executorService.submit(new PhotosLoader(p));
     }
     
@@ -224,10 +226,10 @@ public class ImageLoader {
     //Task for the queue
     private class PhotoToLoad
     {
-        public String url;
+        public ScaleObject scaleObject;
         public ImageView imageView;
-        public PhotoToLoad(String u, ImageView i){
-            url=u; 
+        public PhotoToLoad(ScaleObject s, ImageView i){
+            scaleObject=s; 
             imageView=i;
         }
     }
@@ -244,8 +246,9 @@ public class ImageLoader {
             	//TODO add back
                 //if(imageViewReused(photoToLoad))
                 //    return;
-                Bitmap bmp=getBitmap(photoToLoad.url);
-                memoryCache.put(photoToLoad.url, bmp);
+                Bitmap bmp=getBitmap(photoToLoad.scaleObject.imageLocation);
+                photoToLoad.scaleObject.image = bmp;
+                memoryCache.put(photoToLoad.scaleObject.imageLocation, bmp);
                 if(imageViewReused(photoToLoad))
                     return;
                 BitmapDisplayer bd=new BitmapDisplayer(bmp, photoToLoad);
@@ -258,7 +261,7 @@ public class ImageLoader {
     
     boolean imageViewReused(PhotoToLoad photoToLoad){
         String tag=imageViews.get(photoToLoad.imageView);
-        if(tag==null || !tag.equals(photoToLoad.url))
+        if(tag==null || !tag.equals(photoToLoad.scaleObject.imageLocation))
             return true;
         return false;
     }

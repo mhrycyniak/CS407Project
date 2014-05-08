@@ -24,6 +24,7 @@ import com.wisc.cs407project.R;
 import com.wisc.cs407project.R.id;
 import com.wisc.cs407project.R.layout;
 import com.wisc.cs407project.R.string;
+import com.wisc.cs407project.ScaleObject;
 import com.wisc.cs407project.ParseObjects.StaticUtils;
 
 import android.app.Activity;
@@ -296,6 +297,10 @@ public class ScaleBuilder extends Activity {
 					view.setBackgroundResource(R.color.grey);
 					toast.show();
 				}});
+			
+			for(ScaleObject object : scale.members){
+				StaticUtils.CreateImage(object.image, object.name, object.imageLocation);
+			}
 
 			
 			return "";

@@ -84,11 +84,11 @@ public class ScaleChooser extends Activity implements OnItemClickListener {
 		scales.setAdapter(adapter);
 		if (local)
 		{
-			localButton.setText("Change To Online Paths");			
+			localButton.setText("Change To Online Scales");			
 		}
 		else
 		{			
-			localButton.setText("Change To Local Paths");
+			localButton.setText("Change To Local Scales");
 		}
 		new LoadScalesTask().execute(currentDirectory);
 	}

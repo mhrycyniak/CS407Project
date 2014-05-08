@@ -17,6 +17,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import com.wisc.cs407project.Popup;
 import com.wisc.cs407project.R;
+import com.wisc.cs407project.WalkFragment;
 import com.wisc.cs407project.R.id;
 import com.wisc.cs407project.R.layout;
 import com.wisc.cs407project.R.string;
@@ -211,7 +212,7 @@ public class ImageExplorerPopup extends Activity {
 			}
 			// If an image was selected
 			if (filesAndDirectory.length == 1) {
-				Bitmap image = ImageLoader.decodeFile(new File(filesAndDirectory[0]));
+				Bitmap image = ImageLoader.decodeFile(new File(filesAndDirectory[0]));				
 				if (image != null) {
 					preview.setImageBitmap(image);
 					currentImage = filesAndDirectory[0];

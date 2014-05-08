@@ -2,6 +2,7 @@ package com.wisc.cs407project.ParseObjects;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -25,12 +26,300 @@ import com.wisc.cs407project.Popup;
 import com.wisc.cs407project.R;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
 
 
-public class StaticUtils {
+public class StaticUtils {	
+	
+	public static String GetFileName(String path){
+		int dot = path.lastIndexOf(".");
+		if(dot < 0){
+			dot = path.length();
+		}		
+		String firstPart = path.substring(0, dot);
+		firstPart = firstPart.substring(firstPart.lastIndexOf("/")+1);
+		return firstPart;
+	}
+	
+	public static void CreateImage(Bitmap bitmap, final String scaleName, String originalLocation){
+		if(bitmap == null){
+			Log.d("no bitmap", "alsdjflaksjdfl;");
+			return;
+		}
+		String fileExt = null;
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+    	Bitmap.CompressFormat format = null;
+    	if(originalLocation.contains(".jpg") || originalLocation.contains(".jpeg")){
+    		format = Bitmap.CompressFormat.JPEG;
+    		fileExt = ".jpg";
+    	}
+    	else if(originalLocation.contains(".png")){
+    		format = Bitmap.CompressFormat.PNG;
+    		fileExt = ".png";
+    	}
+    	else if(originalLocation.contains(".webp")){
+    		format = Bitmap.CompressFormat.WEBP;
+    		fileExt = ".webp";
+    	}
+    	else{
+    		Log.d("bad format", "");
+    		return;
+    	}
+        bitmap.compress(format, 100, stream);
+        final byte[] data = stream.toByteArray();
+
+		final String name = originalLocation.replaceAll("\\W+", "");
+		final String fileName = name + fileExt;
+		
+		final ParseObject parseObject = new ParseObject("Image");
+		parseObject.saveInBackground(new SaveCallback(){
+			@Override
+			public void done(ParseException e) {
+				if(e == null){
+			        final ParseFile file = new ParseFile(fileName, data);
+			        file.saveInBackground(new SaveCallback(){
+
+						@Override
+						public void done(ParseException e) {
+							if(e==null){
+								parseObject.put("name", name);
+								parseObject.put("scaleitem", scaleName);
+								parseObject.put("file", file);
+								try {
+									parseObject.save();
+								} catch (Exception e1) {
+									e1.printStackTrace();
+								}
+							}
+							else{
+								e.printStackTrace();
+							}
+						}});
+				}
+			}});
+	}
+	
+	public static void CreateScale(final byte[] data, String originalName, final SaveCallback success){
+		String fileExt = "";
+		int dot = originalName.lastIndexOf(".");
+		if(dot < 0){
+			dot = originalName.length();
+		}
+		else{
+			fileExt = originalName.substring(dot);
+		}
+		
+		String firstPart = originalName.substring(0, dot);
+		firstPart = firstPart.substring(firstPart.lastIndexOf("/")+1);
+		final String name = firstPart.replaceAll("\\W+", "")+fileExt;
+		//TODO check if duplicating
+		final ParseObject parseObject = new ParseObject("ScaleFile");
+		parseObject.saveInBackground(new SaveCallback(){
+			@Override
+			public void done(ParseException e) {
+				if(e == null){
+			        final ParseFile file = new ParseFile(name, data);
+			        file.saveInBackground(new SaveCallback(){
+
+						@Override
+						public void done(ParseException e) {
+							if(e==null){
+								int dot = name.lastIndexOf(".");
+								dot = dot < 0 ? name.length() : dot;
+								parseObject.put("name", name.substring(0, dot));
+								parseObject.put("file", file);
+								try {
+									parseObject.saveInBackground(success);
+								} catch (Exception e1) {
+									e1.printStackTrace();
+								}
+							}
+							else{
+								e.printStackTrace();
+							}
+						}});
+				}
+			}});
+	}
+	
+	public static void CreatePath(final String content, String originalName){	
+		
+		String fileExt = "";
+		int dot = originalName.lastIndexOf(".");
+		if(dot < 0){
+			dot = originalName.length();
+		}
+		else{
+			fileExt = originalName.substring(dot);
+		}
+		
+		String firstPart = originalName.substring(0, dot);
+		final String name = firstPart.replaceAll("\\W+", "")+fileExt;
+		final ParseObject parseObject = new ParseObject("PathFile");
+		parseObject.saveInBackground(new SaveCallback(){
+			@Override
+			public void done(ParseException e) {
+				if(e == null){
+					byte[] data = content.getBytes();
+			        final ParseFile file = new ParseFile(name, data);
+			        file.saveInBackground(new SaveCallback(){
+
+						@Override
+						public void done(ParseException e) {
+							if(e==null){
+								int dot = name.lastIndexOf(".");
+								dot = dot < 0 ? name.length() : dot;
+								parseObject.put("name", name.substring(0, dot));
+								parseObject.put("file", file);
+								try {
+									parseObject.save();
+								} catch (ParseException e1) {
+									e1.printStackTrace();
+								}
+							}
+							else{
+								e.printStackTrace();
+								Log.d("problem saving file", "second lap");
+							}
+						}});
+				}
+			}});
+	}
+	
+	public static void CreatePlanetScale(){
+		final Scale PlanetScale = new Scale();
+		PlanetScale.SetName("Planets");
+		PlanetScale.push(new SaveCallback(){
+			@Override
+			public void done(ParseException arg0) {
+				if(arg0 == null){
+					AddObj(PlanetScale, "Mercury", 
+							"The closest planet to the Sun and the smallest planet in the Solar System, it has no natural satellites.",
+							0.01295681063,
+							"http://moonlady.com/wp-content/uploads/2013/02/Mercury.jpg");	
+					AddObj(PlanetScale, "Neptune",
+							"The most distant planet from earth in our solar system and the smallest of the gas giants.",
+							1,
+							"http://solarsystem.nasa.gov/multimedia/gallery/Neptune_Full.jpg");
+					AddObj(PlanetScale, "Uranus",
+							"The coldest planet in our solar system with temperatures as low as -224C",
+							0.63787375415,
+							"http://www.crystalinks.com/uranus.jpg");
+					AddObj(PlanetScale, "Saturn",
+							"The least dense planet in the solar system. It has 62 moons, including some believed to possibly contain life.",
+							0.31561461794,
+							"http://nssdc.gsfc.nasa.gov/image/planetary/saturn/saturn_false.jpg");
+					AddObj(PlanetScale, "Jupiter",
+							"The largest and densest of the inner planets.",
+							0.17275747508,
+							"http://plus.maths.org/issue36/features/davies/mars.jpg");
+					AddObj(PlanetScale, "Mars",
+							"The largest and densest of the inner planets.",
+							0.04983388704,
+							"http://plus.maths.org/issue36/features/davies/mars.jpg");
+					AddObj(PlanetScale, "Earth",
+							"The largest and densest of the inner planets.",
+							0.03322259136,
+							"http://www.openthefuture.com/images/sunset.jpg");
+					AddObj(PlanetScale, "Venus",
+							"This planet is much drier than Earth, and its atmosphere is ninety times as dense.",
+							0.02325581395,
+							"http://www.windows2universe.org/venus/images/venus_med.jpg");
+				}				
+			}});
+	}
+	
+	private static void AddObj(final Scale scale, final String name, final String text, 
+			final double percent, final String image){		
+		final ScaleObject Obj = new ScaleObject();				
+		Obj.push(new SaveCallback() {
+			  public void done(ParseException e) {
+				Obj.SetName(name);
+				Obj.SetText(text);
+				Obj.SetPercentage(percent);
+				Obj.SetImageLocation(image);
+				Obj.push();
+				scale.AddObject(Obj);
+			  }
+			});			
+	}
+	
+	public static void CreateDinoScale(){
+		final Scale DinoScale = new Scale();
+		DinoScale.SetName("Dinos!");
+		DinoScale.push();
+		
+		final ScaleObject veloco = new ScaleObject();
+		veloco.SetName("Velociraptor");
+		veloco.SetText("Actually stood no taller than 3 feet, the ones from Jurassic Park were based on the Deinonychus");
+		veloco.SetPercentage(.077);
+		veloco.SetImageLocation("http://www.fimfiction-static.net/images/avatars/11792_256.jpg");
+		veloco.parseObject.saveInBackground(new SaveCallback() {
+			  public void done(ParseException e) {
+				DinoScale.AddObject(veloco);
+			  }
+			});
+		
+		final ScaleObject steg = new ScaleObject();
+		steg.SetName("Stegosaurus");
+		steg.SetText("Had one of the smallest brains among dinasours at roughly the size of a walnut.");
+		steg.SetPercentage(.354);
+		steg.SetImageLocation("http://shop.yukonkids.com/photos/product/r/rubber-stegosaurus-256px-256px.jpg");
+		steg.parseObject.saveInBackground(new SaveCallback() {
+			  public void done(ParseException e) {
+				DinoScale.AddObject(steg);
+			  }
+			});
+		
+		final ScaleObject trici = new ScaleObject();
+		trici.SetName("Triceratops");
+		trici.SetText("Triceratops means \"3-horned face\" in Greek, but the dinasour had only two horns and a snout.");
+		trici.SetPercentage(.385);
+		trici.SetImageLocation("http://images2.wikia.nocookie.net/__cb20130214223732/dinosaurs/images/0/04/Triceratops_raul-_martin_net_(1).jpg");
+		trici.parseObject.saveInBackground(new SaveCallback() {
+			  public void done(ParseException e) {
+				DinoScale.AddObject(trici);
+			  }
+			});		
+		
+		final ScaleObject pter = new ScaleObject();
+		pter.SetName("Pteranodon");
+		pter.SetText("Had the longest wingspan of any dinasour at ~27 feet, aproximatly 3.5 times a Pterodactylus'");
+		pter.SetPercentage(.415);
+		pter.SetImageLocation("http://www.kidsdinos.com/images/dinosaurs/Pteranodon1202331923.jpg");
+		pter.parseObject.saveInBackground(new SaveCallback() {
+			  public void done(ParseException e) {
+				DinoScale.AddObject(pter);
+			  }
+			});	
+
+		final ScaleObject rex = new ScaleObject();
+		rex.SetName("Tyrannosaurus rex");
+		rex.SetText("Modern estimates put the force of its bite at over 5000 metric tons, or more than 10 times a gator.");
+		rex.SetPercentage(.692);
+		rex.SetImageLocation("http://www.officialpsds.com/images/thumbs/T-Rex-psd49647.png");
+		rex.parseObject.saveInBackground(new SaveCallback() {
+			  public void done(ParseException e) {
+				DinoScale.AddObject(rex);
+			  }
+			});	
+	
+
+		final ScaleObject bront = new ScaleObject();
+		bront.SetName("Brontosaurus");
+		bront.SetText("One of the largest dinasours, aproximatly 65ft long and weghing upwards of 30 tons");
+		bront.SetPercentage(1);
+		bront.SetImageLocation("http://magpo.blogs.com/davesblog/images/2007/12/03/apato2.jpg");
+		bront.parseObject.saveInBackground(new SaveCallback() {
+			  public void done(ParseException e) {
+				DinoScale.AddObject(bront);
+			  }
+			});	
+
+	}
 	
 	public static final String SecondLapContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" + 
 			"<kml xmlns=\"http://earth.google.com/kml/2.2\">\r\n" + 
@@ -1228,232 +1517,93 @@ public class StaticUtils {
 			"</kml>\r\n" + 
 			"";
 	
-	public static String GetFileName(String path){
-		int dot = path.lastIndexOf(".");
-		if(dot < 0){
-			dot = path.length();
-		}		
-		String firstPart = path.substring(0, dot);
-		firstPart = firstPart.substring(firstPart.lastIndexOf("/")+1);
-		return firstPart;
-	}
-	
-	public static void CreateScale(final byte[] data, String originalName, final SaveCallback success){
-		String fileExt = "";
-		int dot = originalName.lastIndexOf(".");
-		if(dot < 0){
-			dot = originalName.length();
-		}
-		else{
-			fileExt = originalName.substring(dot);
-		}
-		
-		String firstPart = originalName.substring(0, dot);
-		firstPart = firstPart.substring(firstPart.lastIndexOf("/")+1);
-		final String name = firstPart.replaceAll("\\W+", "")+fileExt;
-		//TODO check if duplicating
-		final ParseObject parseObject = new ParseObject("ScaleFile");
-		parseObject.saveInBackground(new SaveCallback(){
-			@Override
-			public void done(ParseException e) {
-				if(e == null){
-			        final ParseFile file = new ParseFile(name, data);
-			        file.saveInBackground(new SaveCallback(){
-
-						@Override
-						public void done(ParseException e) {
-							if(e==null){
-								int dot = name.lastIndexOf(".");
-								dot = dot < 0 ? name.length() : dot;
-								parseObject.put("name", name.substring(0, dot));
-								parseObject.put("file", file);
-								try {
-									parseObject.saveInBackground(success);
-								} catch (Exception e1) {
-									e1.printStackTrace();
-								}
-							}
-							else{
-								e.printStackTrace();
-							}
-						}});
-				}
-			}});
-	}
-	
-	public static void CreatePath(final String content, String originalName){	
-		
-		String fileExt = "";
-		int dot = originalName.lastIndexOf(".");
-		if(dot < 0){
-			dot = originalName.length();
-		}
-		else{
-			fileExt = originalName.substring(dot);
-		}
-		
-		String firstPart = originalName.substring(0, dot);
-		final String name = firstPart.replaceAll("\\W+", "")+fileExt;
-		final ParseObject parseObject = new ParseObject("PathFile");
-		parseObject.saveInBackground(new SaveCallback(){
-			@Override
-			public void done(ParseException e) {
-				if(e == null){
-					byte[] data = content.getBytes();
-			        final ParseFile file = new ParseFile(name, data);
-			        file.saveInBackground(new SaveCallback(){
-
-						@Override
-						public void done(ParseException e) {
-							if(e==null){
-								int dot = name.lastIndexOf(".");
-								dot = dot < 0 ? name.length() : dot;
-								parseObject.put("name", name.substring(0, dot));
-								parseObject.put("file", file);
-								try {
-									parseObject.save();
-								} catch (ParseException e1) {
-									e1.printStackTrace();
-								}
-							}
-							else{
-								e.printStackTrace();
-								Log.d("problem saving file", "second lap");
-							}
-						}});
-				}
-			}});
-	}
-	
-	public static void CreatePlanetScale(){
-		final Scale PlanetScale = new Scale();
-		PlanetScale.SetName("Planets");
-		PlanetScale.push(new SaveCallback(){
-			@Override
-			public void done(ParseException arg0) {
-				if(arg0 == null){
-					AddObj(PlanetScale, "Mercury", 
-							"The closest planet to the Sun and the smallest planet in the Solar System, it has no natural satellites.",
-							0.01295681063,
-							"http://moonlady.com/wp-content/uploads/2013/02/Mercury.jpg");	
-					AddObj(PlanetScale, "Neptune",
-							"The most distant planet from earth in our solar system and the smallest of the gas giants.",
-							1,
-							"http://solarsystem.nasa.gov/multimedia/gallery/Neptune_Full.jpg");
-					AddObj(PlanetScale, "Uranus",
-							"The coldest planet in our solar system with temperatures as low as -224C",
-							0.63787375415,
-							"http://www.crystalinks.com/uranus.jpg");
-					AddObj(PlanetScale, "Saturn",
-							"The least dense planet in the solar system. It has 62 moons, including some believed to possibly contain life.",
-							0.31561461794,
-							"http://nssdc.gsfc.nasa.gov/image/planetary/saturn/saturn_false.jpg");
-					AddObj(PlanetScale, "Jupiter",
-							"The largest and densest of the inner planets.",
-							0.17275747508,
-							"http://plus.maths.org/issue36/features/davies/mars.jpg");
-					AddObj(PlanetScale, "Mars",
-							"The largest and densest of the inner planets.",
-							0.04983388704,
-							"http://plus.maths.org/issue36/features/davies/mars.jpg");
-					AddObj(PlanetScale, "Earth",
-							"The largest and densest of the inner planets.",
-							0.03322259136,
-							"http://www.openthefuture.com/images/sunset.jpg");
-					AddObj(PlanetScale, "Venus",
-							"This planet is much drier than Earth, and its atmosphere is ninety times as dense.",
-							0.02325581395,
-							"http://www.windows2universe.org/venus/images/venus_med.jpg");
-				}				
-			}});
-	}
-	
-	private static void AddObj(final Scale scale, final String name, final String text, 
-			final double percent, final String image){		
-		final ScaleObject Obj = new ScaleObject();				
-		Obj.push(new SaveCallback() {
-			  public void done(ParseException e) {
-				Obj.SetName(name);
-				Obj.SetText(text);
-				Obj.SetPercentage(percent);
-				Obj.SetImageLocation(image);
-				Obj.push();
-				scale.AddObject(Obj);
-			  }
-			});			
-	}
-	
-	public static void CreateDinoScale(){
-		final Scale DinoScale = new Scale();
-		DinoScale.SetName("Dinos!");
-		DinoScale.push();
-		
-		final ScaleObject veloco = new ScaleObject();
-		veloco.SetName("Velociraptor");
-		veloco.SetText("Actually stood no taller than 3 feet, the ones from Jurassic Park were based on the Deinonychus");
-		veloco.SetPercentage(.077);
-		veloco.SetImageLocation("http://www.fimfiction-static.net/images/avatars/11792_256.jpg");
-		veloco.parseObject.saveInBackground(new SaveCallback() {
-			  public void done(ParseException e) {
-				DinoScale.AddObject(veloco);
-			  }
-			});
-		
-		final ScaleObject steg = new ScaleObject();
-		steg.SetName("Stegosaurus");
-		steg.SetText("Had one of the smallest brains among dinasours at roughly the size of a walnut.");
-		steg.SetPercentage(.354);
-		steg.SetImageLocation("http://shop.yukonkids.com/photos/product/r/rubber-stegosaurus-256px-256px.jpg");
-		steg.parseObject.saveInBackground(new SaveCallback() {
-			  public void done(ParseException e) {
-				DinoScale.AddObject(steg);
-			  }
-			});
-		
-		final ScaleObject trici = new ScaleObject();
-		trici.SetName("Triceratops");
-		trici.SetText("Triceratops means \"3-horned face\" in Greek, but the dinasour had only two horns and a snout.");
-		trici.SetPercentage(.385);
-		trici.SetImageLocation("http://images2.wikia.nocookie.net/__cb20130214223732/dinosaurs/images/0/04/Triceratops_raul-_martin_net_(1).jpg");
-		trici.parseObject.saveInBackground(new SaveCallback() {
-			  public void done(ParseException e) {
-				DinoScale.AddObject(trici);
-			  }
-			});		
-		
-		final ScaleObject pter = new ScaleObject();
-		pter.SetName("Pteranodon");
-		pter.SetText("Had the longest wingspan of any dinasour at ~27 feet, aproximatly 3.5 times a Pterodactylus'");
-		pter.SetPercentage(.415);
-		pter.SetImageLocation("http://www.kidsdinos.com/images/dinosaurs/Pteranodon1202331923.jpg");
-		pter.parseObject.saveInBackground(new SaveCallback() {
-			  public void done(ParseException e) {
-				DinoScale.AddObject(pter);
-			  }
-			});	
-
-		final ScaleObject rex = new ScaleObject();
-		rex.SetName("Tyrannosaurus rex");
-		rex.SetText("Modern estimates put the force of its bite at over 5000 metric tons, or more than 10 times a gator.");
-		rex.SetPercentage(.692);
-		rex.SetImageLocation("http://www.officialpsds.com/images/thumbs/T-Rex-psd49647.png");
-		rex.parseObject.saveInBackground(new SaveCallback() {
-			  public void done(ParseException e) {
-				DinoScale.AddObject(rex);
-			  }
-			});	
-	
-
-		final ScaleObject bront = new ScaleObject();
-		bront.SetName("Brontosaurus");
-		bront.SetText("One of the largest dinasours, aproximatly 65ft long and weghing upwards of 30 tons");
-		bront.SetPercentage(1);
-		bront.SetImageLocation("http://magpo.blogs.com/davesblog/images/2007/12/03/apato2.jpg");
-		bront.parseObject.saveInBackground(new SaveCallback() {
-			  public void done(ParseException e) {
-				DinoScale.AddObject(bront);
-			  }
-			});	
-
-	}
+	public static final String SolarSystem = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n" + 
+			"<scale>\r\n" + 
+			"	<scaleItem>\r\n" + 
+			"		<name>Mercury</name>\r\n" + 
+			"		<description>The closest planet to the Sun and the smallest planet in the Solar System, it has no natural satellites.</description>\r\n" + 
+			"		<percentage>0.01295681063</percentage>\r\n" + 
+			"		<picture>http://moonlady.com/wp-content/uploads/2013/02/Mercury.jpg</picture>\r\n" + 
+			"	</scaleItem>\r\n" + 
+			"	<scaleItem>\r\n" + 
+			"		<name>Venus</name>\r\n" + 
+			"		<description>This planet is much drier than Earth, and its atmosphere is ninety times as dense.</description>\r\n" + 
+			"		<percentage>0.02325581395</percentage>\r\n" + 
+			"		<picture>http://www.windows2universe.org/venus/images/venus_med.jpg</picture>\r\n" + 
+			"	</scaleItem>\r\n" + 
+			"	<scaleItem>\r\n" + 
+			"		<name>Earth</name>\r\n" + 
+			"		<description>The largest and densest of the inner planets.</description>\r\n" + 
+			"		<percentage>0.03322259136</percentage>\r\n" + 
+			"		<picture>http://www.openthefuture.com/images/sunset.jpg</picture>\r\n" + 
+			"  </scaleItem>\r\n" + 
+			"	<scaleItem>\r\n" + 
+			"		<name>Mars</name>\r\n" + 
+			"		<description>The largest and densest of the inner planets.</description>\r\n" + 
+			"		<percentage>0.04983388704</percentage>\r\n" + 
+			"    <picture>http://plus.maths.org/issue36/features/davies/mars.jpg</picture>\r\n" + 
+			"  </scaleItem>\r\n" + 
+			"  <scaleItem>\r\n" + 
+			"    <name>Jupiter</name>\r\n" + 
+			"    <description>The largest and densest of the inner planets.</description>\r\n" + 
+			"    <percentage>0.17275747508</percentage>\r\n" + 
+			"    <picture>http://plus.maths.org/issue36/features/davies/mars.jpg</picture>\r\n" + 
+			"  </scaleItem>\r\n" + 
+			"  <scaleItem>  \r\n" + 
+			"		<name>Saturn</name>\r\n" + 
+			"		<description>The least dense planet in the solar system. It has 62 moons, including some believed to possibly contain life.</description>\r\n" + 
+			"    <percentage>0.31561461794</percentage>\r\n" + 
+			"  </scaleItem>\r\n" + 
+			"	<scaleItem>\r\n" + 
+			"		<name>Uranus</name>\r\n" + 
+			"		<description>The coldest planet in our solar system with temperatures as low as -224C</description>\r\n" + 
+			"		<percentage>0.63787375415</percentage>\r\n" + 
+			"  </scaleItem>\r\n" + 
+			"	<scaleItem>\r\n" + 
+			"		<name>Neptune</name>\r\n" + 
+			"		<description>The most distant planet from earth in our solar system and the smallest of the gas giants.</description>\r\n" + 
+			"		<percentage>1</percentage>\r\n" + 
+			"  </scaleItem>\r\n" + 
+			"</scale>\r\n" + 
+			"";
+	public static final String Dinosaurs = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n" + 
+			"<scale>\r\n" + 
+			"	<scaleItem>\r\n" + 
+			"		<name>Velociraptor</name>\r\n" + 
+			"		<description>Actually stood no taller than 3 feet, the ones from Jurassic Park were based on the Deinonychus</description>\r\n" + 
+			"		<percentage>0.077</percentage>\r\n" + 
+			"    <picture>http://www.fimfiction-static.net/images/avatars/11792_256.jpg</picture>\r\n" + 
+			"  </scaleItem>\r\n" + 
+			"	<scaleItem>\r\n" + 
+			"		<name>Stegosaurus</name>\r\n" + 
+			"		<description>Had one of the smallest brains among dinasours at roughly the size of a walnut.</description>\r\n" + 
+			"		<percentage>0.354</percentage>\r\n" + 
+			"    <picture>http://shop.yukonkids.com/photos/product/r/rubber-stegosaurus-256px-256px.jpg</picture>\r\n" + 
+			"  </scaleItem>\r\n" + 
+			"  <scaleItem>\r\n" + 
+			"    <name>Triceratops</name>\r\n" + 
+			"    <description>Triceratops means \"3-horned face\" in Greek, but the dinasour had only two horns and a snout. </description>\r\n" + 
+			"    <percentage>0.385</percentage>\r\n" + 
+			"    <picture>http://images2.wikia.nocookie.net/__cb20130214223732/dinosaurs/images/0/04/Triceratops_raul-_martin_net_(1).jpg</picture>\r\n" + 
+			"  </scaleItem>\r\n" + 
+			"  <scaleItem>  \r\n" + 
+			"    <name>Pteranodon</name>\r\n" + 
+			"		<description>Had the longest wingspan of any dinasour at ~27 feet, aproximatly 3.5 times a Pterodactylus'</description>\r\n" + 
+			"    <percentage>0.415</percentage>\r\n" + 
+			"    <picture>http://www.kidsdinos.com/images/dinosaurs/Pteranodon1202331923.jpg</picture>\r\n" + 
+			"  </scaleItem>\r\n" + 
+			"	<scaleItem>\r\n" + 
+			"		<name>Tyrannosaurus rex</name>\r\n" + 
+			"		<description>Modern estimates put the force of its bite at over 5000 metric tons, or more than 10 times a gator.</description>\r\n" + 
+			"    <percentage>0.692</percentage>\r\n" + 
+			"    <picture>http://www.officialpsds.com/images/thumbs/T-Rex-psd49647.png</picture>\r\n" + 
+			"  </scaleItem>\r\n" + 
+			"	<scaleItem>\r\n" + 
+			"		<name>Brontosaurus</name>\r\n" + 
+			"		<description>One of the largest dinasours, aproximatly 65ft long and weghing upwards of 30 tons </description>\r\n" + 
+			"    <percentage>1</percentage>\r\n" + 
+			"    <picture>http://magpo.blogs.com/davesblog/images/2007/12/03/apato2.jpg</picture>\r\n" + 
+			"  </scaleItem>\r\n" + 
+			"</scale>\r\n" + 
+			"";
 }

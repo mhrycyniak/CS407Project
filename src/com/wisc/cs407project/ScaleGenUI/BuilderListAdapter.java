@@ -238,7 +238,7 @@ public class BuilderListAdapter extends BaseAdapter {
 		width = width / 2;
 		imageLoader.setSize(width, width);
 		//Log.d("redisplay image", data.members.get(position).imageLocation);
-		imageLoader.DisplayImage(data.members.get(position).imageLocation, holder.image);
+		imageLoader.DisplayImage(data.members.get(position), holder.image);
 
 		return convertView;
 	}

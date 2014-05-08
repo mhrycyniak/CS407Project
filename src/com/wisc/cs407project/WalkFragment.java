@@ -5,7 +5,6 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -17,7 +16,6 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.commons.validator.routines.UrlValidator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -32,6 +30,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -40,6 +39,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -63,10 +63,12 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.parse.GetCallback;
+import com.parse.FindCallback;
 import com.parse.ParseException;
+import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.wisc.cs407project.ImageLoader.ImageLoader;
 
 public class WalkFragment extends Fragment implements OnMarkerClickListener, LocationListener {
 	private GoogleMap map;
@@ -379,24 +381,74 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 	
 		@Override
 		protected String doInBackground(ScaleObject... arg0) {
+			final ScaleObject object = arg0[0];
+			if(object.imageLocation == null || object.imageLocation.equals("")){
+				return null; //doesn't have an image
+			}
   			try {
- 				URL url = new URL(arg0[0].imageLocation);
-  				InputStream in = url.openStream();
-  				BufferedInputStream buf = new BufferedInputStream(in);
-  				Bitmap myBitmap = BitmapFactory.decodeStream(buf);
-  				if (in != null) {
-                  in.close();
-              	}
-  					if (buf != null) {
-                  buf.close();
-  					}
-  					arg0[0].image = myBitmap;
+  				Display display = WalkFragment.this.getActivity().getWindowManager().getDefaultDisplay();
+  				Point size = new Point();
+  				display.getSize(size);
+  				int width = size.x;
+  				width = width / 2;
+  				ImageLoader.REQUIRED_WIDTH = width;
+  				ImageLoader.REQUIRED_HEIGHT = width;
+  				object.image = ImageLoader.decodeFile(new File(object.imageLocation)); //TODO doesn't work
+  				if(object.image != null)
+  					return "";
+  				
+  				try{
+  					URL url = new URL(object.imageLocation);
+	 				InputStream in = url.openStream();
+	 				BufferedInputStream buf = new BufferedInputStream(in);
+	 				Bitmap myBitmap = BitmapFactory.decodeStream(buf);
+	 				if (in != null) {
+	 					in.close();
+	 	        	}
+	 				if (buf != null) {
+	 					buf.close();
+	 				}
+	 				object.image = myBitmap;
+	 				return "";
+  				}catch(Exception e){
+  					
+  				}
+  				
+  				ParseQuery<ParseObject> query = ParseQuery.getQuery("Image");
+  				query.whereEqualTo("scaleitem", object.name);
+  				query.whereEqualTo("name", object.imageLocation.replaceAll("\\W+", ""));
+  				query.findInBackground(new FindCallback<ParseObject>(){
+					@Override
+					public void done(List<ParseObject> l, ParseException e) {
+						try{
+							if(e == null && l != null && l.size() > 0){
+								ParseObject image = l.get(0);
+								ParseFile file = image.getParseFile("file");
+								byte[] data = file.getData();
+								object.image = BitmapFactory.decodeByteArray(data, 0, data.length);
+							}
+							else{
+								CouldntLoad(object);
+							}
+						}
+						catch (Exception a){
+							a.printStackTrace();
+							CouldntLoad(object);
+						}
+					}});
+				
   			} catch (Exception e) {
+  				CouldntLoad(object);
   			}
   			return "";
   		}
+		private void CouldntLoad(ScaleObject object){
+			Intent intent = new Intent(WalkFragment.this.getActivity(), Popup.class);
+			intent.putExtra("title", "Error");
+			intent.putExtra("text", "Could not load image for "+object.name);
+			startActivity(intent);
+		}
   	}
-
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		super.onCreateOptionsMenu(menu, inflater);

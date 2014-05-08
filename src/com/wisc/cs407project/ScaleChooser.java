@@ -30,9 +30,11 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import com.wisc.cs407project.R;
+import com.wisc.cs407project.PathChooser.LoadPathsTask;
 
 public class ScaleChooser extends Activity implements OnItemClickListener {
 	private ListView scales;
@@ -40,11 +42,18 @@ public class ScaleChooser extends Activity implements OnItemClickListener {
 	private String currentDirectory;
 	private static final String SETTINGSNAME = "WalkSettings";
 	private HashMap<String,String> fileName = new HashMap<String,String>();
+	private Button localButton;
+	private Button changeDirectory;
+	private boolean local = true;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.chooser);
+		localButton = (Button)findViewById(R.id.local_btn);
+		changeDirectory = (Button)findViewById(R.id.changeDirectory_btn);
+		changeDirectory.setVisibility(View.GONE);
+		localButton.setVisibility(View.VISIBLE);
 		ref = this;
 		scales = (ListView) findViewById(R.id.listView1);
 		scales.setOnItemClickListener(this);
@@ -58,6 +67,24 @@ public class ScaleChooser extends Activity implements OnItemClickListener {
 		} else {
 			ChangeDirectoryClicked(null);
 		}
+	}
+	
+	public void ChangeLocalClicked(View view)
+	{
+		local = !local;
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(ref,
+				android.R.layout.simple_list_item_1, new ArrayList<String>());
+		fileName.clear();
+		scales.setAdapter(adapter);
+		if (local)
+		{
+			localButton.setText("Change To Online Paths");			
+		}
+		else
+		{			
+			localButton.setText("Change To Local Paths");
+		}
+		new LoadScalesTask().execute(currentDirectory);
 	}
 
 	public void ChangeDirectoryClicked(View view) {

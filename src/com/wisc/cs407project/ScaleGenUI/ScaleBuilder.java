@@ -17,11 +17,14 @@ import org.apache.commons.validator.routines.UrlValidator;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
+import com.parse.ParseException;
+import com.parse.SaveCallback;
 import com.wisc.cs407project.Popup;
 import com.wisc.cs407project.R;
 import com.wisc.cs407project.R.id;
 import com.wisc.cs407project.R.layout;
 import com.wisc.cs407project.R.string;
+import com.wisc.cs407project.ParseObjects.StaticUtils;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -63,7 +66,7 @@ public class ScaleBuilder extends Activity {
 	ScaleGenerator scale;
 	EditText headerName;
 	EditText headerUnits;
-	Button headerAdd, headerSort, headerSave;
+	Button headerAdd, headerSort, headerSave, headerUpload;
 	String loadedPath = "";
 	boolean cancelSave = false;
 	boolean holdForDialog = false;
@@ -169,11 +172,24 @@ public class ScaleBuilder extends Activity {
 				}
 			});
 			
+			// Upload button
+			headerUpload = (Button)findViewById(R.id.builderHeaderUploadButton);
+			headerUpload.setOnClickListener(new View.OnClickListener(){
+				@Override
+				public void onClick(View v) {
+					String name = ScaleBuilder.this.GetLocalScalePath();
+					if(name == null)
+						return;
+					path = name;
+					new UploadScaleTask().execute(path);
+				}});
+			
 			// Add Button
 			headerSave = (Button)findViewById(R.id.builderHeaderSaveButton);
 			headerSave.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
 					// Check access to device
+					
 					String extState = Environment.getExternalStorageState();
 					if(!extState.equals(Environment.MEDIA_MOUNTED)) {
 						// This shouldn't be possible
@@ -181,22 +197,10 @@ public class ScaleBuilder extends Activity {
 						return;
 					}
 					
-					// Check if name is empty
-					String scaleName = scale.scaleName;
-					if (scaleName.equals("")) {
-						Intent intent = new Intent(ref, Popup.class);
-						intent.putExtra("title", "Error");
-						intent.putExtra("text", "No Scale Name Entered");
-						startActivity(intent);
-						Log.e("ERROR", "Scale must have a name");
+					String name = ScaleBuilder.this.GetLocalScalePath();
+					if(name == null)
 						return;
-					}
-					
-					// Check if name is already used (by a file other than what was loaded)
-					// Confirm overwrite, save here if confirmed
-					scaleName = scaleName + ".xml";
-					path = Environment.getExternalStorageDirectory().toString();
-					path = path + getResources().getString(R.string.app_scale_directory) + "/" + scaleName;
+					path = name;
 					if ((!path.equals(loadedPath)) && (new File(path).exists())) {
 						
 						AlertDialog.Builder builder = new AlertDialog.Builder(ref);
@@ -235,6 +239,27 @@ public class ScaleBuilder extends Activity {
 				headerSave.setEnabled(false);
 			}
 	}
+	
+	private String GetLocalScalePath(){				
+		// Check if name is empty
+		String scaleName = scale.scaleName;
+		if (scaleName.equals("")) {
+			Intent intent = new Intent(ref, Popup.class);
+			intent.putExtra("title", "Error");
+			intent.putExtra("text", "No Scale Name Entered");
+			startActivity(intent);
+			Log.e("ERROR", "Scale must have a name");
+			return null;
+		}
+		
+		// Check if name is already used (by a file other than what was loaded)
+		// Confirm overwrite, save here if confirmed
+		scaleName = scaleName + ".xml";
+		path = Environment.getExternalStorageDirectory().toString();
+		path = path + getResources().getString(R.string.app_scale_directory) + "/" + scaleName;
+		
+		return path;
+	}
 
 	@Override
 	protected void onStop() {
@@ -254,6 +279,29 @@ public class ScaleBuilder extends Activity {
 		new SaveScaleTask().execute(path);
 	}
 
+	private class UploadScaleTask extends
+	AsyncTask<String, Void, String> {
+
+		@Override
+		protected String doInBackground(String... arg0) {
+			String xmlFile = scale.getXML();
+			byte[] data = xmlFile.getBytes();
+			final String path = arg0[0];
+			StaticUtils.CreateScale(data, path, new SaveCallback(){
+				@Override
+				public void done(ParseException arg0) {
+					Toast toast = Toast.makeText(getApplicationContext(), StaticUtils.GetFileName(path) + " saved", Toast.LENGTH_LONG);
+					toast.setGravity(Gravity.CENTER, 0, 0);
+					View view = toast.getView();
+					view.setBackgroundResource(R.color.grey);
+					toast.show();
+				}});
+
+			
+			return "";
+		}
+	}
+	
 	private class SaveScaleTask extends
 	AsyncTask<String, Void, String> {
 

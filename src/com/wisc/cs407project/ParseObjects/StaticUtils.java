@@ -1228,7 +1228,58 @@ public class StaticUtils {
 			"</kml>\r\n" + 
 			"";
 	
+	public static String GetFileName(String path){
+		int dot = path.lastIndexOf(".");
+		if(dot < 0){
+			dot = path.length();
+		}		
+		String firstPart = path.substring(0, dot);
+		firstPart = firstPart.substring(firstPart.lastIndexOf("/")+1);
+		return firstPart;
+	}
 	
+	public static void CreateScale(final byte[] data, String originalName, final SaveCallback success){
+		String fileExt = "";
+		int dot = originalName.lastIndexOf(".");
+		if(dot < 0){
+			dot = originalName.length();
+		}
+		else{
+			fileExt = originalName.substring(dot);
+		}
+		
+		String firstPart = originalName.substring(0, dot);
+		firstPart = firstPart.substring(firstPart.lastIndexOf("/")+1);
+		final String name = firstPart.replaceAll("\\W+", "")+fileExt;
+		//TODO check if duplicating
+		final ParseObject parseObject = new ParseObject("ScaleFile");
+		parseObject.saveInBackground(new SaveCallback(){
+			@Override
+			public void done(ParseException e) {
+				if(e == null){
+			        final ParseFile file = new ParseFile(name, data);
+			        file.saveInBackground(new SaveCallback(){
+
+						@Override
+						public void done(ParseException e) {
+							if(e==null){
+								int dot = name.lastIndexOf(".");
+								dot = dot < 0 ? name.length() : dot;
+								parseObject.put("name", name.substring(0, dot));
+								parseObject.put("file", file);
+								try {
+									parseObject.saveInBackground(success);
+								} catch (Exception e1) {
+									e1.printStackTrace();
+								}
+							}
+							else{
+								e.printStackTrace();
+							}
+						}});
+				}
+			}});
+	}
 	
 	public static void CreatePath(final String content, String originalName){	
 		
@@ -1262,7 +1313,6 @@ public class StaticUtils {
 								try {
 									parseObject.save();
 								} catch (ParseException e1) {
-									// TODO Auto-generated catch block
 									e1.printStackTrace();
 								}
 							}

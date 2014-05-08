@@ -115,14 +115,14 @@ public class PathChooser extends Activity implements OnItemClickListener {
 		}
 		else
 		{			
-			changeDirectory.setVisibility(View.VISIBLE);
+			//changeDirectory.setVisibility(View.VISIBLE);
 			localButton.setText("Change To Local Paths");
-			SharedPreferences settings = getSharedPreferences(SETTINGSNAME, 0);
+			//SharedPreferences settings = getSharedPreferences(SETTINGSNAME, 0);
 			//currentDirectory = settings.getString("pathDirectory", "");
-			currentDirectory = "http://pages.cs.wisc.edu/~hrycynia/cs407project/";
-			if (currentDirectory != "") {
+			//currentDirectory = "http://pages.cs.wisc.edu/~hrycynia/cs407project/";
+			//if (currentDirectory != "") {
 				new LoadPathsTask().execute(currentDirectory);
-			}
+			//}
 		}
 	}
 	

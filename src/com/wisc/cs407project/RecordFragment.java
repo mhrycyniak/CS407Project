@@ -77,7 +77,7 @@ public class RecordFragment extends Fragment {
 	private Button recordButton, drawButton, modeButton, saveButton, undoButton, locationButton, goButton, loadButton;
 	private LocationManager locationMan;
 	private RecordLocationListener locationLis;
-	private boolean recording, validPath, drawing, markerPlaced, locationOpen, warningsShown, localLoad, isResumeLoad;//, atLeastTwoPoints;
+	private boolean recording, validPath, drawing, markerPlaced, locationOpen, warningsShown, localLoad, isResumeLoad;
 	private boolean inRecordMode = true;
 
 	private LatLng dragOffset;
@@ -93,14 +93,12 @@ public class RecordFragment extends Fragment {
 				// Reset everything
 				resetFragment();
 			} else if(action.equals("LOAD_RECORD_FRAGMENT")) {
-				// TODO perform load
 				
 				String loadFile = intent.getStringExtra("kmlFile");
+				
+				resetFragment();
 				localLoad = intent.getBooleanExtra("isLocalLoad", true);
 				isResumeLoad = intent.getBooleanExtra("isResumeLoad", false);
-				
-				// TODO resetfragment, set proper display
-				resetFragment();
 
 				// Initialize the path drawing buttons, etc
 				drawButton.setVisibility(View.GONE);
@@ -217,6 +215,8 @@ public class RecordFragment extends Fragment {
 		markerPlaced = false;
 		recording = false;
 		validPath = false;
+		localLoad = false;
+		isResumeLoad = false;
 
 		recordButton.setText("Record Path");
 		recordButton.setVisibility(View.VISIBLE);
@@ -226,6 +226,7 @@ public class RecordFragment extends Fragment {
 		loadButton.setVisibility(View.VISIBLE);
 		loadClicked();
 		modeButton.setVisibility(View.GONE);
+		modeButton.setText("Draw Mode");
 		saveButton.setVisibility(View.GONE);
 		undoButton.setVisibility(View.GONE); 
 		locationButton.setVisibility(View.GONE);
@@ -281,6 +282,24 @@ public class RecordFragment extends Fragment {
 		// Unregister since the activity is about to be closed.
 		LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mMessageReceiver);
 		super.onStop();
+		builtPath = state.getPath();
+		if (state.stateList.size() < 2 || builtPath == null || builtPath.equals("")) {
+			
+		} else if (validPath) {
+			// Check access to device
+			String extState = Environment.getExternalStorageState();
+			if(!extState.equals(Environment.MEDIA_MOUNTED)) {
+				Log.e("ERROR: Save on Stop", "Storage not mounted");
+				return;
+			}
+			
+			// Build the save path
+			String path = Environment.getExternalStorageDirectory().toString();
+			path = path + "/" + getResources().getString(R.string.app_name) + "/"
+					+ getResources().getString(R.string.resume_path_backup_filename);
+			
+			new SavePathTask().execute(path);
+		}
 	}
 
 	@Override
@@ -327,9 +346,6 @@ public class RecordFragment extends Fragment {
 						marker.setPosition(state.currentState.leadingMarker);
 					}
 					else {
-						// Ignore Google's repositioning
-						marker.setPosition(new LatLng(marker.getPosition().latitude - dragOffset.latitude, marker.getPosition().longitude - dragOffset.longitude));
-
 						boolean routeNeeded = state.refactor();
 						// If there was a lagging marker to build a route from
 						if (routeNeeded) {
@@ -338,7 +354,7 @@ public class RecordFragment extends Fragment {
 							new DownloadTask().execute(dirUrl);
 						} else {
 							ArrayList<LatLng> newLine = new ArrayList<LatLng>();
-							newLine.add(marker.getPosition());
+							newLine.add(new LatLng(marker.getPosition().latitude - dragOffset.latitude, marker.getPosition().longitude - dragOffset.longitude));
 							state.addState(false, newLine, null);
 						}
 					}
@@ -359,6 +375,14 @@ public class RecordFragment extends Fragment {
 						// Ignore Google's stupid repositioning of the marker
 						dragOffset = new LatLng(marker.getPosition().latitude - state.currentState.leadingMarker.latitude, marker.getPosition().longitude - state.currentState.leadingMarker.longitude);
 						marker.setPosition(state.currentState.leadingMarker);
+						
+						// If no lagging marker, insert one at leading marker location
+						if (state.currentLaggingMarker == null && state.currentLeadingMarker != null) {
+							ArrayList<LatLng> newLine = new ArrayList<LatLng>();
+							newLine.add(state.currentState.leadingMarker);
+							state.addState(true, newLine, marker);
+						}
+						
 						state.prepareForRefactor();
 					}
 				}
@@ -571,7 +595,8 @@ public class RecordFragment extends Fragment {
 					// Don't allow refactoring if there's no path to refactor
 					if (state.currentLaggingMarker == null) {
 						if (state.currentLeadingMarker != null) {
-							state.currentLeadingMarker.setDraggable(false);
+							// TODO Testing, this may cause bugs
+							//state.currentLaggingMarker = state.currentLeadingMarker;
 						}
 					}
 				}
@@ -944,15 +969,19 @@ public class RecordFragment extends Fragment {
 	}
 
 	private void populate(List<String> coordinates) {
-
+		if (coordinates.isEmpty()) return;
+		
 		ArrayList<LatLng> points = new ArrayList<LatLng>();
-
-		for (String point : coordinates) {
-			String[] coordinate = point.split(",");
+		ArrayList<LatLng> initial = new ArrayList<LatLng>();
+		String[] coordinate = coordinates.get(0).split(",");
+		initial.add(new LatLng(Double.parseDouble(coordinate[1]), Double.parseDouble(coordinate[0])));
+		for (int i = 0; i < coordinates.size(); i++) {
+			coordinate = coordinates.get(i).split(",");
 			points.add(new LatLng(Double.parseDouble(coordinate[1]), Double.parseDouble(coordinate[0])));
 		}
+		state.addState(false, initial, null);
 		state.addState(true, points, null);
-		validPath = true;
+
 		if (state.currentState.leadingMarker != null && state.currentState.laggingMarker != null) {
 			LatLngBounds.Builder llb = new LatLngBounds.Builder();
 			for (LatLng point : points) {
@@ -962,6 +991,8 @@ public class RecordFragment extends Fragment {
 			//Change the padding as per needed
 			CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 100);
 			map.animateCamera(cu);
+			validPath = true;
+			markerPlaced = true;
 		}
 	}
 }

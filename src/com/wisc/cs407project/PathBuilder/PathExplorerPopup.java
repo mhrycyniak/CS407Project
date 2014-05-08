@@ -84,6 +84,7 @@ public class PathExplorerPopup extends Activity {
 			resume.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
 					isResuming = true;
+					localPath = true;
 					new LoadIndividualPathTask().execute(resumePath);
 				}
 			});

@@ -23,6 +23,8 @@ public class Settings extends Activity {
 			startActivity(removePath);
 			return;
 		case R.id.deleteScale:
+			Intent removeScale = new Intent(this, DeleteScale.class);
+			startActivity(removeScale);
 			return;
 		}
 	}

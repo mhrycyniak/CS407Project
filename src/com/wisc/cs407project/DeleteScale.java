@@ -20,11 +20,15 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
-public class DeletePath extends Activity {
-	private ListView paths;
+import com.parse.ParseObject;
+
+public class DeleteScale extends Activity {
+	private ListView scales;
+	List<ParseObject> parseScales;
+	private DeleteScale ref;
 	private HashMap<String,String> fileName = new HashMap<String,String>();
-	private Button changeDirectory, localButton;
-	private DeletePath ref;
+	private Button localButton;
+	private Button changeDirectory;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -34,67 +38,55 @@ public class DeletePath extends Activity {
 		changeDirectory = (Button)findViewById(R.id.changeDirectory_btn);
 		changeDirectory.setVisibility(View.GONE);
 		localButton.setVisibility(View.GONE);
-		paths = (ListView) findViewById(R.id.listView1);
+		scales = (ListView) findViewById(R.id.listView1);
 		ref = this;
 		ActionBar actionBar = getActionBar();
 	    actionBar.setDisplayHomeAsUpEnabled(true);
-		loadLocalPaths();
+		loadLocalScales();
 	}
-	
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-	    switch (item.getItemId()) {
-	        case android.R.id.home:
-	            // Back to parent activity
-	            this.finish();
-	            return true;
-	        default:
-	            return super.onOptionsItemSelected(item);
-	    }
-	}
-	
-	private void loadLocalPaths() {
+
+	private void loadLocalScales() {
 		try {
-			final List<String> pathList = new ArrayList<String>();
-			String directoryPath = Environment.getExternalStorageDirectory().toString() + getResources().getString(R.string.app_path_directory);
+			final List<String> scaleList = new ArrayList<String>();
+			String directoryPath = Environment.getExternalStorageDirectory().toString() + getResources().getString(R.string.app_scale_directory);
 			
 			File directory = new File(directoryPath);        
 			File files[] = directory.listFiles();
 			
-			// Loop through all paths
+			// Loop through all scales
 			for (int i=0; i < files.length; i++) {
 				String name = files[i].getName();
 			    String temp = name.substring(0, name.length() - 4);
-			    pathList.add(temp);
+			    scaleList.add(temp);
 			    fileName.put(temp, name);
 			}
-			final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, pathList);
-			paths.setAdapter(adapter);
+			final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, scaleList);
+			scales.setAdapter(adapter);
 			
-			paths.setOnItemClickListener(new android.widget.AdapterView.OnItemClickListener() {
+			scales.setOnItemClickListener(new android.widget.AdapterView.OnItemClickListener() {
 	            @Override
 	            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
 	            	// AlertDialog.Builder
 					AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
 
-					builder.setMessage("Are you sure you want to delete the selected path?").setTitle("Warning");
+					builder.setMessage("Are you sure you want to delete the selected scale?").setTitle("Warning");
 
 					// Add the buttons
 					builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
-							String item = pathList.get(position);
+							String item = scaleList.get(position);
 							
-							// Remove path from storage
+							// Remove scale from storage
 							String directoryPath = Environment.getExternalStorageDirectory().toString();
-							final String filePath = directoryPath + getResources().getString(R.string.app_path_directory) + "/" + item + ".kml";
+							final String filePath = directoryPath + getResources().getString(R.string.app_scale_directory) + "/" + item + ".xml";
 							File file = new File(filePath);
 							boolean deleted = file.delete();
 							
 							if (deleted) {
 								// Remove from list if deleted
-								pathList.remove(position);
+								scaleList.remove(position);
 								adapter.notifyDataSetChanged();
-								Toast toast = Toast.makeText(ref, item + " path deleted.", Toast.LENGTH_SHORT);
+								Toast toast = Toast.makeText(ref, item + " scale deleted.", Toast.LENGTH_SHORT);
 								toast.setGravity(Gravity.CENTER, 0, 0);
 								View view2 = toast.getView();
 								view2.setBackgroundResource(R.color.grey);
@@ -117,5 +109,17 @@ public class DeletePath extends Activity {
 	        });
 		} catch (Exception e) {
 		}	
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    switch (item.getItemId()) {
+	        case android.R.id.home:
+	            // Back to parent activity
+	            this.finish();
+	            return true;
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
 	}
 }

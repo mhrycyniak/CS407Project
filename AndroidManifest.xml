@@ -96,6 +96,10 @@
             android:name="com.wisc.cs407project.DeletePath"
             android:label="Delete Path" />
         
+        <activity
+            android:name="com.wisc.cs407project.DeleteScale"
+            android:label="Delete Scale" />
+        
         <activity android:name="com.google.android.gms.maps.SupportMapFragment"/>
             <meta-data
             android:name="com.google.android.gms.version"

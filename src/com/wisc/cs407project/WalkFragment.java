@@ -217,7 +217,6 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 				distanceTraveled = 0;
 				distanceInterval = 0;
 				
-				//locationLis = null;
 				// Clear map
 				map.clear();
 				getActivity().findViewById(R.id.linearLayout1).setVisibility(View.GONE);

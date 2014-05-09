@@ -14,8 +14,16 @@
     <string name="scale_settings">Create Scale</string>
     <string name="resume_scale_backup_filename">last_edited_scale_file.xml</string>
     <string name="resume_path_backup_filename">last_edited_path_file.kml</string>
-    <item type="id" name="TAG_BUILDER_IMGLOAD_POSITION_ID"/>
-    <item type="id" name="TAG_BUILDER_IMGLOAD_TEXT_ID"/>
-    <item type="id" name="TAG_BUILDER_IMGLOAD_ID"/>
+
+    <item name="TAG_BUILDER_IMGLOAD_POSITION_ID" type="id"/>
+    <item name="TAG_BUILDER_IMGLOAD_TEXT_ID" type="id"/>
+    <item name="TAG_BUILDER_IMGLOAD_ID" type="id"/>
+
+    <string name="action_about">About</string>
+    <string name="title_activity_about">About</string>
+    <string name="about_info">Pathspective was created by Chelsey Denton, Andrew Gailey, and Michael Hrycyniak.
+        Some of the inital code for the app was also provided by Jacob Berger.
+        </string>
+    <string name="google_stackoverflow"><a href="http://youtube.com">Watch a demo of Pathspective</a></string>
 
 </resources>

@@ -140,6 +140,7 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 			}
 			
 			if (!scaleItem.isEmpty() && pathURL != null) {
+				map.clear();
 				new LoadIndividualPathTask().execute(pathURL);
 			}
 		} else if (resultCode == 2) {
@@ -151,6 +152,7 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 			}
 			
 			if (scaleItem != null && pathURL != null) {
+				map.clear();
 				new LoadIndividualPathTask().execute(pathURL);
 			}
 		}

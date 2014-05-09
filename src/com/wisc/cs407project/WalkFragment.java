@@ -138,12 +138,20 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 			if (!scaleItem.isEmpty()) {				
 				scaleButton.setBackgroundResource(R.color.green);
 			}
+			
+			if (!scaleItem.isEmpty() && pathURL != null) {
+				new LoadIndividualPathTask().execute(pathURL);
+			}
 		} else if (resultCode == 2) {
 			Bundle extra = data.getExtras();
 			pathURL = extra.getString("path");
 			localPath = extra.getBoolean("localPath", false);
 			if (pathURL != null) {
 				pathButton.setBackgroundResource(R.color.green);
+			}
+			
+			if (scaleItem != null && pathURL != null) {
+				new LoadIndividualPathTask().execute(pathURL);
 			}
 		}
 	}
@@ -171,9 +179,8 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 				if (scaleItem != null && pathURL != null) {
 					getActivity().findViewById(R.id.relativeLayout1).setVisibility(View.GONE);
 					getActivity().findViewById(R.id.linearLayout1).setVisibility(View.VISIBLE);
-					//locationLis = new ScaleLocationListener(ref);
+					// Request location updates when walk path button is clicked
 					locationMan.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 2, ref);
-					new LoadIndividualPathTask().execute(pathURL);
 				} else if (scaleItem != null && pathURL == null) {
 					Toast toast = Toast.makeText(getActivity(), "Please select a path.", Toast.LENGTH_SHORT);
 					toast.setGravity(Gravity.CENTER, 0, 0);
@@ -487,8 +494,6 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 	@Override
 	public void onResume() {
 		super.onResume();
-		//locationLis = new ScaleLocationListener(ref);
-		locationMan.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 2, this);
 		inFocus = true;
 	}
 
@@ -673,7 +678,7 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 	private void startNotification() {
 		// Prepare intent which is triggered if the notification is clicked.
 		Intent intent = new Intent(getActivity(), Scale.class);
-		//intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 		PendingIntent contentIntent = PendingIntent.getActivity(getActivity(), 0, intent, 0);
 
 		// Build notification
@@ -696,7 +701,7 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 	private void scaleNotification(String name) {
 		// Prepare intent which is triggered if the notification is clicked.
 		Intent intent = new Intent(getActivity(), Scale.class);
-		//intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 		PendingIntent contentIntent = PendingIntent.getActivity(getActivity(), 0, intent, 0);
 
 		// Build notification

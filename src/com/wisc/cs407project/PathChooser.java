@@ -147,6 +147,7 @@ public class PathChooser extends Activity implements OnItemClickListener {
 		protected List<String> doInBackground(String... arg0) {
 			List<String> pathList = new ArrayList<String>();
 			pathList.add("Loading...");
+			parsePaths = null;
 			
 			ParseQuery<ParseObject> query = ParseQuery.getQuery("PathFile");	
 			query.findInBackground(new FindCallback<ParseObject>(){
@@ -226,6 +227,9 @@ public class PathChooser extends Activity implements OnItemClickListener {
 		path += fileName.get((String) paths.getItemAtPosition(arg2));
 		
 		if(!local){
+			if(parsePaths == null){
+				return;
+			}
 			path = parsePaths.get(arg2).getString("name");
 		}
 		Intent intent = new Intent();

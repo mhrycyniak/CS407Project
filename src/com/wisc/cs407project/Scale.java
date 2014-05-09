@@ -72,6 +72,10 @@ public class Scale extends Activity {
 			Intent settings = new Intent(this, Settings.class);
 			startActivity(settings);
 			return true;
+		case R.id.action_about:
+			Intent about = new Intent(this, About.class);
+			startActivity(about);
+			return true;
 		}
 		return false;
 	}

@@ -59,28 +59,23 @@ public class PathChooser extends Activity implements OnItemClickListener {
 		local = true;
 		ref = this;
 		paths = (ListView) findViewById(R.id.listView1);
-		paths.setOnItemClickListener(this);
-		paths.setOnItemLongClickListener(new OnItemLongClickListener(){
-			@Override
-			public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
-					int index, long arg3) {
-				if(local){
-					new UploadPathTask().execute(fileName.get((String) paths.getItemAtPosition(index)));
-					return true;
-				}
-				return false;
-			}});
+		paths.setOnItemClickListener(this);		
 		LoadLocalPath();
 	}
 	
-	private class UploadPathTask extends AsyncTask<String, Void, String> {
+	public static class UploadPathTask extends AsyncTask<String, Void, String> {
+		private Activity ref;
+		
+		public UploadPathTask(Activity activity){
+			ref = activity;
+		}
 
 		@Override
 		protected String doInBackground(String... arg0) {
 			try {
 				String name = arg0[0];
 				BufferedReader in = null;
-				String directoryPath = Environment.getExternalStorageDirectory().toString() + getResources().getString(R.string.app_path_directory);
+				String directoryPath = Environment.getExternalStorageDirectory().toString() + ref.getResources().getString(R.string.app_path_directory);
 				in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(directoryPath, arg0[0]))));
 				
 				String str;
@@ -94,6 +89,7 @@ public class PathChooser extends Activity implements OnItemClickListener {
 				
 				return fullFile;
 			} catch (Exception e) {
+				e.printStackTrace();
 			}
 			return null;
 		}

@@ -63,6 +63,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.wisc.cs407project.ParseObjects.StaticUtils;
 import com.wisc.cs407project.PathBuilder.PathExplorerPopup;
 import com.wisc.cs407project.PathBuilder.PathState;
 import com.wisc.cs407project.PathBuilder.Route;
@@ -73,7 +74,7 @@ public class RecordFragment extends Fragment {
 	private GoogleMap map;
 	private EditText fromText, toText;
 	private LinearLayout searchBox;
-	private Button recordButton, drawButton, modeButton, saveButton, undoButton, locationButton, goButton, loadButton;
+	private Button recordButton, drawButton, modeButton, saveButton, uploadButton, undoButton, locationButton, goButton, loadButton;
 	private LocationManager locationMan;
 	private RecordLocationListener locationLis;
 	private boolean recording, validPath, drawing, markerPlaced, locationOpen, warningsShown, localLoad, isResumeLoad;
@@ -108,6 +109,8 @@ public class RecordFragment extends Fragment {
 				modeClicked();
 				saveButton.setVisibility(View.VISIBLE);
 				saveClicked();
+				uploadButton.setVisibility(View.VISIBLE);
+				uploadClicked();
 				undoButton.setVisibility(View.VISIBLE);
 				undoClicked();
 				map.setMyLocationEnabled(false);
@@ -227,6 +230,7 @@ public class RecordFragment extends Fragment {
 		modeButton.setVisibility(View.GONE);
 		modeButton.setText("Draw Mode");
 		saveButton.setVisibility(View.GONE);
+		uploadButton.setVisibility(View.GONE);
 		undoButton.setVisibility(View.GONE); 
 		locationButton.setVisibility(View.GONE);
 		searchBox.setVisibility(View.GONE);
@@ -263,6 +267,8 @@ public class RecordFragment extends Fragment {
 		modeButton.setVisibility(View.GONE);
 		saveButton = (Button) myFragmentView.findViewById(R.id.rfSaveButton);
 		saveButton.setVisibility(View.GONE);
+		uploadButton = (Button) myFragmentView.findViewById(R.id.rfUploadButton);
+		uploadButton.setVisibility(View.GONE);
 		undoButton = (Button) myFragmentView.findViewById(R.id.rfUndoButton);
 		undoButton.setVisibility(View.GONE);
 		locationButton = (Button) myFragmentView.findViewById(R.id.rfLocationButton);
@@ -552,6 +558,8 @@ public class RecordFragment extends Fragment {
 				modeClicked();
 				saveButton.setVisibility(View.VISIBLE);
 				saveClicked();
+				uploadButton.setVisibility(View.VISIBLE);
+				uploadClicked();
 				undoButton.setVisibility(View.VISIBLE);
 				undoClicked();
 				map.setMyLocationEnabled(false);
@@ -620,6 +628,27 @@ public class RecordFragment extends Fragment {
 			}
 		});
 	}
+	
+	private void uploadClicked() {
+		uploadButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Log.d("upload", "clicked");
+				builtPath = state.getPath();
+				if (state.stateList.size() < 2 || builtPath == null || builtPath.equals("")) {
+					Intent intent = new Intent(getActivity(), Popup.class);
+					intent.putExtra("title", "Warning");
+					intent.putExtra("text", "The required minimum of two points has not yet been recorded.");
+					startActivity(intent);
+				}
+				else {
+					//new PathChooser.UploadPathTask(RecordFragment.this.getActivity()).execute(builtPath);
+					
+					upload(builtPath);
+				}
+			}
+		});
+	}
 
 	private void recordClicked() {	
 		recordButton.setOnClickListener(new OnClickListener() {
@@ -678,6 +707,57 @@ public class RecordFragment extends Fragment {
 			}
 		});
 	}
+	
+	private void upload(final String fileContents) {
+		AlertDialog.Builder alertBuilder = new AlertDialog.Builder(getActivity());
+		alertBuilder.setTitle("Uploading the Path");
+		LinearLayout layout = new LinearLayout(getActivity());
+		layout.setOrientation(LinearLayout.VERTICAL);
+
+		// Set an EditText view to get user input
+		final TextView firstMessage = new TextView(getActivity());
+		firstMessage.setText("Input the path name.");
+		firstMessage.setTextSize(15);
+		final EditText fileName = new EditText(getActivity());
+		layout.addView(firstMessage);
+		layout.addView(fileName);
+		alertBuilder.setView(layout);
+
+		alertBuilder.setPositiveButton("Upload", null);
+
+		alertBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				
+			}
+		});
+
+		final AlertDialog alert = alertBuilder.create();
+		alert.setOnShowListener(new DialogInterface.OnShowListener() {
+
+			@Override
+			public void onShow(DialogInterface dialog) {
+				Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
+				b.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View view) {
+						if (fileName.getText().toString().isEmpty()) {
+							Intent intent = new Intent(getActivity(), Popup.class);
+							intent.putExtra("title", "Error");
+							intent.putExtra("text", "File name cannot be left empty.");
+							getActivity().startActivity(intent);
+						} else {
+							StaticUtils.CreatePath(builtPath, fileName.getText().toString() + ".kml");
+							alert.dismiss();
+							return;
+
+						}
+					}
+				});
+			}
+		});
+		alert.show();
+	}
+	
 	//////////////////////////////////////////////////////////////
 	private void save(final String fileContents) {
 		AlertDialog.Builder alertBuilder = new AlertDialog.Builder(getActivity());

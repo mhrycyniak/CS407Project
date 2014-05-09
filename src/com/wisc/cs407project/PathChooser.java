@@ -63,38 +63,6 @@ public class PathChooser extends Activity implements OnItemClickListener {
 		LoadLocalPath();
 	}
 	
-	public static class UploadPathTask extends AsyncTask<String, Void, String> {
-		private Activity ref;
-		
-		public UploadPathTask(Activity activity){
-			ref = activity;
-		}
-
-		@Override
-		protected String doInBackground(String... arg0) {
-			try {
-				String name = arg0[0];
-				BufferedReader in = null;
-				String directoryPath = Environment.getExternalStorageDirectory().toString() + ref.getResources().getString(R.string.app_path_directory);
-				in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(directoryPath, arg0[0]))));
-				
-				String str;
-				String fullFile = "";
-				while ((str = in.readLine()) != null) {
-					fullFile += str + "\n";
-				}
-				in.close();
-				
-				StaticUtils.CreatePath(fullFile, name);
-				
-				return fullFile;
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			return null;
-		}
-	}
-	
 	public void ChangeLocalClicked(View view)
 	{
 		local = !local;

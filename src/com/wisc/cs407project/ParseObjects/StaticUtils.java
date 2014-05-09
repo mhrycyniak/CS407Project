@@ -189,7 +189,7 @@ public class StaticUtils {
 	}
 	
 	
-	public static void CreatePath(final String content, String originalName){	
+	public static void CreatePath(final String content, String originalName, final Activity ref){	
 		
 		String fileExt = "";
 		int dot = originalName.lastIndexOf(".");
@@ -200,23 +200,70 @@ public class StaticUtils {
 			fileExt = originalName.substring(dot);
 		}
 		
+		final byte[] data = content.getBytes();
 		String firstPart = originalName.substring(0, dot);
 		final String name = firstPart.replaceAll("\\W _+", "")+fileExt;
+		int d = name.lastIndexOf(".");
+		d = d < 0 ? name.length() : d;
+		final String parseName = name.substring(0, d);
+		
+		ParseQuery<ParseObject> query = ParseQuery.getQuery("PathFile");
+		query.whereEqualTo("name", parseName);
+		query.findInBackground(new FindCallback<ParseObject>(){
+			@Override
+			public void done(List<ParseObject> l, ParseException e) {
+				if(l==null || l.size()<=0){
+					createPath(data, name, parseName);
+				}
+				else{
+					final ParseObject duplicate = l.get(0);
+					AlertDialog.Builder builder = new AlertDialog.Builder(ref);
+					builder.setTitle("A path by this name already exists. Do you want to overwrite it?");
+					// Add the buttons
+					builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() 
+					{
+						public void onClick(DialogInterface dialog, int id) 
+						{
+							dialog.dismiss();
+							try {
+								duplicate.delete();
+							} catch (ParseException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							createPath(data, name, parseName);
+						}
+					});
+					builder.setNegativeButton("No", new DialogInterface.OnClickListener() 
+					{
+						public void onClick(DialogInterface dialog, int id) 
+						{
+							dialog.dismiss();
+						}
+					});
+
+					// Create and show
+					builder.create();
+					builder.show(); 
+				}
+			}});
+		
+	
+	}
+	
+	private static void createPath(final byte[] data, final String name, final String parseName){
 		final ParseObject parseObject = new ParseObject("PathFile");
 		parseObject.saveInBackground(new SaveCallback(){
 			@Override
 			public void done(ParseException e) {
-				if(e == null){
-					byte[] data = content.getBytes();
+				if(e == null){					
 			        final ParseFile file = new ParseFile(name, data);
 			        file.saveInBackground(new SaveCallback(){
 
 						@Override
 						public void done(ParseException e) {
 							if(e==null){
-								int dot = name.lastIndexOf(".");
-								dot = dot < 0 ? name.length() : dot;
-								parseObject.put("name", name.substring(0, dot));
+								parseObject.put("name", parseName);
 								parseObject.put("file", file);
 								try {
 									parseObject.save();
@@ -232,7 +279,6 @@ public class StaticUtils {
 				}
 			}});
 	}
-	
 	public static void CreatePlanetScale(){
 		final Scale PlanetScale = new Scale();
 		PlanetScale.SetName("Planets");

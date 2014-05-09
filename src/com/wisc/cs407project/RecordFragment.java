@@ -746,7 +746,7 @@ public class RecordFragment extends Fragment {
 							intent.putExtra("text", "File name cannot be left empty.");
 							getActivity().startActivity(intent);
 						} else {
-							StaticUtils.CreatePath(builtPath, fileName.getText().toString() + ".kml");
+							StaticUtils.CreatePath(builtPath, fileName.getText().toString() + ".kml", RecordFragment.this.getActivity());
 							alert.dismiss();
 							return;
 

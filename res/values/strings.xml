@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">cs407project</string>
+    <string name="app_name">Pathspective</string>
     <string name="app_image_directory">/cs407project/Images</string>
     <string name="app_scale_directory">/cs407project/Scales</string>
     <string name="app_path_directory">/cs407project/Paths</string>

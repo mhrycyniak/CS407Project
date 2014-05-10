@@ -77,7 +77,7 @@ public class RecordFragment extends Fragment {
 	private Button recordButton, drawButton, modeButton, saveButton, uploadButton, undoButton, locationButton, goButton, loadButton;
 	private LocationManager locationMan;
 	private RecordLocationListener locationLis;
-	private boolean recording, validPath, drawing, markerPlaced, locationOpen, warningsShown, localLoad, isResumeLoad;
+	private boolean recording, validPath, drawing, markerPlaced, locationOpen, warningsShown, localLoad, isResumeLoad, directionsAreFromSearch;
 	private boolean inRecordMode = true;
 
 	private LatLng dragOffset;
@@ -338,7 +338,7 @@ public class RecordFragment extends Fragment {
 					// Ignore Google's stupid repositioning of the marker
 					marker.setPosition(new LatLng(marker.getPosition().latitude - dragOffset.latitude, marker.getPosition().longitude - dragOffset.longitude));
 					if (drawing && MapUtils.getDistance(state.currentState.leadingMarker.latitude, state.currentState.leadingMarker.longitude, marker.getPosition().latitude, marker.getPosition().longitude) > 10) {
-						state.extendState(marker.getPosition(), marker);
+						state.extendState(marker.getPosition(), marker, drawing);
 					}
 				}
 			}
@@ -351,7 +351,7 @@ public class RecordFragment extends Fragment {
 						marker.setPosition(state.currentState.leadingMarker);
 					}
 					else {
-						boolean routeNeeded = state.refactor();
+						boolean routeNeeded = state.refactor(drawing);
 						// If there was a lagging marker to build a route from
 						if (routeNeeded) {
 							String dirUrl = getDirectionsUrl(state.currentState.leadingMarker, new LatLng(marker.getPosition().latitude - dragOffset.latitude, marker.getPosition().longitude - dragOffset.longitude));
@@ -360,7 +360,7 @@ public class RecordFragment extends Fragment {
 						} else {
 							ArrayList<LatLng> newLine = new ArrayList<LatLng>();
 							newLine.add(new LatLng(marker.getPosition().latitude - dragOffset.latitude, marker.getPosition().longitude - dragOffset.longitude));
-							state.addState(false, newLine, null);
+							state.addState(false, newLine, null, drawing);
 						}
 					}
 				}
@@ -375,7 +375,7 @@ public class RecordFragment extends Fragment {
 						marker.setPosition(state.currentState.leadingMarker);
 						ArrayList<LatLng> newLine = new ArrayList<LatLng>();
 						newLine.add(state.currentState.leadingMarker);
-						state.addState(false, newLine, marker);
+						state.addState(false, newLine, marker, drawing);
 					} else {
 						// Ignore Google's stupid repositioning of the marker
 						dragOffset = new LatLng(marker.getPosition().latitude - state.currentState.leadingMarker.latitude, marker.getPosition().longitude - state.currentState.leadingMarker.longitude);
@@ -385,7 +385,7 @@ public class RecordFragment extends Fragment {
 						if (state.currentLaggingMarker == null && state.currentLeadingMarker != null) {
 							ArrayList<LatLng> newLine = new ArrayList<LatLng>();
 							newLine.add(state.currentState.leadingMarker);
-							state.addState(true, newLine, marker);
+							state.addState(true, newLine, marker, drawing);
 						}
 						
 						state.prepareForRefactor();
@@ -405,7 +405,7 @@ public class RecordFragment extends Fragment {
 						if (!markerPlaced) {
 							ArrayList<LatLng> newLine = new ArrayList<LatLng>();
 							newLine.add(coords);
-							state.addState(false, newLine, null);
+							state.addState(false, newLine, null, drawing);
 							markerPlaced = true;
 						}
 					}
@@ -418,7 +418,7 @@ public class RecordFragment extends Fragment {
 						} else {
 							ArrayList<LatLng> newLine = new ArrayList<LatLng>();
 							newLine.add(coords);
-							state.addState(false, newLine, null);
+							state.addState(false, newLine, null, drawing);
 							markerPlaced = true;
 						}
 					}
@@ -428,7 +428,7 @@ public class RecordFragment extends Fragment {
 	}
 
 	private void undoLast() {
-		state.revertState();
+		state.revertState(drawing);
 		if (locationOpen) {
 			locationButton.setBackgroundColor(getResources().getColor(R.color.grey));
 			searchBox.setVisibility(View.GONE);
@@ -591,21 +591,12 @@ public class RecordFragment extends Fragment {
 				if (!drawing) {
 					modeButton.setText("Draw Mode");
 					drawing = true;
-					// Make sure leading marker is draggable
-					if (state.currentLeadingMarker != null) {
-						state.currentLeadingMarker.setDraggable(true);
-					}
+					state.modeChange(PathState.MarkerType.DRAW);
 				}
 				else {
 					modeButton.setText("Connect Mode");
 					drawing = false;
-					// Don't allow refactoring if there's no path to refactor
-					if (state.currentLaggingMarker == null) {
-						if (state.currentLeadingMarker != null) {
-							// TODO Testing, this may cause bugs
-							//state.currentLaggingMarker = state.currentLeadingMarker;
-						}
-					}
+					state.modeChange(PathState.MarkerType.CONNECT);
 				}
 			}
 		});
@@ -841,7 +832,7 @@ public class RecordFragment extends Fragment {
 			}
 		});
 		alert.show();
-	} ////////////////////////////////////////////////////
+	}
 
 	public void addEdge(LatLng last, LatLng current) {
 		validPath = true;
@@ -863,6 +854,7 @@ public class RecordFragment extends Fragment {
 		String output = "json";
 		// Building the url to the web service
 		String url = "https://maps.googleapis.com/maps/api/directions/"+output+"?"+parameters;
+		directionsAreFromSearch = false;
 		return url;
 	}
 
@@ -882,6 +874,7 @@ public class RecordFragment extends Fragment {
 		// Building the url to the web service
 		String url = "https://maps.googleapis.com/maps/api/directions/"+output+"?"+parameters;
 		Log.d("search url", url);
+		directionsAreFromSearch = true;
 		return url;
 	}
 
@@ -961,8 +954,8 @@ public class RecordFragment extends Fragment {
 				intent.putExtra("text", "Try adjusting your search parameters.");
 				startActivity(intent);
 			} else {
-				state.addState(true, result.route, null);
-				if (state.currentState.leadingMarker != null && state.currentState.laggingMarker != null) {
+				state.addState(true, result.route, null, drawing);
+				if (directionsAreFromSearch && state.currentState.leadingMarker != null && state.currentState.laggingMarker != null) {
 					LatLngBounds.Builder llb = new LatLngBounds.Builder();
 					for (LatLng point : result.route) {
 						llb.include(point);
@@ -1058,8 +1051,8 @@ public class RecordFragment extends Fragment {
 			coordinate = coordinates.get(i).split(",");
 			points.add(new LatLng(Double.parseDouble(coordinate[1]), Double.parseDouble(coordinate[0])));
 		}
-		state.addState(false, initial, null);
-		state.addState(true, points, null);
+		state.addState(false, initial, null, drawing);
+		state.addState(true, points, null, drawing);
 
 		if (state.currentState.leadingMarker != null && state.currentState.laggingMarker != null) {
 			LatLngBounds.Builder llb = new LatLngBounds.Builder();

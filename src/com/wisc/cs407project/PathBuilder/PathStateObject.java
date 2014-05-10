@@ -9,8 +9,11 @@ public class PathStateObject {
 	public LatLng leadingMarker;
 	public LatLng laggingMarker;
 	public boolean hasLaggingMarker;
+	// This allows putting "connect mode" redraws into the undo stack
+	public boolean hidden;
 	
 	public PathStateObject(boolean hasLaggingMarker, ArrayList<LatLng> line) {
+		hidden = false;
 		if (!line.isEmpty()) {
 			mainLine = line;
 			leadingMarker = mainLine.get(mainLine.size() - 1);

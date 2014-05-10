@@ -14,6 +14,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 public class PathState {
+	public enum MarkerType {DRAW, CONNECT}
 	public ArrayList<PathStateObject> stateList;
 	public PathStateObject currentState;
 	private Polyline currentLeadingLine;
@@ -26,7 +27,7 @@ public class PathState {
 		refMap = map;
 	}
 	
-	public void addState(boolean hasLaggingMarker, ArrayList<LatLng> coords, Marker maintainLeading) {
+	public void addState(boolean hasLaggingMarker, ArrayList<LatLng> coords, Marker maintainLeading, boolean inDrawMode) {
 		if (coords.isEmpty()) {
 			return;
 		}
@@ -39,7 +40,9 @@ public class PathState {
 		if (!stateList.isEmpty()) {
 			ArrayList<LatLng> newLagLine = new ArrayList<LatLng>();
 			for (PathStateObject previousState : stateList) {
-				newLagLine.addAll(previousState.mainLine);
+				if (!previousState.hidden) {
+					newLagLine.addAll(previousState.mainLine);
+				}
 			}
 			currentLaggingLine = refMap.addPolyline(new PolylineOptions()
 			.addAll(newLagLine)
@@ -65,14 +68,21 @@ public class PathState {
             .draggable(false));
 		}
 		if (maintainLeading == null) {
-			currentLeadingMarker = refMap.addMarker(new MarkerOptions()
-			.position(currentState.leadingMarker)
-			.icon(BitmapDescriptorFactory.fromResource(com.wisc.cs407project.R.drawable.draggable_marker))
-			.draggable(true));
+			if (!inDrawMode) {
+				currentLeadingMarker = refMap.addMarker(new MarkerOptions()
+				.position(currentState.leadingMarker)
+				.icon(BitmapDescriptorFactory.fromResource(com.wisc.cs407project.R.drawable.draggable_marker))
+				.draggable(true));
+			} else {
+				currentLeadingMarker = refMap.addMarker(new MarkerOptions()
+				.position(currentState.leadingMarker)
+				.icon(BitmapDescriptorFactory.fromResource(com.wisc.cs407project.R.drawable.drawable_marker))
+				.draggable(true));
+			}
 		}
 	}
 	
-	public void revertState() {
+	public void revertState(boolean inDrawMode) {
 		Log.d("state removed", "f");
 		clearCurrent(null);
 		// If we're at the initial state
@@ -87,10 +97,10 @@ public class PathState {
 		}
 		// Otherwise, re-add previousState
 		PathStateObject previousState = stateList.remove(stateList.size() - 1);
-		addState(previousState.hasLaggingMarker, previousState.mainLine, null);
+		addState(previousState.hasLaggingMarker, previousState.mainLine, null, inDrawMode);
 	}
 	
-	public void extendState(LatLng coords, Marker maintainLeading) {
+	public void extendState(LatLng coords, Marker maintainLeading, boolean inDrawMode) {
 		// If we're at the initial state (we shouldn't be)
 		if (stateList.isEmpty()) {
 			return;
@@ -99,7 +109,7 @@ public class PathState {
 		PathStateObject previousState = stateList.remove(stateList.size() - 1);
 		ArrayList<LatLng> newMainLine = previousState.mainLine;
 		newMainLine.add(coords);
-		addState(previousState.hasLaggingMarker, newMainLine, maintainLeading);
+		addState(previousState.hasLaggingMarker, newMainLine, maintainLeading, inDrawMode);
 	}
 	
 	private void clearCurrent(Marker maintainLeading) {
@@ -126,13 +136,13 @@ public class PathState {
 	}
 	
 	// Returns true if a refactored route should be fetched
-	public boolean refactor() {
+	public boolean refactor(boolean inDrawMode) {
 		if (stateList.size() > 1) {
 			if (currentLaggingLine != null) currentLaggingLine.remove();
 			if (currentLeadingMarker != null) currentLeadingMarker.remove();
 			if (currentLaggingMarker != null) currentLaggingMarker.remove();
-			stateList.remove(stateList.size() - 1);
-			currentState = stateList.get(stateList.size() - 1);
+			makeHidden(stateList.size() - 1);
+			currentState = stateList.get(stateList.size() - 2);
 			return true;
 		} else if (stateList.size() == 1 && currentLaggingMarker != null) {
 			ArrayList<LatLng> newLine = new ArrayList<LatLng>();
@@ -140,15 +150,44 @@ public class PathState {
 			if (currentLaggingLine != null) currentLaggingLine.remove();
 			if (currentLeadingMarker != null) currentLeadingMarker.remove();
 			currentLaggingMarker.remove();
-			stateList.remove(stateList.size() - 1);
-			this.addState(false, newLine, null);
+			makeHidden(stateList.size() - 1);
+			this.addState(false, newLine, null, inDrawMode);
 			return true;
 		} else {
 			if (currentLaggingLine != null) currentLaggingLine.remove();
 			if (currentLeadingMarker != null) currentLeadingMarker.remove();
 			if (currentLaggingMarker != null) currentLaggingMarker.remove();
-			stateList.remove(stateList.size() - 1);
+			makeHidden(stateList.size() - 1);
 			return false;
+		}
+	}
+	
+	public void modeChange(MarkerType changeTo) {
+		if (currentLeadingMarker != null) {
+			currentLeadingMarker.remove();
+			if (changeTo == MarkerType.CONNECT) {
+				currentLeadingMarker = refMap.addMarker(new MarkerOptions()
+				.position(currentState.leadingMarker)
+				.icon(BitmapDescriptorFactory.fromResource(com.wisc.cs407project.R.drawable.draggable_marker))
+				.draggable(true));
+			} else {
+				currentLeadingMarker = refMap.addMarker(new MarkerOptions()
+				.position(currentState.leadingMarker)
+				.icon(BitmapDescriptorFactory.fromResource(com.wisc.cs407project.R.drawable.drawable_marker))
+				.draggable(true));
+			}
+		}
+	}
+	
+	public void makeHidden(int index) {
+		if (stateList.size() > index) {
+			stateList.get(index).hidden = true;
+		}
+	}
+	
+	public void makeUnhidden(int index) {
+		if (stateList.size() > index) {
+			stateList.get(index).hidden = false;
 		}
 	}
 	
@@ -159,7 +198,7 @@ public class PathState {
 		}
 		LatLng previousAdded = null;
 		for(PathStateObject leg : stateList) {
-			if (!leg.mainLine.isEmpty()) {
+			if (!leg.mainLine.isEmpty() && !leg.hidden) {
 				for (LatLng point : leg.mainLine) {
 					if(previousAdded == null || (previousAdded != null && !previousAdded.equals(point))) {
 						result += "\n"+ point.longitude + ","+ point.latitude +",0";

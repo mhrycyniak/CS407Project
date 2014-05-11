@@ -2,9 +2,9 @@
 <resources>
 
     <string name="app_name">Pathspective</string>
-    <string name="app_image_directory">/cs407project/Images</string>
-    <string name="app_scale_directory">/cs407project/Scales</string>
-    <string name="app_path_directory">/cs407project/Paths</string>
+    <string name="app_image_directory">/Pathspective/Images</string>
+    <string name="app_scale_directory">/Pathspective/Scales</string>
+    <string name="app_path_directory">/Pathspective/Paths</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>

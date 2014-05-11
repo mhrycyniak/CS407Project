@@ -483,6 +483,14 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 	@Override
 	public void onDestroy(){
 		super.onDestroy();
+		// Reset all variables for walk.
+		pathStarted = false;
+		scaleItem = null;
+		pathURL = null;
+		startingPoint = null;
+		previousPoint = null;
+		distanceTraveled = 0;
+		distanceInterval = 0;
 		locationMan.removeUpdates(this);
 	} 
 	

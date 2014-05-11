@@ -52,6 +52,16 @@ public class Scale extends Activity {
 			//TODO no storage access, possibly post warning message
 		}
 	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {

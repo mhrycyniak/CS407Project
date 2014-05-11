@@ -36,7 +36,6 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -56,19 +55,15 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener;
 import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.wisc.cs407project.ParseObjects.StaticUtils;
 import com.wisc.cs407project.PathBuilder.PathExplorerPopup;
 import com.wisc.cs407project.PathBuilder.PathState;
 import com.wisc.cs407project.PathBuilder.Route;
 import com.wisc.cs407project.PathBuilder.RouteJSONParser;
-import com.wisc.cs407project.ScaleGenUI.ScaleExplorerFragment;
 
 public class RecordFragment extends Fragment {
 	private GoogleMap map;
@@ -212,7 +207,7 @@ public class RecordFragment extends Fragment {
 		locationLis = new RecordLocationListener(this);
 		locationMan.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 2, locationLis);
 
-		inRecordMode = false;
+		inRecordMode = true;
 		drawing = false;
 		markerPlaced = false;
 		recording = false;

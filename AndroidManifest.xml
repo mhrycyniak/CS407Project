@@ -46,9 +46,6 @@
             android:label="ScaleBuilder"
             android:windowSoftInputMode="stateHidden|adjustPan" />
         <activity
-            android:name="com.wisc.cs407project.Map"
-            android:label="@string/app_name" />
-        <activity
             android:name="com.wisc.cs407project.Popup"
             android:theme="@android:style/Theme.Dialog" >
         </activity>
@@ -74,12 +71,6 @@
         <activity
             android:name="com.wisc.cs407project.PathChooser"
             android:label="Choose a path" />
-        <activity
-            android:name="com.wisc.cs407project.RecordPath"
-            android:label="@string/app_name" />
-        <activity
-            android:name="com.wisc.cs407project.DirChooser"
-            android:label="@string/app_name" />
         <activity
             android:name="com.wisc.cs407project.Settings"
             android:label="Settings" />

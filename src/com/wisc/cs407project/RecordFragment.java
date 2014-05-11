@@ -287,23 +287,27 @@ public class RecordFragment extends Fragment {
 		// Unregister since the activity is about to be closed.
 		LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mMessageReceiver);
 		super.onStop();
-		builtPath = state.getPath();
-		if (state.stateList.size() < 2 || builtPath == null || builtPath.equals("")) {
-			
-		} else if (validPath) {
-			// Check access to device
-			String extState = Environment.getExternalStorageState();
-			if(!extState.equals(Environment.MEDIA_MOUNTED)) {
-				Log.e("ERROR: Save on Stop", "Storage not mounted");
-				return;
+		
+		// Fix null pointer
+		if (state != null) {
+			builtPath = state.getPath();
+			if (state.stateList.size() < 2 || builtPath == null || builtPath.equals("")) {
+				
+			} else if (validPath) {
+				// Check access to device
+				String extState = Environment.getExternalStorageState();
+				if(!extState.equals(Environment.MEDIA_MOUNTED)) {
+					Log.e("ERROR: Save on Stop", "Storage not mounted");
+					return;
+				}
+				
+				// Build the save path
+				String path = Environment.getExternalStorageDirectory().toString();
+				path = path + "/" + getResources().getString(R.string.app_name) + "/"
+						+ getResources().getString(R.string.resume_path_backup_filename);
+				
+				new SavePathTask().execute(path);
 			}
-			
-			// Build the save path
-			String path = Environment.getExternalStorageDirectory().toString();
-			path = path + "/" + getResources().getString(R.string.app_name) + "/"
-					+ getResources().getString(R.string.resume_path_backup_filename);
-			
-			new SavePathTask().execute(path);
 		}
 	}
 

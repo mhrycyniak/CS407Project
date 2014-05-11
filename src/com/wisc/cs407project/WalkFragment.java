@@ -684,9 +684,9 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 
 		// Build notification
 		Notification notification = new Notification.Builder(getActivity())
-				.setContentTitle("Walk Through Time")
+				.setContentTitle("Pathspective")
 				.setContentText("You have reached the paths starting point. Click to view the map.")
-				.setSmallIcon(R.drawable.ic_launcher)
+				.setSmallIcon(R.drawable.pglow)
 				.setContentIntent(contentIntent)
 				.setAutoCancel(true)
 				.setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_LIGHTS)
@@ -707,9 +707,9 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 
 		// Build notification
 		Notification notification = new Notification.Builder(getActivity())
-				.setContentTitle("Walk Through Time")
+				.setContentTitle("Pathspective")
 				.setContentText("You have reached the following scale: " + name + ". Click to view the map.")
-				.setSmallIcon(R.drawable.ic_launcher)
+				.setSmallIcon(R.drawable.pglow)
 				.setContentIntent(contentIntent)
 				.setAutoCancel(true)
 				.setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_LIGHTS)

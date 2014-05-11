@@ -27,6 +27,7 @@ import com.wisc.cs407project.R.string;
 import com.wisc.cs407project.ScaleObject;
 import com.wisc.cs407project.ParseObjects.StaticUtils;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -43,6 +44,7 @@ import android.text.Spanned;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.Button;
@@ -78,6 +80,8 @@ public class ScaleBuilder extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.scale_builder);
 		ref = this;
+		ActionBar actionBar = getActionBar();
+	    actionBar.setDisplayHomeAsUpEnabled(true);
 
 		// Check intent to see if New or Editing
 		Intent intent = getIntent();
@@ -239,6 +243,18 @@ public class ScaleBuilder extends Activity {
 			if(!extState.equals(Environment.MEDIA_MOUNTED)) {
 				headerSave.setEnabled(false);
 			}
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    switch (item.getItemId()) {
+	        case android.R.id.home:
+	            // Back to parent activity
+	            this.finish();
+	            return true;
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
 	}
 	
 	private String GetLocalScalePath(){				

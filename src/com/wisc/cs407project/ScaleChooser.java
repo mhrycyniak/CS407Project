@@ -18,6 +18,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.apache.commons.validator.routines.UrlValidator;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -26,6 +27,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -64,6 +66,8 @@ public class ScaleChooser extends Activity implements OnItemClickListener {
 		ref = this;
 		scales = (ListView) findViewById(R.id.listView1);
 		scales.setOnItemClickListener(this);
+		ActionBar actionBar = getActionBar();
+	    actionBar.setDisplayHomeAsUpEnabled(true);
 		currentDirectory = Environment.getExternalStorageDirectory().toString() +
 				getResources().getString(R.string.app_scale_directory) + "/";
 		if (currentDirectory != "") {
@@ -71,6 +75,18 @@ public class ScaleChooser extends Activity implements OnItemClickListener {
 		} else {
 			ChangeDirectoryClicked(null);
 		}
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    switch (item.getItemId()) {
+	        case android.R.id.home:
+	            // Back to parent activity
+	            this.finish();
+	            return true;
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
 	}
 	
 	public void ChangeLocalClicked(View view)

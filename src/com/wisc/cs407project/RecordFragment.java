@@ -72,6 +72,7 @@ public class RecordFragment extends Fragment {
 	private Button recordButton, drawButton, modeButton, saveButton, uploadButton, undoButton, locationButton, goButton, loadButton;
 	private LocationManager locationMan;
 	private RecordLocationListener locationLis;
+	private RecordFragment ref;
 	private boolean recording, validPath, drawing, markerPlaced, locationOpen, warningsShown, localLoad, isResumeLoad, directionsAreFromSearch;
 	private boolean inRecordMode = true;
 
@@ -204,9 +205,11 @@ public class RecordFragment extends Fragment {
 			map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
 			map.animateCamera(CameraUpdateFactory.zoomTo(15));
 		}
-		locationLis = new RecordLocationListener(this);
-		locationMan.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 2, locationLis);
-
+		locationLis.StopRecording();
+		locationMan.removeUpdates(locationLis);
+		//locationLis = new RecordLocationListener(this);
+		//locationMan.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 2, locationLis);
+		
 		inRecordMode = true;
 		drawing = false;
 		markerPlaced = false;
@@ -250,7 +253,8 @@ public class RecordFragment extends Fragment {
 			map.animateCamera(CameraUpdateFactory.zoomTo(15));
 		}
 		locationLis = new RecordLocationListener(this);
-		locationMan.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 2, locationLis);
+		ref = this;
+		//locationMan.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 2, locationLis);
 
 		recordButton = (Button) myFragmentView.findViewById(R.id.recordPath);
 		recordClicked();
@@ -645,6 +649,7 @@ public class RecordFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				if (!recording) {
+					locationMan.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 2, locationLis);
 					if (locationMan.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
 						FragmentTransaction ft = getActivity().getFragmentManager().beginTransaction();
 						ft.addToBackStack(null).commit();
@@ -692,6 +697,7 @@ public class RecordFragment extends Fragment {
 
 					// Stop recording path.
 					builtPath = locationLis.StopRecording();
+					locationMan.removeUpdates(locationLis);
 					save(builtPath);
 				}
 			}

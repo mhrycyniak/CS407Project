@@ -422,9 +422,10 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
   					
   				}
   				
+  				Log.d("load parse", "start");
   				ParseQuery<ParseObject> query = ParseQuery.getQuery("Image");
   				query.whereEqualTo("scaleitem", object.name);
-  				query.whereEqualTo("name", object.imageLocation.replaceAll("\\W _+", ""));
+  				query.whereEqualTo("name", object.imageLocation.replaceAll("\\W+", ""));
   				query.findInBackground(new FindCallback<ParseObject>(){
 					@Override
 					public void done(List<ParseObject> l, ParseException e) {
@@ -435,7 +436,7 @@ public class WalkFragment extends Fragment implements OnMarkerClickListener, Loc
 								byte[] data = file.getData();
 								object.image = BitmapFactory.decodeByteArray(data, 0, data.length);
 							}
-							else{
+							else{								
 								CouldntLoad(object);
 							}
 						}
